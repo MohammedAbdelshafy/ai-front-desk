@@ -1,0 +1,2 @@
+[console_scripts]
+ai-front-desk-webhook = ai_front_desk.webhook:main
