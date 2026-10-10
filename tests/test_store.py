@@ -79,6 +79,27 @@ def test_correction_preserves_original_and_audits(store):
     assert any(a["action"] == "answer.corrected" for a in trail)
 
 
+def test_unregistered_clinic_cannot_create_submission(store):
+    with pytest.raises(TenantMismatchError):
+        store.save_submission("not-a-clinic", "dental-intake", "1.0.0",
+                              "Demo Patient One", _answers())
+
+
+def test_correction_chain_uses_previous_correction_as_old_value(store):
+    answers = {"med.taking_any": "Yes", "med.list": "Original medication"}
+    sid = store.save_submission("clinic-a", "dental-intake", "1.0.0",
+                                "Demo Patient One", answers)
+    store.record_correction("clinic-a", sid, "med.list", "First correction",
+                             "staff_verified", "Nurse Demo")
+    store.record_correction("clinic-a", sid, "med.list", "Second correction",
+                             "staff_verified", "Nurse Demo")
+    corrections = store.list_corrections("clinic-a", sid)
+    assert corrections[0]["old_value"] == "Original medication"
+    assert corrections[1]["old_value"] == "First correction"
+    trail = store.audit_trail("clinic-a", sid)
+    assert all("Original medication" not in event["detail"] for event in trail)
+
+
 def test_correction_cross_tenant_denied(store):
     sid = store.save_submission("clinic-a", "dental-intake", "1.0.0",
                                 "Synth Patient", _answers())
