@@ -3,7 +3,43 @@
 A fully-owned WhatsApp support agent build: **WhatsApp Business Cloud API + n8n + OpenAI**.
 WhatsApp intake → qualification → human escalation → follow-up. No vendor lock-in.
 
-## What's inside
+Plus the **Mia Clinical Platform**: dental pre-visit intake + dentist-facing
+patient-history dashboard, with reusable foundations (MiaShell character
+component, versioned question bank, FHIR-compatible records) for future
+specialties. Synthetic data only — not HIPAA-compliant, not for real patients.
+
+## Mia Clinical Platform (demo)
+
+- `ai_front_desk/clinical/question_bank.py` — versioned, conditional question
+  bank with validation and FHIR R4 `Questionnaire` export.
+- `ai_front_desk/clinical/dental_intake_v1.json` — dental pre-visit questionnaire
+  v1.0.0 (identity, visit, medications incl. antibiotics, allergies, conditions,
+  surgical history). **Status: draft — dentist review pending before any
+  clinical use.**
+- `ai_front_desk/clinical/intake.py` — intake processing: validation, omission
+  and contradiction detection, FHIR `QuestionnaireResponse` export.
+- `ai_front_desk/clinical/store.py` — SQLite dev store with tenant isolation
+  and append-only audit log. See `docs/adr/001-clinical-data-store.md`.
+- `ai_front_desk/clinical/dashboard.py` — dentist brief: patient-reported facts,
+  labeled AI rollup, flags, corrections overlay (originals preserved).
+- `ai_front_desk/clinical/mia_shell.py` — reusable MiaShell character manifest
+  + honest task-stage tracker (Dental Mia included).
+- `ai_front_desk/clinical/server.py` — stdlib demo server: mobile patient
+  intake form, dentist dashboard, record brief, review/correction actions.
+
+Run the demo:
+
+```bash
+python -m ai_front_desk.clinical.server
+# open http://127.0.0.1:8766 — pick a demo clinic, complete an intake,
+# then open the dentist dashboard. Synthetic data only.
+```
+
+Hard rules: no real patient data, no live messaging/booking, no medication
+decision support in v1 (collect + present history only), every finding labeled
+by source (patient_reported / system_check / ai_summary / clinician_entered).
+
+## What's inside (WhatsApp reference)
 
 - `ai_front_desk/logic.py` — the qualification state machine as pure, importable
   Python: greet → name → service → urgency → done, with FAQ answers and
