@@ -48,6 +48,7 @@ Open **http://127.0.0.1:8767**. The landing page explains the copilot workflow, 
 
 - 7-day free trial from first activation (server-side clock; reinstalling can't restart it). After expiry the module locks, data is preserved, and a subscribe screen appears. Default price **$99/mo** — founder's call, one constant in `ai_front_desk/clinical/prescribe/trial.py`. Billing is **test mode only**: no live charges, no provider keys.
 - Reference dataset `reference v1 (2026-10-11)`: standard dental prescribing references; requires dentist review before clinical use. Uncertain rules are omitted, not guessed. Missing/uncertain patient data is never shown as verified-safe.
+- **Guided question wizard** (`Start guided check` on any patient card): indication → patient factors → allergies → medications → conditions → summary → dentist's own prescription choice with indication-specific cited reference → safety check. Every question offers "don't know / not applicable"; unknowns become visible missing-info flags, never green.
 - Locked teasers use the exact upsell tier names: **Mia Dental Practice**, **Mia Dental Automation**, **Mia Dental OS Pro**. Nothing behind them is built yet.
 
 **Do not enter real patient data.** Synthetic demo data only. Not HIPAA-compliant. Not for real patients.
