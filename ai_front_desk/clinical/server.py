@@ -65,7 +65,9 @@ body{font:16px/1.5 system-ui,-apple-system,sans-serif;margin:0;color:#1a1a1a}
 .mia-help{margin-top:9px;font-size:12px;color:#596985}.mia-help summary{cursor:pointer;font-weight:700;color:#4560c6}.mia-help p{font-size:12px!important;color:#6b7790!important;margin-top:8px!important}
 h1{font-size:22px} h2{font-size:18px;margin-top:28px}
 .q{border:1px solid #ddd;border-radius:10px;padding:12px;margin:10px 0}
-.q label{font-weight:600;display:block;margin-bottom:6px}
+.q>label{font-weight:600;display:block;margin-bottom:6px}
+.multi-option{font-weight:400!important;display:block;margin:6px 0}
+.multi-option input{margin-right:6px}
 input[type=text],input[type=date],input[type=number],textarea,select{width:100%;padding:10px;font-size:16px;border:1px solid #bbb;border-radius:8px;box-sizing:border-box}
 textarea{min-height:70px}
 button{background:#0b5fff;color:#fff;border:0;border-radius:10px;padding:12px 20px;font-size:16px;cursor:pointer}
@@ -139,25 +141,30 @@ def render_intake(clinic_id, clinic_name):
         field = ""
         if q.qtype in ("choice", "yes_no"):
             opts = "".join(f"<option value='{esc(o)}'>{esc(o)}</option>" for o in q.options)
-            esc_opts = "".join(f"<option value='{esc(e)}'>{esc(e)}</option>" for e in ("I don't know", "Not applicable", "Prefer not to answer"))
-            field = f"<select name='{q.qid}' data-qtype='{q.qtype}'><option value=''>— choose —</option>{opts}{esc_opts}</select>"
+            esc_opts = "".join(f"<option value='{esc(e)}'>{esc(e)}</option>" for e in ("I don't know", "Not applicable", "Prefer not to answer")) if q.allow_escape else ""
+            req_attr = " required" if q.required else ""
+            field = f"<select id='{esc(q.qid)}' name='{esc(q.qid)}' data-qtype='{esc(q.qtype)}'{req_attr}><option value=''>— choose —</option>{opts}{esc_opts}</select>"
         elif q.qtype == "multi_choice":
             boxes = "".join(
-                f"<label style='font-weight:normal;display:block'>"
-                f"<input type='checkbox' name='{q.qid}' value='{esc(o)}'> {esc(o)}</label>"
-                for o in q.options
+                f"<label class='multi-option'>"
+                f"<input type='checkbox' id='{esc(q.qid)}-{i}' name='{esc(q.qid)}' value='{esc(o)}'> {esc(o)}</label>"
+                for i, o in enumerate(q.options)
             )
-            field = f"<div data-qtype='multi_choice' data-qid='{q.qid}'>{boxes}</div>"
+            field = f"<div role='group' aria-labelledby='label-{esc(q.qid)}' data-qtype='multi_choice' data-qid='{esc(q.qid)}'>{boxes}</div>"
         elif q.qtype == "date":
-            field = f"<input type='date' name='{q.qid}'>"
+            req_attr = " required" if q.required else ""
+            field = f"<input type='date' id='{esc(q.qid)}' name='{esc(q.qid)}'{req_attr}>"
         elif q.qtype == "number":
-            field = f"<input type='number' name='{q.qid}'>"
+            req_attr = " required" if q.required else ""
+            field = f"<input type='number' id='{esc(q.qid)}' name='{esc(q.qid)}'{req_attr}>"
         else:
-            field = f"<textarea name='{q.qid}' rows='2'></textarea>"
-        req = " <span style='color:#c00'>*</span>" if q.required else ""
+            req_attr = " required" if q.required else ""
+            field = f"<textarea id='{esc(q.qid)}' name='{esc(q.qid)}' rows='2'{req_attr}></textarea>"
+        req = " <span style='color:#c00' aria-hidden='true'>*</span>" if q.required else ""
+        label_for = "" if q.qtype == "multi_choice" else f" for='{esc(q.qid)}'"
         qs_html.append(
-            f"<div class='q' data-qid='{q.qid}'{cond}>"
-            f"<label>{esc(q.text)}{req}</label>{field}</div>"
+            f"<div class='q' data-qid='{esc(q.qid)}'{cond}>"
+            f"<label id='label-{esc(q.qid)}'{label_for}>{esc(q.text)}{req}</label>{field}</div>"
         )
     return f"""<html><head><title>Pre-visit intake — {esc(clinic_name)}</title>{STYLE}</head><body>
 {BANNER}<div class="wrap">
