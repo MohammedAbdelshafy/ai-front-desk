@@ -105,8 +105,13 @@ def to_fhir_questionnaire_response(
             continue
         if isinstance(v, list):
             answer = [{"valueString": str(x)} for x in v]
-        elif q.qtype == "yes_no":
-            answer = [{"valueBoolean": v == "Yes"}]
+        elif q.qtype in ("choice", "yes_no"):
+            # Choice answers remain strings so "I don't know" is never coerced to "No".
+            answer = [{"valueString": str(v)}]
+        elif q.qtype == "date":
+            answer = [{"valueDate": str(v)}]
+        elif q.qtype == "number":
+            answer = [{"valueDecimal": float(v)}]
         else:
             answer = [{"valueString": str(v)}]
         items.append({"linkId": q.qid, "text": q.text, "answer": answer})
