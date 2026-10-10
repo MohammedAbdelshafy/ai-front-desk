@@ -354,6 +354,20 @@
   $("#record-search").addEventListener("input", renderRecords);
   $("#status-filter").addEventListener("change", renderRecords);
 
+  function initImages() {
+    $("img").forEach(img => {
+      img.addEventListener("error", () => {
+        img.style.display = "none";
+        if (img.classList.contains("mia-hero-image")) {
+          const fallback = $("#mia-hero-fallback");
+          if (fallback) fallback.style.display = "grid";
+        }
+        const avatarFallback = img.parentElement ? $(".avatar-fallback", img.parentElement) : null;
+        if (avatarFallback) avatarFallback.style.display = "grid";
+      });
+    });
+  }
+
   async function init() {
     try {
       const health = await api("/api/health");
@@ -366,6 +380,7 @@
     }
   }
 
+  initImages();
   initIntakeForm();
   init();
 })();
