@@ -58,9 +58,10 @@ class Question:
         if self.qtype not in QUESTION_TYPES:
             return [f"{self.qid}: unsupported question type '{self.qtype}'"]
         if isinstance(value, str) and value in ESCAPE_OPTIONS:
-            if self.allow_escape:
+            # Date/number FHIR items cannot safely carry text escape values.
+            if self.allow_escape and self.qtype not in ("date", "number"):
                 return errors
-            return [f"{self.qid}: escape answer is not allowed"]
+            return [f"{self.qid}: escape answer is not allowed for this question type"]
         if self.qtype in ("choice", "yes_no"):
             allowed = set(self.options) | (set(ESCAPE_OPTIONS) if self.allow_escape else set())
             if not isinstance(value, str) or value not in allowed:
