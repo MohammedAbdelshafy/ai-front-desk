@@ -288,6 +288,7 @@
     const help = field.help_text ? '<small>' + esc(field.help_text) + "</small>" : "";
     const maxLength = field.max_length ? ' maxlength="' + Number(field.max_length) + '"' : "";
     const placeholder = field.placeholder ? ' placeholder="' + esc(field.placeholder) + '"' : "";
+    const defaultValue = field.default_value == null ? "" : String(field.default_value);
 
     if (field.type === "choice") {
       const options = (field.options || []).map(option =>
@@ -301,15 +302,18 @@
     let control = "";
     if (field.type === "textarea") {
       control = '<textarea name="' + esc(field.id) + '" rows="' + Number(field.rows || 2) + '"' +
-        maxLength + placeholder + (field.required ? " required" : "") + (conditional ? " disabled" : "") + "></textarea>";
+        maxLength + placeholder + (field.required ? " required" : "") + (conditional ? " disabled" : "") +
+        ">" + esc(defaultValue) + "</textarea>";
     } else if (field.type === "select") {
       const choices = (field.options || []).map(option =>
-        '<option value="' + esc(option.value) + '">' + esc(option.label) + "</option>"
+        '<option value="' + esc(option.value) + '"' +
+        (String(option.value) === defaultValue ? " selected" : "") + ">" + esc(option.label) + "</option>"
       ).join("");
       control = '<select name="' + esc(field.id) + '"' + (field.required ? " required" : "") +
         '><option value="">Choose an option</option>' + choices + "</select>";
     } else {
-      control = '<input type="text" name="' + esc(field.id) + '"' + maxLength + placeholder +
+      control = '<input type="text" name="' + esc(field.id) + '"' +
+        (defaultValue ? ' value="' + esc(defaultValue) + '"' : "") + maxLength + placeholder +
         (field.required ? " required" : "") + ' autocomplete="off">';
     }
 
