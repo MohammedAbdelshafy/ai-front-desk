@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f6f8">
+  <title>Mia Dental Intake | Local Demo</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="demo-ribbon"><span class="pulse"></span> FICTIONAL DATA DEMO <span class="ribbon-divider">•</span> LOCAL ONLY <span class="ribbon-spacer"></span> No real patient data, live messaging, bookings or medical advice</div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="/" class="brand" aria-label="Mia Dental Intake home">
+        <span class="brand-mark"><span class="brand-mark-inner">M</span></span>
+        <span class="brand-text"><strong>mia<span class="brand-dot">.</span></strong><small>DENTAL INTAKE</small></span>
+      </a>
+      <div class="clinic-switcher">
+        <span class="clinic-icon">D</span>
+        <span><strong>Demo Dental</strong><small>Sample practice</small></span>
+        <span class="switcher-chevron">⌄</span>
+      </div>
+      <p class="nav-label">WORKSPACE</p>
+      <nav class="primary-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-view="overview"><span class="nav-icon">⌂</span><span>Overview</span></button>
+        <button class="nav-item" data-view="records"><span class="nav-icon">▤</span><span>Patient records</span><span class="nav-count" id="nav-count">0</span></button>
+        <button class="nav-item" data-view="intake"><span class="nav-icon">＋</span><span>New intake</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="assistant-mini">
+          <div class="assistant-mini-avatar"><img src="https://mohammedabdelshafy.github.io/mia-ai-site/assets/mia-stand-hi.webp" alt="" onerror="this.style.display='none'"><span class="avatar-fallback">M</span></div>
+          <div><strong>Dental Mia</strong><small>Intake assistant</small></div>
+          <span class="online-dot" title="Local demo ready"></span>
+        </div>
+        <div class="sidebar-note"><span class="shield-symbol">◇</span><span>Demo data stays on this machine. This is not a production clinical system.</span></div>
+        <div class="sidebar-footer"><span>PLATFORM PREVIEW</span><span class="version-tag">v0.1</span></div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div class="breadcrumbs"><span>Workspace</span><span class="crumb-slash">/</span><strong id="breadcrumb-current">Overview</strong></div>
+        <div class="topbar-right"><span class="local-status"><span class="status-dot"></span> Local demo</span><span class="user-avatar">DC</span><span class="user-caption"><strong>Demo Clinician</strong><small>Sample workspace</small></span></div>
+      </header>
+
+      <div class="page-wrap">
+        <section class="view-panel" id="view-overview">
+          <div class="page-heading heading-row">
+            <div><p class="eyebrow">DENTAL INTAKE WORKSPACE</p><h1>Your next appointment starts <span class="heading-highlight">before the chair.</span></h1><p class="page-subtitle">Patient-reported history, organized for review before the visit.</p></div>
+            <button class="button button-primary" data-view="intake"><span class="button-plus">＋</span> Start a demo intake</button>
+          </div>
+
+          <div class="alert-banner"><span class="alert-symbol">!</span><div><strong>Prototype environment</strong><p>Use fictional details only. Do not enter real patient names, health information, or identifying details.</p></div><span class="alert-tag">SAFE DEMO</span></div>
+
+          <div class="hero-card">
+            <div class="hero-content">
+              <span class="hero-kicker"><span class="sparkle">✦</span> MEET YOUR INTAKE ASSISTANT</span>
+              <h2>Less paperwork at check-in.<br><span>More context before the visit.</span></h2>
+              <p>Mia guides the patient through a structured history. You receive the answers, missing information, and review status in one place.</p>
+              <button class="button button-light" data-view="intake">Walk through a sample intake <span class="arrow">↗</span></button>
+              <div class="hero-footnote"><span class="check-mark">✓</span> Built for a dentist-led review, not automated clinical decisions.</div>
+            </div>
+            <div class="hero-visual">
+              <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div>
+              <div class="mia-stage">
+                <div class="mia-glow"></div>
+                <img src="https://mohammedabdelshafy.github.io/mia-ai-site/assets/mia-stand-hi.webp" alt="Mia, the virtual intake assistant" class="mia-hero-image" onerror="this.style.display='none';document.getElementById('mia-hero-fallback').style.display='grid'">
+                <div class="mia-hero-fallback" id="mia-hero-fallback">M</div>
+              </div>
+              <div class="floating-card floating-top"><span class="floating-icon icon-lavender">✓</span><span><strong>History captured</strong><small>Patient-reported answers</small></span></div>
+              <div class="floating-card floating-bottom"><span class="floating-icon icon-mint">▤</span><span><strong>Ready for review</strong><small>Original answers preserved</small></span></div>
+              <div class="hero-orbit-label">MIA / DENTAL</div>
+            </div>
+          </div>
+
+          <div class="section-header"><div><h2>Intake overview</h2><p>Counts are calculated from this local demo database.</p></div><button class="text-button" data-view="records">View all records <span>→</span></button></div>
+          <div class="stats-grid">
+            <article class="stat-card"><div class="stat-top"><span class="stat-label">Total demo intakes</span><span class="stat-icon blue-icon">▤</span></div><div class="stat-value" id="stat-total">—</div><div class="stat-foot">Fictional records only</div></article>
+            <article class="stat-card"><div class="stat-top"><span class="stat-label">Awaiting review</span><span class="stat-icon amber-icon">◷</span></div><div class="stat-value" id="stat-awaiting">—</div><div class="stat-foot">Need a clinician review</div></article>
+            <article class="stat-card"><div class="stat-top"><span class="stat-label">Reviewed</span><span class="stat-icon green-icon">✓</span></div><div class="stat-value" id="stat-reviewed">—</div><div class="stat-foot">Review action recorded</div></article>
+            <article class="stat-card"><div class="stat-top"><span class="stat-label">Clarification requested</span><span class="stat-icon purple-icon">↗</span></div><div class="stat-value" id="stat-clarify">—</div><div class="stat-foot">Follow-up information needed</div></article>
+          </div>
+
+          <div class="lower-grid">
+            <section class="content-card recent-card"><div class="card-heading"><div><h2>Recent patient history</h2><p>Open a record to inspect the original answers.</p></div><span class="tiny-pill">DEMO RECORDS</span></div><div id="recent-records" class="recent-records"><div class="loading-row">Loading local records…</div></div><div class="card-bottom"><button class="text-button" data-view="records">Open patient records <span>→</span></button></div></section>
+            <section class="content-card mia-guide-card"><div class="card-heading"><div><h2>Mia's workflow</h2><p>What happens in this prototype</p></div><span class="mia-guide-dot"></span></div><div class="workflow-list"><div class="workflow-step"><span class="workflow-number">01</span><div><strong>Collect</strong><p>Patient answers the clinic-approved intake questions.</p></div><span class="step-status">FORM</span></div><div class="workflow-step"><span class="workflow-number">02</span><div><strong>Organize</strong><p>Answers are stored with their form version and timestamp.</p></div><span class="step-status">RECORD</span></div><div class="workflow-step"><span class="workflow-number">03</span><div><strong>Review</strong><p>Dentist checks the information and records a review.</p></div><span class="step-status">HUMAN</span></div></div><div class="honesty-note"><span>ⓘ</span><p>Mia does not diagnose, prescribe, or confirm appointments in this demo.</p></div></section>
+          </div>
+        </section>
+
+        <section class="view-panel" id="view-intake" hidden>
+          <div class="page-heading"><p class="eyebrow">PATIENT WORKFLOW / 01</p><h1>Pre-visit <span class="heading-highlight">health history.</span></h1><p class="page-subtitle">A fictional patient completes a dental intake. Keep answers accurate and ask the clinic if you are unsure.</p></div>
+          <div class="form-layout">
+            <form id="intake-form" class="content-card intake-form" novalidate>
+              <div class="form-topline"><div><span class="form-step">PATIENT FORM</span><h2>Tell us about your health</h2><p>All answers below are fictional demonstration data.</p></div><span class="required-legend"><span>*</span> Required</span></div>
+              <div class="form-section"><div class="form-section-heading"><span class="section-number">01</span><div><h3>About this visit</h3><p>Basic context to prepare the visit.</p></div></div>
+                <div class="field-grid"><label class="field full-field"><span>Fictional patient label <b>*</b></span><input name="patient_label" value="Demo Patient Casey" required maxlength="50" autocomplete="off"><small>Must start with “Demo”, “Test”, or “Sample”. Never enter a real name.</small></label>
+                  <label class="field"><span>Age group <b>*</b></span><select name="age_group" required><option value="">Choose age group</option><option value="under_18">Under 18</option><option value="18_39">18–39</option><option value="40_64" selected>40–64</option><option value="65_plus">65+</option><option value="prefer_not_to_say">Prefer not to say</option></select></label>
+                  <label class="field"><span>When did the concern begin?</span><input name="symptom_duration" maxlength="250" placeholder="e.g., Fictional example: two days ago"></label>
+                  <label class="field full-field"><span>What brings you to the clinic today? <b>*</b></span><textarea name="reason_for_visit" required maxlength="500" rows="3" placeholder="Describe the reason for this sample visit.">Routine check-up. Fictional example only.</textarea></label>
+                </div>
+              </div>
+              <div class="form-section"><div class="form-section-heading"><span class="section-number">02</span><div><h3>Medicines and allergies</h3><p>Include what you know. Don't change any medicine based on this form.</p></div></div>
+                <div class="field-grid">
+                  <fieldset class="field full-field status-fieldset"><legend>Do you have any allergies, including to medicines or antibiotics? <b>*</b></legend><div class="radio-row"><label><input type="radio" name="allergy_status" value="yes" required><span>Yes</span></label><label><input type="radio" name="allergy_status" value="no"><span>No</span></label><label><input type="radio" name="allergy_status" value="unsure"><span>Not sure</span></label></div></fieldset>
+                  <label class="field full-field conditional-field" data-for="allergy_status"><span>Allergy and reaction details <b class="conditional-star">*</b></span><textarea name="allergy_details" rows="2" maxlength="1500" placeholder="Fictional example only: allergen and what reaction occurred."></textarea><small>Describe the reported reaction; the dentist will review it.</small></label>
+                  <fieldset class="field full-field status-fieldset"><legend>Do you currently take prescription medicines, over-the-counter medicines, vitamins, or supplements? <b>*</b></legend><div class="radio-row"><label><input type="radio" name="medication_status" value="yes" required><span>Yes</span></label><label><input type="radio" name="medication_status" value="no"><span>No</span></label><label><input type="radio" name="medication_status" value="unsure"><span>Not sure</span></label></div></fieldset>
+                  <label class="field full-field conditional-field" data-for="medication_status"><span>Medicine details <b class="conditional-star">*</b></span><textarea name="medication_details" rows="3" maxlength="1500" placeholder="Fictional example only: name, strength, dose, frequency, and reason if known."></textarea><small>Include current and recently changed medicines where known.</small></label>
+                  <fieldset class="field full-field status-fieldset"><legend>Are you taking antibiotics now, or have you taken any recently? <b>*</b></legend><div class="radio-row"><label><input type="radio" name="antibiotic_status" value="yes" required><span>Yes</span></label><label><input type="radio" name="antibiotic_status" value="no"><span>No</span></label><label><input type="radio" name="antibiotic_status" value="unsure"><span>Not sure</span></label></div></fieldset>
+                  <label class="field full-field conditional-field" data-for="antibiotic_status"><span>Antibiotic details <b class="conditional-star">*</b></span><textarea name="antibiotic_details" rows="2" maxlength="1500" placeholder="Fictional example only: medicine name and dates or dose if known."></textarea></label>
+                </div>
+              </div>
+              <div class="form-section"><div class="form-section-heading"><span class="section-number">03</span><div><h3>Ongoing health conditions</h3><p>Tell the clinic about conditions that may be relevant to your care.</p></div></div>
+                <div class="field-grid">
+                  <fieldset class="field full-field status-fieldset"><legend>Do you have any long-term or ongoing medical conditions? <b>*</b></legend><div class="radio-row"><label><input type="radio" name="condition_status" value="yes" required><span>Yes</span></label><label><input type="radio" name="condition_status" value="no"><span>No</span></label><label><input type="radio" name="condition_status" value="unsure"><span>Not sure</span></label></div></fieldset>
+                  <label class="field full-field conditional-field" data-for="condition_status"><span>Condition details <b class="conditional-star">*</b></span><textarea name="condition_details" rows="3" maxlength="1500" placeholder="Fictional example only: condition, current status, and treating specialist if relevant."></textarea><small>Examples include diabetes, high blood pressure, heart, kidney, liver, respiratory, immune, or bleeding conditions.</small></label>
+                </div>
+              </div>
+              <div class="form-section"><div class="form-section-heading"><span class="section-number">04</span><div><h3>Procedures and dental history</h3><p>Information for the dentist to review.</p></div></div>
+                <div class="field-grid">
+                  <fieldset class="field full-field status-fieldset"><legend>Have you had surgery or been hospitalized for a significant illness? <b>*</b></legend><div class="radio-row"><label><input type="radio" name="surgery_status" value="yes" required><span>Yes</span></label><label><input type="radio" name="surgery_status" value="no"><span>No</span></label><label><input type="radio" name="surgery_status" value="unsure"><span>Not sure</span></label></div></fieldset>
+                  <label class="field full-field conditional-field" data-for="surgery_status"><span>Procedure details <b class="conditional-star">*</b></span><textarea name="surgery_details" rows="2" maxlength="1500" placeholder="Fictional example only: type of procedure and approximate date if known."></textarea></label>
+                  <fieldset class="field full-field status-fieldset"><legend>Have you ever had a reaction or complication with anesthesia? <b>*</b></legend><div class="radio-row"><label><input type="radio" name="anesthesia_reaction_status" value="yes" required><span>Yes</span></label><label><input type="radio" name="anesthesia_reaction_status" value="no"><span>No</span></label><label><input type="radio" name="anesthesia_reaction_status" value="unsure"><span>Not sure</span></label></div></fieldset>
+                  <label class="field full-field conditional-field" data-for="anesthesia_reaction_status"><span>Reaction details <b class="conditional-star">*</b></span><textarea name="anesthesia_details" rows="2" maxlength="1500" placeholder="Fictional example only: what happened, if known."></textarea></label>
+                  <label class="field full-field"><span>Relevant dental history</span><textarea name="dental_history" rows="2" maxlength="1500" placeholder="Fictional example only: previous dental procedures or other context."></textarea></label>
+                </div>
+              </div>
+              <div class="form-consent"><span class="consent-icon">ⓘ</span><p><strong>Demo notice:</strong> This prototype only saves fictional sample data to a local SQLite database on this machine. Do not enter real patient information. This is not a production patient portal.</p></div>
+              <div class="form-actions"><button type="button" class="button button-quiet" data-view="overview">Cancel</button><button type="submit" class="button button-primary" id="submit-intake">Submit demo history <span>→</span></button></div>
+              <p class="form-error" id="form-error" role="alert" hidden></p>
+            </form>
+            <aside class="form-aside"><div class="aside-mia-card"><div class="aside-mia-head"><span class="eyebrow">YOUR GUIDE</span><span class="online-label"><span class="status-dot"></span> Demo ready</span></div><img class="aside-mia-image" src="https://mohammedabdelshafy.github.io/mia-ai-site/assets/mia-stand-hi.webp" alt="Mia assistant" onerror="this.style.display='none'"><h3>Hi, I'm Mia.</h3><p>I'll guide you through each section and organize your answers for the dentist to review.</p><div class="mia-message"><span class="message-star">✦</span><span>Not sure about an answer? Choose “Not sure.” The clinic can clarify it with you.</span></div></div><div class="aside-checklist content-card"><h3>What you'll cover</h3><div class="checklist-item"><span>✓</span> Medicines and antibiotics</div><div class="checklist-item"><span>✓</span> Allergies and reactions</div><div class="checklist-item"><span>✓</span> Ongoing health conditions</div><div class="checklist-item"><span>✓</span> Previous procedures</div><div class="checklist-item"><span>✓</span> Your reason for visiting</div></div></aside>
+          </div>
+        </section>
+
+        <section class="view-panel" id="view-records" hidden>
+          <div class="page-heading heading-row"><div><p class="eyebrow">WORKSPACE / RECORDS</p><h1>Patient <span class="heading-highlight">history.</span></h1><p class="page-subtitle">Synthetic demonstration records stored on this local machine.</p></div><button class="button button-primary" data-view="intake"><span class="button-plus">＋</span> New intake</button></div>
+          <div class="alert-banner compact-alert"><span class="alert-symbol">!</span><div><strong>Fictional records only</strong><p>Do not use this prototype for actual patient records.</p></div><span class="alert-tag">LOCAL DEMO</span></div>
+          <section class="content-card records-card"><div class="records-toolbar"><div><h2>All intake records</h2><p id="records-description">Loading records…</p></div><div class="records-controls"><label class="search-box"><span>⌕</span><input id="record-search" placeholder="Search demo labels" aria-label="Search demo labels"></label><select id="status-filter" aria-label="Filter records by status"><option value="all">All statuses</option><option value="awaiting_review">Awaiting review</option><option value="reviewed">Reviewed</option><option value="needs_clarification">Needs clarification</option></select></div></div><div class="table-wrap"><table><thead><tr><th>Patient label</th><th>Reason for visit</th><th>Submitted</th><th>Status</th><th></th></tr></thead><tbody id="records-body"><tr><td colspan="5" class="loading-row">Loading local records…</td></tr></tbody></table></div><div class="table-foot"><span id="records-count">0 records</span><span>DEMO WORKSPACE</span></div></section>
+        </section>
+
+        <section class="view-panel" id="view-detail" hidden>
+          <div class="detail-top"><button class="back-button" id="back-to-records">← All records</button><span class="detail-demo-tag"><span class="status-dot"></span> Synthetic record</span></div>
+          <div id="detail-content"><div class="loading-row">Loading intake…</div></div>
+        </section>
+        <footer class="app-footer"><span>© MIA CLINICAL PLATFORM <span class="footer-separator">·</span> PROTOTYPE ONLY</span><span>Designed for clinician review, not clinical automation.</span></footer>
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
