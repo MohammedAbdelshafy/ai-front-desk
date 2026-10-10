@@ -318,7 +318,7 @@
     }
 
     const star = conditional
-      ? ' <b class="conditional-star" style="display:none">*</b>'
+      ? ' <b class="conditional-star">*</b>'
       : requiredMark;
     return '<label class="' + className + '"' + conditionalAttrs + '><span>' + esc(field.label) +
       star + "</span>" + control + help + "</label>";
