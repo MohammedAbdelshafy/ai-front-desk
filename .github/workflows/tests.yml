@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - "feat/**"
+      - "build/**"
+      - "plan/**"
   pull_request:
 
 permissions:
@@ -26,5 +28,9 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .
           python -m pip install pytest
+      - name: Check Python syntax
+        run: python -m compileall -q ai_front_desk tests
+      - name: Check browser JavaScript syntax
+        run: node --check ai_front_desk/static/app.js
       - name: Run tests
         run: python -m pytest -q
