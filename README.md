@@ -1,96 +1,64 @@
 # AI Front Desk
 
-A fully-owned WhatsApp support agent build: **WhatsApp Business Cloud API + n8n + OpenAI**.
-WhatsApp intake → qualification → human escalation → follow-up. No vendor lock-in.
+A WhatsApp support-agent reference build using **WhatsApp Business Cloud API + n8n + OpenAI**. WhatsApp intake → qualification → human escalation → follow-up. No vendor lock-in.
 
-Plus the **Mia Clinical Platform**: dental pre-visit intake + dentist-facing
-patient-history dashboard, with reusable foundations (MiaShell character
-component, versioned question bank, FHIR-compatible records) for future
-specialties. Synthetic data only — not HIPAA-compliant, not for real patients.
+This repository now also contains the **Mia Clinical Platform demo**: dental pre-visit intake plus a dentist-facing history dashboard, with reusable foundations for future specialties. The clinical demo uses synthetic data only and is not suitable for real patient records.
 
-## Mia Clinical Platform (demo)
+## What's inside
 
-- `ai_front_desk/clinical/question_bank.py` — versioned, conditional question
-  bank with validation and FHIR R4 `Questionnaire` export.
-- `ai_front_desk/clinical/dental_intake_v1.json` — dental pre-visit questionnaire
-  v1.0.0 (identity, visit, medications incl. antibiotics, allergies, conditions,
-  surgical history). **Status: draft — dentist review pending before any
-  clinical use.**
-- `ai_front_desk/clinical/intake.py` — intake processing: validation, omission
-  and contradiction detection, FHIR `QuestionnaireResponse` export.
-- `ai_front_desk/clinical/store.py` — SQLite dev store with tenant isolation
-  and append-only audit log. See `docs/adr/001-clinical-data-store.md`.
-- `ai_front_desk/clinical/dashboard.py` — dentist brief: patient-reported facts,
-  labeled AI rollup, flags, corrections overlay (originals preserved).
-- `ai_front_desk/clinical/mia_shell.py` — reusable MiaShell character manifest
-  + honest task-stage tracker (Dental Mia included).
-- `ai_front_desk/clinical/server.py` — stdlib demo server: mobile patient
-  intake form, dentist dashboard, record brief, review/correction actions.
+- `ai_front_desk/logic.py`: generic qualification state machine as pure, importable Python.
+- `ai_front_desk/webhook.py`: local development/test harness for the Meta webhook contract. `DRY_RUN=1` by default.
+- `ai_front_desk/n8n_workflow.json`: reference WhatsApp Cloud API workflow.
+- `ai_front_desk/dental_logic.py`: early dental administrative intake logic, approved FAQ handling, and human handoff.
+- `ai_front_desk/clinical/question_bank.py`: versioned conditional question bank and FHIR R4 Questionnaire export.
+- `ai_front_desk/clinical/dental_intake_v1.json`: dental health-history form, currently a draft awaiting qualified dentist review.
+- `ai_front_desk/clinical/intake.py`: validation, missing-answer and contradiction checks, FHIR QuestionnaireResponse export.
+- `ai_front_desk/clinical/store.py`: local SQLite development store with clinic scoping and an audit log.
+- `ai_front_desk/clinical/dashboard.py`: dentist-facing history brief with patient-reported answers, system-check flags, and a deterministic structured rollup. It is not AI-generated clinical interpretation.
+- `ai_front_desk/clinical/mia_shell.py`: Dental Mia character manifest and task-stage model.
+- `ai_front_desk/clinical/server.py`: local demo server with patient intake, dentist dashboard, record review, corrections, audit history, and FHIR export endpoints.
+- `docs/DENTAL_AI_MVP_BUILD_SPEC.md`, `docs/DENTAL_AI_GITHUB_RESEARCH.md`, `docs/DENTAL_AI_PRODUCTION_REFERENCE.md`: scope, research, and production architecture notes.
+- `docs/MIA_CLINICAL_PLATFORM_BUILD_PLAN.md`: multi-app Mia runtime and multi-specialty clinical platform plan.
+- `docs/adr/001-clinical-data-store.md`: development storage decision and production prerequisites.
 
-Run the demo:
+## Run the Mia Clinical demo
+
+Requires Python 3.9 or newer. From the repository root:
 
 ```bash
+python -m pip install -e .
 python -m ai_front_desk.clinical.server
-# open http://127.0.0.1:8766 — pick a demo clinic, complete an intake,
-# then open the dentist dashboard. Synthetic data only.
 ```
 
-Hard rules: no real patient data, no live messaging/booking, no medication
-decision support in v1 (collect + present history only), every finding labeled
-by source (patient_reported / system_check / ai_summary / clinician_entered).
+Open **http://127.0.0.1:8766**. Pick a fictional demo clinic, submit a fictional history, and then inspect the dentist dashboard. The server deliberately binds to loopback only.
 
-## What's inside (WhatsApp reference)
+The demo database is stored at `~/.mia-clinical-demo/clinical-demo.sqlite3` by default. Set `CLINICAL_DB` to override the local path. This is a development prototype, not an EHR.
 
-- `ai_front_desk/logic.py` — the qualification state machine as pure, importable
-  Python: greet → name → service → urgency → done, with FAQ answers and
-  escalation triggers. No network calls — reuse it anywhere (n8n Code node,
-  your own server, tests).
-- `ai_front_desk/webhook.py` — local dev/test server (stdlib only) emulating the
-  Meta webhook contract: GET verify (hub.mode/hub.verify_token/hub.challenge)
-  and POST message callbacks. `DRY_RUN=1` (default) writes the would-be Graph
-  reply payload instead of sending anything.
-- `ai_front_desk/n8n_workflow.json` — the **production** workflow. Import into
-  n8n: Webhook (Meta callbacks) → IF (verify challenge vs message event) →
-  Set (extract sender/text) → OpenAI node (front-desk brain) →
-  HTTP Request (POST reply to Graph API) → Respond 200.
+**Do not enter real patient data.** The questionnaire is marked draft and must be reviewed and approved by a qualified dentist before clinical use. The prototype has no production authentication, does not send messages or book appointments, and does not provide medication recommendations or autonomous clinical decisions. The Mia help conversation uses fixed local responses and is explicitly not a connected live AI model.
 
-## Install
+## Test
 
 ```bash
-pip install ai-front-desk
+python -m pip install -e .
+python -m pip install pytest
+python -m pytest -q
 ```
 
-## Local test
+The GitHub Actions workflow runs the test suite on relevant branches and pull requests. Check the actual workflow status before claiming a build is green.
+
+## Original WhatsApp reference flow
 
 ```bash
 VERIFY_TOKEN=mysecret PORT=8765 ai-front-desk-webhook
-# then in another shell:
+# in another shell:
 curl "http://127.0.0.1:8765/webhook?hub.mode=subscribe&hub.verify_token=mysecret&hub.challenge=ping"
 ```
 
-Run the test suite: `pytest` (unit tests) — the webhook contract e2e spins up the
-real server on localhost.
+Before enabling live messaging, the actual configuration needs provider signature verification, idempotency, tenant-scoped persistence, durable outbound retries, staff handoff, retention/deletion controls, and privacy/security review. Clinic-approved messages and explicit consent are required. An appointment request is not a confirmed booking unless a trusted scheduling workflow confirms it.
 
-## Going live — Meta app setup checklist
+## Safety and claims
 
-1. Create an app at developers.facebook.com → add the **WhatsApp** product.
-2. In WhatsApp → API Setup: note the **test phone number** and generate a
-   **temporary access token** (later: a permanent system-user token).
-3. Note the **Phone Number ID** from the same page.
-4. Configure the webhook: callback URL = your public n8n webhook URL,
-   verify token = your `VERIFY_TOKEN`, subscribe to the **messages** field.
-5. On the n8n host set env vars: `VERIFY_TOKEN`, `WHATSAPP_TOKEN`,
-   `PHONE_NUMBER_ID`. Add the OpenAI credential to the Front Desk Brain node
-   and the HTTP Header Auth credential to the Reply node.
-6. For production traffic beyond the test number, complete Meta's business
-   verification and request messaging limits upgrades in the app dashboard.
-
-## What it does not do
-
-This is a reference build, not a managed service. You bring your own Meta app,
-phone number, n8n host, and OpenAI key. No guaranteed response quality, lead
-volume, or revenue — the state machine is deterministic and test-covered; the
-AI reply quality depends on your own OpenAI configuration.
+This repository is a reference build, not a managed service. Do not claim that it is HIPAA-compliant, clinically validated, or safe for production patient data. The dental questionnaire remains a draft pending qualified dentist review. It only captures and organizes information; it does not diagnose, prescribe, recommend medicines, or replace a clinician.
 
 ## License
 
