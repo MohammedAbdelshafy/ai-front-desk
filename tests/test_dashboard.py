@@ -29,8 +29,7 @@ def _submission(answers):
 
 
 def test_brief_labels_patient_reported(bank):
-    answers = {"id.full_name": "Synth Patient", "id.dob": "1990-01-01",
-               "id.phone": "555-0100", "id.contact_pref": "Phone call",
+    answers = {"id.demo_label": "Demo Patient Synth", "id.contact_pref": "Phone call",
                "visit.reason": "Tooth pain", "med.taking_any": "Yes",
                "med.list": "Ibuprofen 200mg as needed",
                "med.antibiotics_recent": "No", "allergy.med_allergy": "Yes",
@@ -45,7 +44,7 @@ def test_brief_labels_patient_reported(bank):
 
 
 def test_brief_flags_contradiction(bank):
-    answers = {"id.full_name": "P", "id.dob": "1990-01-01", "id.phone": "1",
+    answers = {"id.demo_label": "Demo Patient P",
                "id.contact_pref": "Phone call", "visit.reason": "Tooth pain",
                "med.taking_any": "No", "med.list": "Lisinopril",
                "med.antibiotics_recent": "No", "allergy.med_allergy": "No",
@@ -57,13 +56,13 @@ def test_brief_flags_contradiction(bank):
 
 
 def test_brief_flags_missing_required(bank):
-    answers = {"id.full_name": "P", "id.dob": "1990-01-01", "id.phone": "1",
+    answers = {"id.demo_label": "Demo Patient P",
                "id.contact_pref": "Phone call", "visit.reason": "Tooth pain",
                "med.taking_any": "No", "med.antibiotics_recent": "No",
                "allergy.med_allergy": "No", "allergy.latex": "No",
                "allergy.anesthesia": "No", "consent.accuracy": "Yes"}
     brief = generate_brief(bank, _submission(answers))
-    # consent.accuracy present; id.full_name etc present — nothing missing
+    # consent.accuracy present; id.demo_label etc present — nothing missing
     assert not any(f["type"] == "missing" for f in brief["flags"])
     del answers["consent.accuracy"]
     brief2 = generate_brief(bank, _submission(answers))
@@ -71,7 +70,7 @@ def test_brief_flags_missing_required(bank):
 
 
 def test_ai_summary_labeled_not_clinical(bank):
-    answers = {"id.full_name": "P", "id.dob": "1990-01-01", "id.phone": "1",
+    answers = {"id.demo_label": "Demo Patient P",
                "id.contact_pref": "Phone call", "visit.reason": "Tooth pain",
                "med.taking_any": "No", "med.antibiotics_recent": "No",
                "allergy.med_allergy": "No", "allergy.latex": "No",
@@ -82,7 +81,7 @@ def test_ai_summary_labeled_not_clinical(bank):
 
 
 def test_correction_overlay_does_not_rewrite_original(bank):
-    answers = {"id.full_name": "P", "id.dob": "1990-01-01", "id.phone": "1",
+    answers = {"id.demo_label": "Demo Patient P",
                "id.contact_pref": "Phone call", "visit.reason": "Tooth pain",
                "med.taking_any": "Yes", "med.list": "Old Med",
                "med.antibiotics_recent": "No", "allergy.med_allergy": "No",
@@ -99,7 +98,7 @@ def test_correction_overlay_does_not_rewrite_original(bank):
 
 
 def test_priority_sections_first(bank):
-    answers = {"id.full_name": "P", "id.dob": "1990-01-01", "id.phone": "1",
+    answers = {"id.demo_label": "Demo Patient P",
                "id.contact_pref": "Phone call", "visit.reason": "Tooth pain",
                "med.taking_any": "No", "med.antibiotics_recent": "No",
                "allergy.med_allergy": "No", "allergy.latex": "No",
