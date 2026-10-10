@@ -47,8 +47,7 @@ def _post_json(base, path, payload):
 
 
 def _answers():
-    return {"id.full_name": "E2E Synth", "id.dob": "1985-05-05",
-            "id.phone": "555-0199", "id.contact_pref": "Phone call",
+    return {"id.demo_label": "Demo Patient E2E", "id.contact_pref": "Phone call",
             "visit.reason": "Routine checkup / cleaning",
             "med.taking_any": "No", "med.antibiotics_recent": "No",
             "allergy.med_allergy": "No", "allergy.latex": "No",
@@ -71,7 +70,7 @@ def test_intake_page_renders_questions(live_server):
 def test_api_intake_accepts_valid(live_server):
     code, resp = _post_json(live_server, "/api/intake",
                             {"clinic_id": "demo-smile-arts",
-                             "patient_ref": "E2E Synth", "answers": _answers()})
+                             "patient_ref": "Demo Patient E2E", "answers": _answers()})
     assert code == 200
     assert resp["ok"] is True
     assert resp["submission_id"].startswith("sub_")
@@ -79,28 +78,28 @@ def test_api_intake_accepts_valid(live_server):
 
 def test_api_intake_rejects_invalid(live_server):
     bad = _answers()
-    del bad["id.full_name"]
+    del bad["id.demo_label"]
     code, resp = _post_json(live_server, "/api/intake",
                             {"clinic_id": "demo-smile-arts",
-                             "patient_ref": "E2E Synth", "answers": bad})
+                             "patient_ref": "Demo Patient E2E", "answers": bad})
     assert code == 422
     assert resp["ok"] is False
-    assert "id.full_name" in resp["missing"]
+    assert "id.demo_label" in resp["missing"]
 
 
 def test_dashboard_lists_submission(live_server):
     _post_json(live_server, "/api/intake",
                {"clinic_id": "demo-smile-arts",
-                "patient_ref": "E2E Synth", "answers": _answers()})
+                "patient_ref": "Demo Patient E2E", "answers": _answers()})
     code, body = _get(live_server, "/dashboard?clinic=demo-smile-arts")
     assert code == 200
-    assert "E2E Synth" in body
+    assert "Demo Patient E2E" in body
 
 
 def test_record_brief_shows_flags_and_sources(live_server):
     code, resp = _post_json(live_server, "/api/intake",
                             {"clinic_id": "demo-smile-arts",
-                             "patient_ref": "E2E Synth", "answers": _answers()})
+                             "patient_ref": "Demo Patient E2E", "answers": _answers()})
     sub = resp["submission_id"]
     code, body = _get(live_server, f"/record?clinic=demo-smile-arts&sub={sub}")
     assert code == 200
@@ -111,7 +110,7 @@ def test_record_brief_shows_flags_and_sources(live_server):
 def test_cross_tenant_record_denied_over_http(live_server):
     code, resp = _post_json(live_server, "/api/intake",
                             {"clinic_id": "demo-smile-arts",
-                             "patient_ref": "E2E Synth", "answers": _answers()})
+                             "patient_ref": "Demo Patient E2E", "answers": _answers()})
     sub = resp["submission_id"]
     try:
         _get(live_server, f"/record?clinic=demo-lakeside&sub={sub}")
