@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+from contextlib import contextmanager
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -161,12 +162,25 @@ def _connect(db_path: str | Path) -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
+@contextmanager
+def _connection(db_path: str | Path):
+    """Commit or roll back a unit of work, and always close the SQLite handle."""
+    conn = _connect(db_path)
+    try:
+        yield conn
+        conn.commit()
+    except BaseException:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
 
 def initialize_database(db_path: str | Path) -> None:
     """Create the local demo schema. This schema is not production healthcare storage."""
     path = Path(db_path).expanduser()
     path.parent.mkdir(parents=True, exist_ok=True)
-    with _connect(path) as conn:
+    with _connection(path) as conn:
         conn.execute("PRAGMA journal_mode = WAL")
         conn.executescript(
             """
@@ -248,7 +262,7 @@ def create_intake(db_path: str | Path, payload: Mapping[str, Any]) -> dict[str, 
     initialize_database(db_path)
     intake_id = uuid.uuid4().hex
     created_at = _now()
-    with _connect(db_path) as conn:
+    with _connection(db_path) as conn:
         conn.execute(
             "INSERT INTO intakes (id, clinic_id, form_version, created_at, status, answers_json) "
             "VALUES (?, ?, ?, ?, ?, ?)",
@@ -272,7 +286,7 @@ def create_intake(db_path: str | Path, payload: Mapping[str, Any]) -> dict[str, 
 
 def get_intake(db_path: str | Path, intake_id: str) -> dict[str, Any]:
     initialize_database(db_path)
-    with _connect(db_path) as conn:
+    with _connection(db_path) as conn:
         row = conn.execute(
             "SELECT * FROM intakes WHERE id = ? AND clinic_id = ?",
             (intake_id, DEMO_CLINIC_ID),
@@ -285,7 +299,7 @@ def get_intake(db_path: str | Path, intake_id: str) -> dict[str, Any]:
 def list_intakes(db_path: str | Path, limit: int = 100) -> list[dict[str, Any]]:
     initialize_database(db_path)
     safe_limit = min(max(int(limit), 1), 200)
-    with _connect(db_path) as conn:
+    with _connection(db_path) as conn:
         rows = conn.execute(
             "SELECT * FROM intakes WHERE clinic_id = ? ORDER BY created_at DESC, id DESC LIMIT ?",
             (DEMO_CLINIC_ID, safe_limit),
@@ -309,7 +323,7 @@ def review_intake(
     review_notes = _text(notes, "review_notes", 1200)
 
     initialize_database(db_path)
-    with _connect(db_path) as conn:
+    with _connection(db_path) as conn:
         exists = conn.execute(
             "SELECT id FROM intakes WHERE id = ? AND clinic_id = ?",
             (intake_id, DEMO_CLINIC_ID),
@@ -342,7 +356,7 @@ def review_intake(
 def seed_demo_records(db_path: str | Path) -> None:
     """Create fictional UI examples once, without importing real patient data."""
     initialize_database(db_path)
-    with _connect(db_path) as conn:
+    with _connection(db_path) as conn:
         count = conn.execute("SELECT COUNT(*) FROM intakes WHERE clinic_id = ?", (DEMO_CLINIC_ID,)).fetchone()[0]
     if count:
         return
