@@ -20,6 +20,7 @@ from __future__ import annotations
 import html
 import json
 import os
+import re
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
@@ -33,12 +34,17 @@ from .store import ClinicalStore, TenantMismatchError
 
 BASE = Path(__file__).resolve().parent
 BANK = load_bank(BASE / "dental_intake_v1.json")
-DB_PATH = Path(os.environ.get("CLINICAL_DB", "/tmp/mia_clinical_demo.db"))
+DB_PATH = Path(os.environ.get("CLINICAL_DB", str(Path.home() / ".mia-clinical-demo" / "clinical-demo.sqlite3")))
+MAX_REQUEST_BODY = 64 * 1024
+DEMO_PATIENT_LABEL_RE = re.compile(r"(?:Demo|Test|Sample) [A-Za-z0-9][A-Za-z0-9 _-]{0,44}\\Z", re.IGNORECASE)
+SUBMISSION_ID_RE = re.compile(r"sub_[a-f0-9]{12}\\Z")
 
 DEMO_CLINICS = [
     ("demo-smile-arts", "Smile Arts Dental (demo)"),
     ("demo-lakeside", "Lakeside Family Dental (demo)"),
 ]
+
+DEMO_CLINIC_IDS = {clinic_id for clinic_id, _name in DEMO_CLINICS}
 
 BANNER = (
     "<div style='background:#fff3cd;color:#664d03;padding:10px 14px;"
@@ -283,12 +289,37 @@ class Handler(BaseHTTPRequestHandler):
         pass  # keep demo output clean; no patient data in logs
 
     def _send(self, code, body, ctype="text/html"):
-        data = body.encode() if isinstance(body, str) else body
+        data = body.encode("utf-8") if isinstance(body, str) else body
         self.send_response(code)
         self.send_header("Content-Type", ctype + "; charset=utf-8")
         self.send_header("Content-Length", str(len(data)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
         self.end_headers()
         self.wfile.write(data)
+
+    def _read_body(self):
+        raw_length = self.headers.get("Content-Length", "0")
+        try:
+            length = int(raw_length)
+        except (TypeError, ValueError):
+            raise ValueError("invalid Content-Length")
+        if length <= 0:
+            raise ValueError("request body is required")
+        if length > MAX_REQUEST_BODY:
+            raise OverflowError("request body exceeds the demo limit")
+        return self.rfile.read(length)
+
+    def _resolve_clinic(self, clinic_id):
+        if clinic_id not in DEMO_CLINIC_IDS:
+            return None
+        return dict(DEMO_CLINICS).get(clinic_id)
+
+    def _valid_submission_id(self, submission_id):
+        return bool(isinstance(submission_id, str) and SUBMISSION_ID_RE.fullmatch(submission_id))
 
     def _json(self, code, obj):
         self._send(code, json.dumps(obj), "application/json")
@@ -296,17 +327,37 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         u = urlparse(self.path)
         q = parse_qs(u.query)
-        clinic_id = (q.get("clinic", [""])[0])
-        name = dict(DEMO_CLINICS).get(clinic_id, clinic_id or "demo clinic")
+        clinic_id = q.get("clinic", [""])[0]
         if u.path == "/":
             self._send(200, render_landing())
-        elif u.path == "/intake":
-            self._send(200, render_intake(clinic_id or "demo-smile-arts", name))
-        elif u.path == "/dashboard":
-            self._send(200, render_dashboard(clinic_id or "demo-smile-arts", name, self.store))
-        elif u.path == "/record":
-            code, body = render_record(clinic_id, q.get("sub", [""])[0], self.store)
-            self._send(code, body)
+        elif u.path in ("/intake", "/dashboard", "/record", "/api/audit"):
+            name = self._resolve_clinic(clinic_id)
+            if name is None:
+                self._send(404, "Unknown demo clinic.")
+                return
+            if u.path == "/intake":
+                self._send(200, render_intake(clinic_id, name))
+            elif u.path == "/dashboard":
+                self._send(200, render_dashboard(clinic_id, name, self.store))
+            elif u.path == "/record":
+                sub_id = q.get("sub", [""])[0]
+                if not self._valid_submission_id(sub_id):
+                    self._send(404, "Submission not found.")
+                    return
+                code, body = render_record(clinic_id, sub_id, self.store)
+                self._send(code, body)
+            else:
+                target = q.get("target", [""])[0]
+                if not self._valid_submission_id(target):
+                    self._send(404, "Submission not found.")
+                    return
+                try:
+                    self.get_submission_guard(clinic_id, target)
+                    self._json(200, {"audit": self.store.audit_trail(clinic_id, target)})
+                except TenantMismatchError:
+                    self._json(403, {"ok": False, "error": "Cross-clinic access denied."})
+                except KeyError:
+                    self._json(404, {"ok": False, "error": "Submission not found."})
         elif u.path == "/api/questions":
             self._json(200, {"bank": bank_snapshot(BANK),
                              "questions": [{"qid": x.qid, "section": x.section,
@@ -318,14 +369,6 @@ class Handler(BaseHTTPRequestHandler):
         elif u.path == "/api/manifest":
             from .mia_shell import DENTAL_MIA
             self._json(200, DENTAL_MIA.to_dict())
-        elif u.path == "/api/audit":
-            try:
-                self.get_submission_guard(clinic_id, q.get("target", [""])[0])
-                self._json(200, {"audit": self.store.audit_trail(
-                    clinic_id, q.get("target", [""])[0])})
-            except (TenantMismatchError, KeyError) as e:
-                self._json(403 if isinstance(e, TenantMismatchError) else 404,
-                            {"ok": False, "error": str(e)})
         else:
             self._send(404, "Not found.")
 
@@ -335,54 +378,99 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urlparse(self.path)
-        length = int(self.headers.get("Content-Length", 0))
-        raw = self.rfile.read(length) if length else b""
-        ctype = self.headers.get("Content-Type", "")
+        try:
+            raw = self._read_body()
+        except OverflowError:
+            self._send(413, "Request body too large.")
+            return
+        except ValueError:
+            self._send(400, "Invalid request body.")
+            return
+        ctype = self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
 
         if u.path == "/api/intake":
+            if ctype != "application/json":
+                self._json(415, {"ok": False, "errors": ["Content-Type must be application/json"]})
+                return
             try:
-                payload = json.loads(raw.decode())
-            except Exception:
+                payload = json.loads(raw.decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError):
                 self._json(400, {"ok": False, "errors": ["invalid JSON"]})
                 return
+            if not isinstance(payload, dict):
+                self._json(400, {"ok": False, "errors": ["request must be a JSON object"]})
+                return
             clinic_id = payload.get("clinic_id", "")
+            if clinic_id not in DEMO_CLINIC_IDS:
+                self._json(404, {"ok": False, "errors": ["unknown demo clinic"]})
+                return
             answers = payload.get("answers", {})
-            patient_ref = str(payload.get("patient_ref", "anonymous"))[:80]
             result = process_intake(BANK, answers)
             if not result["valid"]:
                 self._json(422, {"ok": False, "errors": result["errors"],
                                  "missing": result["missing_required"]})
                 return
-            sub_id = self.store.save_submission(
-                clinic_id, BANK.bank_id, BANK.version, patient_ref, answers)
-            self._json(200, {"ok": True, "submission_id": sub_id,
+            patient_ref = answers.get("id.demo_label", "")
+            if not isinstance(patient_ref, str) or not DEMO_PATIENT_LABEL_RE.fullmatch(patient_ref):
+                self._json(422, {"ok": False, "errors": [
+                    "Use a fictional patient label beginning with Demo, Test, or Sample."
+                ]})
+                return
+            try:
+                sub_id = self.store.save_submission(
+                    clinic_id, BANK.bank_id, BANK.version, patient_ref, answers)
+            except (TenantMismatchError, ValueError):
+                self._json(400, {"ok": False, "errors": ["Could not save this demo intake."]})
+                return
+            self._json(201, {"ok": True, "submission_id": sub_id,
                              "contradictions": result["contradictions"],
                              "needs_confirmation": result["needs_confirmation"]})
             return
 
-        # form-encoded actions from the dashboard
-        form = parse_qs(raw.decode())
+        # Form-encoded review/correction actions remain available only for fixed demo clinics.
+        if ctype != "application/x-www-form-urlencoded":
+            self._send(415, "Content-Type must be application/x-www-form-urlencoded.")
+            return
+        try:
+            form = parse_qs(raw.decode("utf-8", errors="strict"), max_num_fields=30)
+        except (UnicodeDecodeError, ValueError):
+            self._send(400, "Invalid form body.")
+            return
         get = lambda k: (form.get(k, [""])[0] or "").strip()
         clinic_id, sub_id = get("clinic_id"), get("sub")
+        if clinic_id not in DEMO_CLINIC_IDS or not self._valid_submission_id(sub_id):
+            self._send(404, "Submission not found.")
+            return
         if u.path == "/api/review":
             try:
                 self.store.record_review(clinic_id, sub_id, get("reviewer"),
                                          get("decision"), get("note"))
-            except (TenantMismatchError, KeyError, ValueError) as e:
+            except TenantMismatchError:
+                self._send(403, "Cross-clinic access denied.")
+                return
+            except (KeyError, ValueError) as e:
                 self._send(400, f"Review failed: {esc(str(e))}")
                 return
             self.send_response(303)
+            self.send_header("Cache-Control", "no-store")
             self.send_header("Location", f"/record?clinic={clinic_id}&sub={sub_id}")
             self.end_headers()
         elif u.path == "/api/correct":
+            if BANK.get(get("qid")) is None:
+                self._send(400, "Unknown question id.")
+                return
             try:
                 self.store.record_correction(clinic_id, sub_id, get("qid"),
                                              get("new_value"), get("source"),
                                              get("author"))
-            except (TenantMismatchError, KeyError) as e:
+            except TenantMismatchError:
+                self._send(403, "Cross-clinic access denied.")
+                return
+            except (KeyError, ValueError) as e:
                 self._send(400, f"Correction failed: {esc(str(e))}")
                 return
             self.send_response(303)
+            self.send_header("Cache-Control", "no-store")
             self.send_header("Location", f"/record?clinic={clinic_id}&sub={sub_id}")
             self.end_headers()
         else:
@@ -395,6 +483,8 @@ def ensure_demo_clinics(store: ClinicalStore):
 
 
 def run(host="127.0.0.1", port=8766):
+    if host != "127.0.0.1":
+        raise ValueError("The synthetic demo server must bind to 127.0.0.1 only.")
     store = ClinicalStore(DB_PATH)
     ensure_demo_clinics(store)
     Handler.store = store
