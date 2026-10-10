@@ -13,9 +13,10 @@ license = { text = "MIT" }
 
 [project.scripts]
 ai-front-desk-webhook = "ai_front_desk.webhook:main"
+ai-front-desk-demo = "ai_front_desk.demo_app:main"
 
 [tool.setuptools.packages.find]
 include = ["ai_front_desk*"]
 
 [tool.setuptools.package-data]
-ai_front_desk = ["n8n_workflow.json", ".env.example"]
+ai_front_desk = ["n8n_workflow.json", ".env.example", "static/*"]
