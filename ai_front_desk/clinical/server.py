@@ -324,10 +324,10 @@ def render_record(clinic_id, sub_id, store):
         )
         sections_html += f"<h2>{esc(brief['section_labels'].get(sec, sec))}</h2><table>{items}</table>"
 
-    ai = brief["ai_summary"]
-    ai_html = ("<h2>AI rollup <span class='src'>source: ai_summary — derived only, not clinical interpretation</span></h2><ul>"
-               + "".join(f"<li>{esc(line)}</li>" for line in ai["lines"])
-               + f"</ul><p class='src'>{esc(ai['disclaimer'])}</p>")
+    rollup = brief["structured_rollup"]
+    rollup_html = ("<h2>Structured rollup <span class='src'>source: structured_rollup — deterministic, not AI-generated</span></h2><ul>"
+                   + "".join(f"<li>{esc(line)}</li>" for line in rollup["lines"])
+                   + f"</ul><p class='src'>{esc(rollup['disclaimer'])}</p>")
 
     audit_html = "".join(
         f"<tr><td>{time.strftime('%H:%M:%S', time.localtime(a['created_at']))}</td>"
@@ -344,7 +344,7 @@ def render_record(clinic_id, sub_id, store):
 review status: {esc(brief['bank']['review_status'])} · original answers preserved</span></p>
 <h2>Flags ({brief['flag_count']})</h2>{flags_html}
 {sections_html}
-{ai_html}
+{rollup_html}
 <h2>Record review</h2>
 <form method="POST" action="/api/review" id="revForm">
 <input type="hidden" name="clinic_id" value="{clinic_id}">
@@ -408,7 +408,7 @@ class Handler(BaseHTTPRequestHandler):
         return self.rfile.read(length)
 
     def _resolve_clinic(self, clinic_id):
-        if clinic_id not in DEMO_CLINIC_IDS:
+        if not isinstance(clinic_id, str) or clinic_id not in DEMO_CLINIC_IDS:
             return None
         return dict(DEMO_CLINICS).get(clinic_id)
 
