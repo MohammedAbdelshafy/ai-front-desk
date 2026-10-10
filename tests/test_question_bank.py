@@ -57,7 +57,7 @@ def test_invalid_choice_rejected(bank):
 
 def test_required_missing_flagged(bank):
     missing = bank.missing_required({})
-    assert "id.full_name" in missing
+    assert "id.demo_label" in missing
     assert "consent.accuracy" in missing
 
 
