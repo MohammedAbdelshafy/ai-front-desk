@@ -1,10 +1,48 @@
-# AI Front Desk
+# Mia Dental OS
+
+**The prescribing safety copilot for young dentists.** Mia Dental OS is an AI front-desk platform for dental clinics. Its entry module, the **Mia Dental Prescribing Copilot**, is a prescribing safety *reference aid*: it walks the dentist through a guided 7-step check — indication, patient factors, allergies, current medications, conditions — and returns a cited safety review (clear / caution / do-not-use / cannot-verify) before the dentist makes their own call.
+
+Mia is the employee you hire for your clinic's departments — an AI operator that shows its work. She never prescribes, never signs orders, never diagnoses, and the dentist always decides.
+
+> **Honest status (read first):** Mia Dental OS is a **working demo using synthetic data only**. It is **not publicly deployed yet**, it is **not live with any clinic**, and the prescribing reference data is **awaiting qualified dentist review**. Everything here is **founding-pilot / prelaunch**. There are no customers, no clinical validation claims, and no real patient data anywhere in this repository.
+
+## Pricing
+
+- **$99/month**, with a **7-day free trial**.
+- Billing today is **manual via Neteller**: send $99 to **abdelshafyclapps@gmail.com**, then message us and the founder activates your account by hand. No automatic checkout yet.
+
+## Try the demo
+
+The prescribing copilot runs locally (standard-library Python only, no dependencies to install):
+
+```bash
+python -m ai_front_desk.clinical.prescribe.server
+```
+
+Open **http://127.0.0.1:8767**. Run the guided wizard, try a penicillin-allergy scenario, and watch the safety review flag it with citations.
+
+A public hosted demo is coming after the founder's hosting setup — no public URL yet.
+
+## What's inside (prescribing module)
+
+- `ai_front_desk/clinical/prescribe/server.py`: the Mia Dental OS web app — landing page, signup/signin, 7-step wizard, safety review, trial/subscription state, dentist review workflow, legal pages.
+- `ai_front_desk/clinical/prescribe/reference_data.py`: the cited reference library (DailyMed/FDA labels, ADA and WHO guidance). **Draft — requires qualified dentist review before any clinical use.**
+- `ai_front_desk/clinical/prescribe/wizard.py`: the guided intake flow with missing-information flags (missing info never renders as "safe").
+- `ai_front_desk/clinical/prescribe/accounts.py`, `billing.py`, `trial.py`: per-account isolation, manual Neteller billing, 7-day trial lifecycle.
+- `docs/review/`: the dentist review packet (generated from the reference data) — ready to send to a reviewing dentist.
+- `docs/legal/`: draft privacy, terms, security, and clinical-limitation documents (require qualified legal review before production use).
+
+> The prescribing module is in active development on branch `build/dental-mia-prescribe-2026-10-11` (draft PR #6, not yet merged into `main`).
+
+---
+
+## Also in this repo: AI Front Desk (reference build)
 
 A WhatsApp support-agent reference build using **WhatsApp Business Cloud API + n8n + OpenAI**. WhatsApp intake → qualification → human escalation → follow-up. No vendor lock-in.
 
-This repository now also contains the **Mia Clinical Platform demo**: dental pre-visit intake plus a dentist-facing history dashboard, with reusable foundations for future specialties. The clinical demo uses synthetic data only and is not suitable for real patient records.
+This repository also contains the **Mia Clinical Platform demo**: dental pre-visit intake plus a dentist-facing history dashboard, with reusable foundations for future specialties. The clinical demo uses synthetic data only and is not suitable for real patient records.
 
-## What's inside
+### What's inside
 
 - `ai_front_desk/logic.py`: generic qualification state machine as pure, importable Python.
 - `ai_front_desk/webhook.py`: local development/test harness for the Meta webhook contract. `DRY_RUN=1` by default.
@@ -21,7 +59,7 @@ This repository now also contains the **Mia Clinical Platform demo**: dental pre
 - `docs/MIA_CLINICAL_PLATFORM_BUILD_PLAN.md`: multi-app Mia runtime and multi-specialty clinical platform plan.
 - `docs/adr/001-clinical-data-store.md`: development storage decision and production prerequisites.
 
-## Run the Mia Clinical demo
+### Run the Mia Clinical demo
 
 Requires Python 3.9 or newer. From the repository root:
 
@@ -58,7 +96,7 @@ Before enabling live messaging, the actual configuration needs provider signatur
 
 ## Safety and claims
 
-This repository is a reference build, not a managed service. Do not claim that it is HIPAA-compliant, clinically validated, or safe for production patient data. The dental questionnaire remains a draft pending qualified dentist review. It only captures and organizes information; it does not diagnose, prescribe, recommend medicines, or replace a clinician.
+This repository is a reference build, not a managed service. Do not claim that it is HIPAA-compliant, clinically validated, or safe for production patient data. The dental questionnaire and the prescribing reference data remain drafts pending qualified dentist review. They only capture and organize information; they do not diagnose, prescribe, recommend medicines, or replace a clinician.
 
 ## License
 
