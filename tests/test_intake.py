@@ -19,9 +19,7 @@ def bank():
 
 def valid_answers():
     return {
-        "id.full_name": "Synth Patient",
-        "id.dob": "1990-01-01",
-        "id.phone": "555-0100",
+        "id.demo_label": "Demo Patient Synth",
         "id.contact_pref": "Phone call",
         "visit.reason": "Routine checkup / cleaning",
         "med.taking_any": "No",
@@ -42,10 +40,10 @@ def test_valid_intake_passes(bank):
 
 def test_missing_required_blocks(bank):
     answers = valid_answers()
-    del answers["id.full_name"]
+    del answers["id.demo_label"]
     result = process_intake(bank, answers)
     assert result["valid"] is False
-    assert "id.full_name" in result["missing_required"]
+    assert "id.demo_label" in result["missing_required"]
 
 
 def test_contradiction_no_meds_but_list(bank):
