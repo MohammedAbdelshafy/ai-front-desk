@@ -410,6 +410,25 @@ class Handler(BaseHTTPRequestHandler):
         elif u.path == "/api/manifest":
             from .mia_shell import DENTAL_MIA
             self._json(200, DENTAL_MIA.to_dict())
+        elif u.path == "/api/fhir/questionnaire":
+            self._json(200, BANK.to_fhir_questionnaire())
+        elif u.path == "/api/fhir/questionnaire-response":
+            clinic_id = q.get("clinic", [""])[0]
+            sub_id = q.get("sub", [""])[0]
+            if clinic_id not in DEMO_CLINIC_IDS or not self._valid_submission_id(sub_id):
+                self._json(404, {"ok": False, "error": "Demo submission not found."})
+                return
+            try:
+                submission = self.store.get_submission(clinic_id, sub_id)
+            except TenantMismatchError:
+                self._json(403, {"ok": False, "error": "Cross-clinic access denied."})
+                return
+            except KeyError:
+                self._json(404, {"ok": False, "error": "Demo submission not found."})
+                return
+            self._json(200, to_fhir_questionnaire_response(
+                BANK, submission["answers"], submission["submission_id"]
+            ))
         else:
             self._send(404, "Not found.")
 
