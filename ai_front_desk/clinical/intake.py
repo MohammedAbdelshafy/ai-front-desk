@@ -78,6 +78,16 @@ def process_intake(
     Returns dict with: valid, errors, missing_required, contradictions,
     needs_confirmation, visible_question_ids.
     """
+    if not isinstance(answers, dict):
+        return {
+            "valid": False,
+            "errors": ["answers: expected an object keyed by question id"],
+            "missing_required": bank.missing_required({}),
+            "contradictions": [],
+            "needs_confirmation": [],
+            "visible_question_ids": [q.qid for q in bank.visible_questions({})],
+            "bank": {"bank_id": bank.bank_id, "version": bank.version},
+        }
     visible = bank.visible_questions(answers)
     errors = bank.validate_answers(answers)
     missing = bank.missing_required(answers)
