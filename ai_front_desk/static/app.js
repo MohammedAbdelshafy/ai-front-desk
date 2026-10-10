@@ -277,6 +277,70 @@
     if (state.view === "records") renderRecords();
   }
 
+  function renderQuestionField(field) {
+    const conditional = Boolean(field.conditional_on);
+    const fullWidth = field.full_width !== false;
+    const className = "field" + (fullWidth ? " full-field" : "") + (conditional ? " conditional-field" : "");
+    const conditionalAttrs = conditional
+      ? ' data-for="' + esc(field.conditional_on) + '" hidden'
+      : "";
+    const requiredMark = field.required ? " <b>*</b>" : "";
+    const help = field.help_text ? '<small>' + esc(field.help_text) + "</small>" : "";
+    const maxLength = field.max_length ? ' maxlength="' + Number(field.max_length) + '"' : "";
+    const placeholder = field.placeholder ? ' placeholder="' + esc(field.placeholder) + '"' : "";
+
+    if (field.type === "choice") {
+      const options = (field.options || []).map(option =>
+        '<label><input type="radio" name="' + esc(field.id) + '" value="' + esc(option.value) + '"' +
+        (field.required ? " required" : "") + '><span>' + esc(option.label) + "</span></label>"
+      ).join("");
+      return '<fieldset class="field full-field status-fieldset"><legend>' + esc(field.label) +
+        requiredMark + '</legend><div class="radio-row">' + options + "</div></fieldset>";
+    }
+
+    let control = "";
+    if (field.type === "textarea") {
+      control = '<textarea name="' + esc(field.id) + '" rows="' + Number(field.rows || 2) + '"' +
+        maxLength + placeholder + (field.required ? " required" : "") + (conditional ? " disabled" : "") + "></textarea>";
+    } else if (field.type === "select") {
+      const choices = (field.options || []).map(option =>
+        '<option value="' + esc(option.value) + '">' + esc(option.label) + "</option>"
+      ).join("");
+      control = '<select name="' + esc(field.id) + '"' + (field.required ? " required" : "") +
+        '><option value="">Choose an option</option>' + choices + "</select>";
+    } else {
+      control = '<input type="text" name="' + esc(field.id) + '"' + maxLength + placeholder +
+        (field.required ? " required" : "") + ' autocomplete="off">';
+    }
+
+    const star = conditional
+      ? ' <b class="conditional-star" style="display:none">*</b>'
+      : requiredMark;
+    return '<label class="' + className + '"' + conditionalAttrs + '><span>' + esc(field.label) +
+      star + "</span>" + control + help + "</label>";
+  }
+
+  function renderQuestionnaire(schema) {
+    $("#form-step-label").textContent = schema.approval_status === "draft_requires_dentist_approval"
+      ? "DRAFT QUESTIONNAIRE"
+      : "PATIENT FORM";
+    $("#questionnaire-title").textContent = schema.title || "Dental history";
+    $("#questionnaire-description").textContent = "Form version " + (schema.version || "unknown") +
+      " · Choose “Not sure” when you don't know an answer.";
+    const container = $("#questionnaire-container");
+    const sections = Array.isArray(schema.sections) ? schema.sections : [];
+    container.innerHTML = sections.map(section => {
+      const fields = (section.fields || []).map(renderQuestionField).join("");
+      return '<div class="form-section"><div class="form-section-heading"><span class="section-number">' +
+        esc(section.number || "") + "</span><div><h3>" + esc(section.title || "") +
+        "</h3><p>" + esc(section.description || "") + '</p></div></div><div class="field-grid">' +
+        fields + "</div></div>";
+    }).join("");
+    const notice = $("#questionnaire-status");
+    notice.textContent = schema.notice || "Review this draft with a qualified dentist before clinical use.";
+    notice.hidden = false;
+  }
+
   function syncConditionalFields() {
     $$(".conditional-field").forEach(wrapper => {
       const fieldName = wrapper.dataset.for;
@@ -374,6 +438,13 @@
       if (health.mode !== "synthetic-demo-only" || health.real_patient_data_allowed !== false) {
         throw new Error("The demo safety configuration is not correct.");
       }
+      const questionnaire = await api("/api/questionnaire");
+      if (!questionnaire || !Array.isArray(questionnaire.sections)) {
+        throw new Error("The question bank is unavailable.");
+      }
+      renderQuestionnaire(questionnaire);
+      initIntakeForm();
+      syncConditionalFields();
       await refreshRecords();
     } catch (err) {
       showToast("Could not initialize the local demo: " + (err.message || "unknown error"), true);
@@ -381,6 +452,5 @@
   }
 
   initImages();
-  initIntakeForm();
   init();
 })();
