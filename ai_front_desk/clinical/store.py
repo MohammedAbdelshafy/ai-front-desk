@@ -193,8 +193,9 @@ class ClinicalStore:
             (review_id, submission_id, clinic_id, reviewer, decision, note, time.time()),
         )
         self._db.execute(
-            "UPDATE intake_submissions SET status = ?, updated_at = ? WHERE submission_id = ?",
-            ("reviewed:" + decision, time.time(), submission_id),
+            """UPDATE intake_submissions SET status = ?, updated_at = ?
+               WHERE submission_id = ? AND clinic_id = ?""",
+            ("reviewed:" + decision, time.time(), submission_id, clinic_id),
         )
         self._audit(clinic_id, reviewer, "submission.reviewed", submission_id,
                     f"decision={decision}")
