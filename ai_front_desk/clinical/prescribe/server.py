@@ -508,6 +508,25 @@ def shell(active: str, clinic_name: str, trial: dict, body: str, ctx: dict | Non
     )
 
 
+# ---------------------------------------------------------------- videos ---
+# Demo videos (mia-muse-assets repo, raw URLs). If a video fails to load,
+# the <video> element degrades to the text link inside it — pages keep working.
+VIDEO_BASE = "https://raw.githubusercontent.com/MohammedAbdelshafy/mia-muse-assets/main"
+
+
+def demo_video(filename: str, caption: str) -> str:
+    url = f"{VIDEO_BASE}/{filename}"
+    return (
+        "<div class='card'><p class='eyebrow'>Watch</p>"
+        f"<video controls preload='metadata' playsinline "
+        f"style='width:100%;border-radius:12px;background:#0b1c22'>"
+        f"<source src='{url}' type='video/mp4'>"
+        f"<p><a href='{url}'>Watch the video: {esc(caption)}</a></p>"
+        "</video>"
+        f"<p class='src'>{esc(caption)} · synthetic demo data</p></div>"
+    )
+
+
 def landing_page() -> str:
     return (
         "<!doctype html><html><head><title>Mia Dental OS — Mia Dental Prescribing Copilot</title>"
@@ -519,6 +538,7 @@ def landing_page() -> str:
         + "<p class='lede'>Hi, I'm Mia. I'll double-check every intended prescription against your patient's "
         "record before you sign — allergies, interactions, dosing. You always make the call; "
         "I just make sure nothing gets missed.</p></div></div>"
+        + demo_video("mia-dental-os-demo.mp4", "Watch Mia work — 32 seconds")
         + "<div class='card'><p class='eyebrow'>How the copilot workflow works</p><ol class='howto'>"
         "<li><b>Open the patient card</b> — allergies, conditions, current meds in one view.</li>"
         "<li><b>Answer the guided questions</b> — indication, patient factors, allergies, meds, conditions.</li>"
@@ -704,6 +724,7 @@ def subscribe_page(trial: dict, ctx: dict | None = None) -> str:
             "No card details are entered or stored here.</p>"
             "</div>"
         )
+        + demo_video("mia-dental-os-trial.mp4", "How the trial works — 21 seconds")
     return (
         "<!doctype html><html><head><title>Subscribe — Mia Dental OS</title>"
         + STYLE + "</head><body>" + banner()
@@ -844,6 +865,7 @@ def check_result_page(store, ctx: dict, check_id: str) -> str:
         + (flags or "<p>No flags.</p>")
         + f"<p class='src'>{esc(REFERENCE_DISCLAIMER)}</p></div>"
         + review
+        + demo_video("mia-dental-os-review.mp4", "How clinician review works — 21 seconds")
         + f"<p><a href='{px}/patient?id={c['patient_id']}'>← Back to patient card</a></p>"
     )
     return shell("copilot", ctx["clinic_name"], trial, body, ctx)
@@ -883,6 +905,7 @@ def reference_page(ctx: dict) -> str:
         + f"<div class='card'><p><b>Dataset:</b> {REFERENCE_VERSION} ({REFERENCE_DATE}) — "
         "requires dentist review before clinical use. Uncertain rules are omitted, not guessed."
         f"<br><span class='src'><b>Guidance sources:</b>{gen}</span></p></div>"
+        + demo_video("mia-dental-os-reference.mp4", "Tour the reference library — 22 seconds")
         + sections
     )
     return shell("copilot", ctx["clinic_name"], trial, body, ctx)
@@ -987,6 +1010,7 @@ def _security_headers(handler) -> None:
         "Content-Security-Policy",
         "default-src 'self'; script-src 'none'; style-src 'unsafe-inline'; "
         "img-src 'self' https: data:; font-src 'self' https:; "
+        "media-src https:; "
         "connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; "
         "form-action 'self'",
     )
