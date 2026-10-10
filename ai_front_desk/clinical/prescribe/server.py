@@ -1011,16 +1011,6 @@ def _num(value) -> float | None:
         return None
 
 
-def main() -> None:
-    server = HTTPServer(("127.0.0.1", PORT), Handler)
-    print(f"Mia Dental OS demo → http://127.0.0.1:{PORT}/  (synthetic data only)")
-    server.serve_forever()
-
-
-if __name__ == "__main__":
-    main()
-
-
 # --------------------------------------------------------------- wizard ---
 
 from .wizard import (  # noqa: E402
@@ -1038,6 +1028,16 @@ from .reference_data import INDICATIONS  # noqa: E402
 
 WIZARDS = WizardSessions()
 WIZ_TOKEN_RE = re.compile(r"wz_[a-f0-9]{12}\Z")
+
+
+def main() -> None:
+    server = HTTPServer(("127.0.0.1", PORT), Handler)
+    print(f"Mia Dental OS demo → http://127.0.0.1:{PORT}/  (synthetic data only)")
+    server.serve_forever()
+
+
+if __name__ == "__main__":
+    main()
 
 
 def _wizard_or_404(token: str):
