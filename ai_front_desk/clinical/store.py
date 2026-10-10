@@ -12,6 +12,7 @@ Design rules:
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 import time
 import uuid
@@ -78,10 +79,20 @@ class TenantMismatchError(PermissionError):
 
 class ClinicalStore:
     def __init__(self, path: str | Path):
-        self.path = Path(path)
-        self._db = sqlite3.connect(str(self.path), check_same_thread=False)
+        self.path = Path(path).expanduser()
+        self.path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        existed = self.path.exists()
+        self._db = sqlite3.connect(str(self.path), timeout=5.0, check_same_thread=False)
         self._db.row_factory = sqlite3.Row
+        self._db.execute("PRAGMA foreign_keys = ON")
+        self._db.execute("PRAGMA busy_timeout = 5000")
         self._db.executescript(SCHEMA)
+        if not existed:
+            try:
+                self.path.chmod(0o600)
+            except OSError:
+                # Windows or restricted filesystems may not implement POSIX modes.
+                pass
 
     def close(self):
         self._db.close()
@@ -96,10 +107,24 @@ class ClinicalStore:
         self._db.commit()
 
     # -- submissions ------------------------------------------------------
+    def is_registered_clinic(self, clinic_id: str) -> bool:
+        row = self._db.execute(
+            "SELECT 1 FROM clinics WHERE clinic_id = ?", (clinic_id,)
+        ).fetchone()
+        return row is not None
+
     def save_submission(
         self, clinic_id: str, bank_id: str, bank_version: str,
         patient_ref: str, answers: dict[str, Any], actor: str = "patient",
     ) -> str:
+        if not self.is_registered_clinic(clinic_id):
+            self._audit(clinic_id, "system", "submission.denied", "", "unknown clinic")
+            self._db.commit()
+            raise TenantMismatchError("unknown clinic")
+        if not isinstance(patient_ref, str) or not patient_ref.strip() or len(patient_ref) > 80:
+            raise ValueError("patient reference must be non-empty text of at most 80 characters")
+        if not isinstance(answers, dict):
+            raise ValueError("answers must be an object")
         submission_id = "sub_" + uuid.uuid4().hex[:12]
         now = time.time()
         self._db.execute(
@@ -116,21 +141,31 @@ class ClinicalStore:
         return submission_id
 
     def get_submission(self, clinic_id: str, submission_id: str) -> dict[str, Any]:
+        # The primary record query is tenant-scoped. Do not load answers from
+        # another tenant before checking ownership.
         row = self._db.execute(
-            "SELECT * FROM intake_submissions WHERE submission_id = ?",
+            "SELECT * FROM intake_submissions WHERE submission_id = ? AND clinic_id = ?",
+            (submission_id, clinic_id),
+        ).fetchone()
+        if row is not None:
+            return _row_to_submission(row)
+
+        owner = self._db.execute(
+            "SELECT clinic_id FROM intake_submissions WHERE submission_id = ?",
             (submission_id,),
         ).fetchone()
-        if row is None:
-            raise KeyError(f"submission {submission_id} not found")
-        if row["clinic_id"] != clinic_id:
-            # Cross-tenant access denied — and we audit the attempt.
+        if owner is not None and owner["clinic_id"] != clinic_id:
             self._audit(clinic_id, "system", "access.denied", submission_id,
                         "cross-tenant read attempt")
             self._db.commit()
             raise TenantMismatchError("submission belongs to a different clinic")
-        return _row_to_submission(row)
+        raise KeyError(f"submission {submission_id} not found")
 
     def list_submissions(self, clinic_id: str, limit: int = 50) -> list[dict[str, Any]]:
+        try:
+            limit = max(1, min(int(limit), 200))
+        except (TypeError, ValueError):
+            limit = 50
         rows = self._db.execute(
             """SELECT * FROM intake_submissions WHERE clinic_id = ?
                ORDER BY created_at DESC LIMIT ?""",
@@ -146,6 +181,10 @@ class ClinicalStore:
         self.get_submission(clinic_id, submission_id)  # enforces tenant
         if decision not in ("approved", "needs_clarification", "flagged"):
             raise ValueError(f"unknown review decision: {decision}")
+        if not isinstance(reviewer, str) or not reviewer.strip() or len(reviewer) > 120:
+            raise ValueError("reviewer label must be 1–120 characters")
+        if not isinstance(note, str) or len(note) > 2000:
+            raise ValueError("review note must be text of at most 2000 characters")
         review_id = "rev_" + uuid.uuid4().hex[:12]
         self._db.execute(
             """INSERT INTO reviews
@@ -168,18 +207,37 @@ class ClinicalStore:
         new_value: str, source: str, author: str,
     ) -> str:
         sub = self.get_submission(clinic_id, submission_id)  # enforces tenant
-        old_value = str(sub["answers"].get(qid, ""))
+        if not isinstance(qid, str) or not re.fullmatch(r"[a-z][a-z0-9_.-]{0,99}", qid):
+            raise ValueError("invalid question identifier")
+        if not isinstance(new_value, str) or len(new_value) > 5000:
+            raise ValueError("correction must be text of at most 5000 characters")
+        if source not in ("staff_verified", "patient_correction"):
+            raise ValueError("unknown correction source")
+        if not isinstance(author, str) or not author.strip() or len(author) > 120:
+            raise ValueError("author label must be 1–120 characters")
+        latest = self._db.execute(
+            """SELECT new_value FROM corrections
+               WHERE submission_id = ? AND clinic_id = ? AND qid = ?
+               ORDER BY rowid DESC LIMIT 1""",
+            (submission_id, clinic_id, qid),
+        ).fetchone()
+        old_value = (
+            str(latest["new_value"]) if latest is not None
+            else str(sub["answers"].get(qid, ""))
+        )
         correction_id = "cor_" + uuid.uuid4().hex[:12]
+        created_at = time.time()
         self._db.execute(
             """INSERT INTO corrections
                (correction_id, submission_id, clinic_id, qid, old_value,
                 new_value, source, author, created_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (correction_id, submission_id, clinic_id, qid, old_value,
-             new_value, source, author, time.time()),
+             new_value, source, author, created_at),
         )
+        # Keep health values in the corrections table, not duplicated in audit logs.
         self._audit(clinic_id, author, "answer.corrected", submission_id,
-                    f"{qid}: {old_value[:40]} -> {new_value[:40]} (source={source})")
+                    f"qid={qid}; source={source}")
         self._db.commit()
         return correction_id
 
