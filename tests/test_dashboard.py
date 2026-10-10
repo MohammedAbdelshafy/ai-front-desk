@@ -69,15 +69,15 @@ def test_brief_flags_missing_required(bank):
     assert any(f["type"] == "missing" for f in brief2["flags"])
 
 
-def test_ai_summary_labeled_not_clinical(bank):
+def test_structured_rollup_labeled_not_ai_or_clinical(bank):
     answers = {"id.demo_label": "Demo Patient P",
                "id.contact_pref": "Phone call", "visit.reason": "Tooth pain",
                "med.taking_any": "No", "med.antibiotics_recent": "No",
                "allergy.med_allergy": "No", "allergy.latex": "No",
                "allergy.anesthesia": "No", "consent.accuracy": "Yes"}
     brief = generate_brief(bank, _submission(answers))
-    assert brief["ai_summary"]["source"] == "ai_summary"
-    assert "Not a clinical interpretation" in brief["ai_summary"]["disclaimer"]
+    assert brief["structured_rollup"]["source"] == "structured_rollup"
+    assert "not a clinical interpretation" in brief["structured_rollup"]["disclaimer"]
 
 
 def test_correction_overlay_does_not_rewrite_original(bank):
