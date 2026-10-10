@@ -80,10 +80,27 @@ def esc(s):
 
 
 def mia_stage_html(manifest_name="Dental Mia", stage="listening", reason=""):
+    default_message = (
+        "I'm your intake guide. I can explain this workflow, but I don't diagnose "
+        "conditions or recommend medicines."
+    )
+    message = reason or default_message
     return (
-        f"<div class='mia-stage'><span class='stage'>"
-        f"\U0001f9a0 {esc(manifest_name)} · {esc(stage)}"
-        f"{(' — ' + esc(reason)) if reason else ''}</span></div>"
+        "<section class='mia-stage' aria-label='Dental Mia assistant'>"
+        "<img class='mia-avatar' src='/assets/mia-stand-hi.webp' "
+        "alt='Mia, your AI intake guide' width='64' height='64'>"
+        "<div class='mia-stage-content'>"
+        "<div class='mia-stage-head'>"
+        f"<strong>{esc(manifest_name)}</strong>"
+        f"<span class='stage'>{esc(stage)}</span>"
+        "</div>"
+        f"<p>{esc(message)}</p>"
+        "<details class='mia-help'><summary>What can Mia help with?</summary>"
+        "<p>I can explain how to complete the form, help you find the right section, "
+        "and organize patient-reported answers. I can't diagnose symptoms, recommend "
+        "medicines, or send a message to clinic staff from this local demo. "
+        "For clinical concerns, contact the clinic directly.</p>"
+        "</details></div></section>"
     )
 
 
@@ -291,7 +308,10 @@ class Handler(BaseHTTPRequestHandler):
     def _send(self, code, body, ctype="text/html"):
         data = body.encode("utf-8") if isinstance(body, str) else body
         self.send_response(code)
-        self.send_header("Content-Type", ctype + "; charset=utf-8")
+        if ctype.startswith(("text/", "application/json")):
+            self.send_header("Content-Type", ctype + "; charset=utf-8")
+        else:
+            self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(data)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
@@ -358,6 +378,14 @@ class Handler(BaseHTTPRequestHandler):
                     self._json(403, {"ok": False, "error": "Cross-clinic access denied."})
                 except KeyError:
                     self._json(404, {"ok": False, "error": "Submission not found."})
+        elif u.path == "/assets/mia-stand-hi.webp":
+            asset = BASE / "static" / "mia-stand-hi.webp"
+            try:
+                data = asset.read_bytes()
+            except OSError:
+                self._send(404, "Mia avatar asset not found.")
+                return
+            self._send(200, data, "image/webp")
         elif u.path == "/api/questions":
             self._json(200, {"bank": bank_snapshot(BANK),
                              "questions": [{"qid": x.qid, "section": x.section,
