@@ -71,7 +71,7 @@ def test_api_intake_accepts_valid(live_server):
     code, resp = _post_json(live_server, "/api/intake",
                             {"clinic_id": "demo-smile-arts",
                              "patient_ref": "Demo Patient E2E", "answers": _answers()})
-    assert code == 200
+    assert code == 201
     assert resp["ok"] is True
     assert resp["submission_id"].startswith("sub_")
 
