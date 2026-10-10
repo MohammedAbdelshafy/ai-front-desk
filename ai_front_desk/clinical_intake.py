@@ -96,12 +96,13 @@ QUESTIONNAIRE = {
                 {
                     "id": "patient_label", "label": "Fictional patient label", "type": "text",
                     "required": True, "max_length": 50, "full_width": True,
+                    "default_value": "Demo Patient Casey",
                     "placeholder": "e.g., Demo Patient Casey",
                     "help_text": "Must begin with Demo, Test, or Sample. Never enter a real name.",
                 },
                 {
                     "id": "age_group", "label": "Age group", "type": "select", "required": True,
-                    "full_width": False,
+                    "full_width": False, "default_value": "40_64",
                     "options": [
                         {"value": "under_18", "label": "Under 18"},
                         {"value": "18_39", "label": "18–39"},
@@ -118,6 +119,7 @@ QUESTIONNAIRE = {
                 {
                     "id": "reason_for_visit", "label": "What brings you to the clinic today?",
                     "type": "textarea", "required": True, "max_length": 500, "full_width": True,
+                    "default_value": "Routine check-up. Fictional example only.",
                     "rows": 3, "placeholder": "Describe the reason for this sample visit.",
                 },
             ],
