@@ -1036,10 +1036,6 @@ def main() -> None:
     server.serve_forever()
 
 
-if __name__ == "__main__":
-    main()
-
-
 def _wizard_or_404(token: str):
     state = WIZARDS.get(token)
     return state
@@ -1217,3 +1213,7 @@ def wizard_choose_page(state: dict, clinic_name: str, trial: dict) -> str:
         "<p class='src'>Mia never auto-selects or issues a prescription. Unknown safety = “cannot verify”, never green.</p></div>"
     )
     return shell("copilot", clinic_name, trial, body)
+
+
+if __name__ == "__main__":
+    main()
