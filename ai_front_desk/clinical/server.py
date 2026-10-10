@@ -57,6 +57,12 @@ STYLE = """
 <style>
 body{font:16px/1.5 system-ui,-apple-system,sans-serif;margin:0;color:#1a1a1a}
 .wrap{max-width:720px;margin:0 auto;padding:16px}
+.mia-stage{display:flex;align-items:flex-start;gap:14px;margin:14px 0 20px;padding:14px;background:linear-gradient(135deg,#eef2ff,#f8f9ff);border:1px solid #dce4ff;border-radius:16px;box-shadow:0 4px 18px rgba(49,76,160,.07)}
+.mia-avatar{width:64px;height:64px;flex:0 0 64px;object-fit:cover;object-position:top center;border-radius:15px;background:#e3eaff;border:1px solid #d4defd}
+.mia-stage-content{min-width:0;flex:1}.mia-stage-head{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}
+.mia-stage-head strong{font-size:15px;letter-spacing:-.2px;color:#26365a}.mia-stage>div p{font-size:13px;color:#586784;line-height:1.55;margin:7px 0 0}
+.mia-stage .stage{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;padding:4px 8px;color:#3554bf;background:#e1e9ff;border:1px solid #cedaff;border-radius:20px}
+.mia-help{margin-top:9px;font-size:12px;color:#596985}.mia-help summary{cursor:pointer;font-weight:700;color:#4560c6}.mia-help p{font-size:12px!important;color:#6b7790!important;margin-top:8px!important}
 h1{font-size:22px} h2{font-size:18px;margin-top:28px}
 .q{border:1px solid #ddd;border-radius:10px;padding:12px;margin:10px 0}
 .q label{font-weight:600;display:block;margin-bottom:6px}
