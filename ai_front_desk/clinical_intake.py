@@ -77,6 +77,177 @@ FIELD_LABELS = {
     "symptom_duration": "Symptom duration or timeline",
     "dental_history": "Relevant dental history",
 }
+QUESTIONNAIRE = {
+    "id": "dental-medical-history",
+    "version": FORM_VERSION,
+    "title": "Dental medical and dental history",
+    "approval_status": "draft_requires_dentist_approval",
+    "notice": (
+        "Fictional demo only. This draft questionnaire is not clinically approved and "
+        "must be reviewed by a qualified dentist before any real clinical use."
+    ),
+    "sections": [
+        {
+            "id": "visit",
+            "number": "01",
+            "title": "About this visit",
+            "description": "Basic context to prepare the visit.",
+            "fields": [
+                {
+                    "id": "patient_label", "label": "Fictional patient label", "type": "text",
+                    "required": True, "max_length": 50, "full_width": True,
+                    "placeholder": "e.g., Demo Patient Casey",
+                    "help_text": "Must begin with Demo, Test, or Sample. Never enter a real name.",
+                },
+                {
+                    "id": "age_group", "label": "Age group", "type": "select", "required": True,
+                    "full_width": False,
+                    "options": [
+                        {"value": "under_18", "label": "Under 18"},
+                        {"value": "18_39", "label": "18–39"},
+                        {"value": "40_64", "label": "40–64"},
+                        {"value": "65_plus", "label": "65+"},
+                        {"value": "prefer_not_to_say", "label": "Prefer not to say"},
+                    ],
+                },
+                {
+                    "id": "symptom_duration", "label": "When did the concern begin?", "type": "text",
+                    "required": False, "max_length": 250, "full_width": False,
+                    "placeholder": "Fictional example: two days ago",
+                },
+                {
+                    "id": "reason_for_visit", "label": "What brings you to the clinic today?",
+                    "type": "textarea", "required": True, "max_length": 500, "full_width": True,
+                    "rows": 3, "placeholder": "Describe the reason for this sample visit.",
+                },
+            ],
+        },
+        {
+            "id": "medicines",
+            "number": "02",
+            "title": "Medicines and allergies",
+            "description": "Include what is known. Do not change any medicine based on this form.",
+            "fields": [
+                {
+                    "id": "allergy_status", "label": "Do you have any allergies, including to medicines or antibiotics?",
+                    "type": "choice", "required": True, "full_width": True,
+                    "options": [
+                        {"value": "yes", "label": "Yes"},
+                        {"value": "no", "label": "No"},
+                        {"value": "unsure", "label": "Not sure"},
+                    ],
+                },
+                {
+                    "id": "allergy_details", "label": "Allergy and reaction details", "type": "textarea",
+                    "required": False, "conditional_on": "allergy_status", "conditional_value": "yes",
+                    "max_length": 1500, "full_width": True, "rows": 2,
+                    "placeholder": "Fictional example: allergen and reported reaction.",
+                    "help_text": "Describe the reported reaction; the dentist will review it.",
+                },
+                {
+                    "id": "medication_status",
+                    "label": "Do you currently take prescription medicines, over-the-counter medicines, vitamins, or supplements?",
+                    "type": "choice", "required": True, "full_width": True,
+                    "options": [
+                        {"value": "yes", "label": "Yes"},
+                        {"value": "no", "label": "No"},
+                        {"value": "unsure", "label": "Not sure"},
+                    ],
+                },
+                {
+                    "id": "medication_details", "label": "Medicine details", "type": "textarea",
+                    "required": False, "conditional_on": "medication_status", "conditional_value": "yes",
+                    "max_length": 1500, "full_width": True, "rows": 3,
+                    "placeholder": "Fictional example: name, strength, dose, frequency, and reason if known.",
+                    "help_text": "Include current and recently changed medicines where known.",
+                },
+                {
+                    "id": "antibiotic_status", "label": "Are you taking antibiotics now, or have you taken any recently?",
+                    "type": "choice", "required": True, "full_width": True,
+                    "options": [
+                        {"value": "yes", "label": "Yes"},
+                        {"value": "no", "label": "No"},
+                        {"value": "unsure", "label": "Not sure"},
+                    ],
+                },
+                {
+                    "id": "antibiotic_details", "label": "Antibiotic details", "type": "textarea",
+                    "required": False, "conditional_on": "antibiotic_status", "conditional_value": "yes",
+                    "max_length": 1500, "full_width": True, "rows": 2,
+                    "placeholder": "Fictional example: medicine name and dates or dose if known.",
+                },
+            ],
+        },
+        {
+            "id": "conditions",
+            "number": "03",
+            "title": "Ongoing health conditions",
+            "description": "Tell the clinic about conditions that may be relevant to your care.",
+            "fields": [
+                {
+                    "id": "condition_status", "label": "Do you have any long-term or ongoing medical conditions?",
+                    "type": "choice", "required": True, "full_width": True,
+                    "options": [
+                        {"value": "yes", "label": "Yes"},
+                        {"value": "no", "label": "No"},
+                        {"value": "unsure", "label": "Not sure"},
+                    ],
+                },
+                {
+                    "id": "condition_details", "label": "Condition details", "type": "textarea",
+                    "required": False, "conditional_on": "condition_status", "conditional_value": "yes",
+                    "max_length": 1500, "full_width": True, "rows": 3,
+                    "placeholder": "Fictional example: condition and current status, if known.",
+                    "help_text": "Examples include diabetes, blood pressure, heart, kidney, liver, respiratory, immune, or bleeding conditions.",
+                },
+            ],
+        },
+        {
+            "id": "procedures",
+            "number": "04",
+            "title": "Procedures and dental history",
+            "description": "Information for the dentist to review.",
+            "fields": [
+                {
+                    "id": "surgery_status", "label": "Have you had surgery or been hospitalized for a significant illness?",
+                    "type": "choice", "required": True, "full_width": True,
+                    "options": [
+                        {"value": "yes", "label": "Yes"},
+                        {"value": "no", "label": "No"},
+                        {"value": "unsure", "label": "Not sure"},
+                    ],
+                },
+                {
+                    "id": "surgery_details", "label": "Procedure details", "type": "textarea",
+                    "required": False, "conditional_on": "surgery_status", "conditional_value": "yes",
+                    "max_length": 1500, "full_width": True, "rows": 2,
+                    "placeholder": "Fictional example: procedure and approximate date, if known.",
+                },
+                {
+                    "id": "anesthesia_reaction_status", "label": "Have you had a reaction or complication with anesthesia?",
+                    "type": "choice", "required": True, "full_width": True,
+                    "options": [
+                        {"value": "yes", "label": "Yes"},
+                        {"value": "no", "label": "No"},
+                        {"value": "unsure", "label": "Not sure"},
+                    ],
+                },
+                {
+                    "id": "anesthesia_details", "label": "Reaction details", "type": "textarea",
+                    "required": False, "conditional_on": "anesthesia_reaction_status", "conditional_value": "yes",
+                    "max_length": 1500, "full_width": True, "rows": 2,
+                    "placeholder": "Fictional example: what happened, if known.",
+                },
+                {
+                    "id": "dental_history", "label": "Relevant dental history", "type": "textarea",
+                    "required": False, "max_length": 1500, "full_width": True, "rows": 2,
+                    "placeholder": "Fictional example: previous procedures or relevant context.",
+                },
+            ],
+        },
+    ],
+}
+
 ALLOWED_FIELDS = frozenset(FIELD_LABELS)
 _DEMO_LABEL_RE = re.compile(r"(?:Demo|Test|Sample) [A-Za-z0-9][A-Za-z0-9 -]{1,44}\Z")
 _REVIEWER_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9 .'-]{1,78}\Z")
