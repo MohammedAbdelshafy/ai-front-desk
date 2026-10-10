@@ -16,6 +16,7 @@ from urllib.parse import urlsplit
 from ai_front_desk.clinical_intake import (
     IntakeNotFoundError,
     IntakeValidationError,
+    QUESTIONNAIRE,
     create_intake,
     get_intake,
     initialize_database,
@@ -135,6 +136,9 @@ def make_handler(db_path: str | Path):
                     self._json(500, {"error": "Demo asset is unavailable."})
                     return
                 self._send_bytes(200, content_type, body)
+                return
+            if path == "/api/questionnaire":
+                self._json(200, QUESTIONNAIRE)
                 return
             if path == "/api/health":
                 self._json(200, {
