@@ -29,6 +29,17 @@ def live_server(tmp_path_factory):
     http.shutdown()
 
 
+@pytest.fixture(autouse=True)
+def _reset_signup_limiter(live_server):
+    # The per-IP signup throttle is DB-backed and shared across this module's
+    # tests (module-scoped DB); reset per test so the suite exercises
+    # validation logic instead of tripping the throttle.
+    accounts = srv.get_accounts()
+    accounts._db.execute("DELETE FROM prescribe_signup_attempts")
+    accounts._db.commit()
+    yield
+
+
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None
@@ -72,6 +83,7 @@ def _signup(opener, base, email=None, password="correct horse battery staple"):
     code, loc, _ = _post(opener, base, "/api/signup", {
         "name": "Dr. Auth", "email": email, "clinic_name": "Auth Dental",
         "password": password, "confirm": password,
+        "accept_terms": "1", "accept_privacy": "1",
     })
     assert code == 303, f"signup failed: {code} {loc}"
     return email
@@ -100,6 +112,7 @@ def test_duplicate_email_rejected_case_insensitive(live_server):
         "name": "Dr. Dup", "email": email.upper(), "clinic_name": "Dup Dental",
         "password": "correct horse battery staple",
         "confirm": "correct horse battery staple",
+        "accept_terms": "1", "accept_privacy": "1",
     })
     assert code == 400
     assert "already exists" in body
@@ -112,18 +125,21 @@ def test_signup_validation_errors_inline(live_server):
         "name": "Dr. X", "email": "not-an-email", "clinic_name": "X Dental",
         "password": "correct horse battery staple",
         "confirm": "correct horse battery staple",
+        "accept_terms": "1", "accept_privacy": "1",
     })
     assert code == 400 and "doesn&#x27;t look valid" in body or "look valid" in body
     # short password
     code, body, _ = _post(c, live_server, "/api/signup", {
         "name": "Dr. X", "email": _uniq(), "clinic_name": "X Dental",
         "password": "short", "confirm": "short",
+        "accept_terms": "1", "accept_privacy": "1",
     })
     assert code == 400 and "10 characters" in body
     # mismatched confirm
     code, body, _ = _post(c, live_server, "/api/signup", {
         "name": "Dr. X", "email": _uniq(), "clinic_name": "X Dental",
         "password": "correct horse battery staple", "confirm": "different words here ok",
+        "accept_terms": "1", "accept_privacy": "1",
     })
     assert code == 400 and "don&#x27;t match" in body or "match" in body
 
@@ -185,12 +201,17 @@ def test_trial_expiry_locks_and_subscribe_unlocks(live_server):
     code, body, _ = _post(c, live_server, "/api/sample-patient", {})
     assert code == 402
     assert json.loads(body)["code"] == "subscription_required"
-    # subscribe via test-mode checkout
-    code, loc, _ = _post(c, live_server, "/api/billing/checkout", {})
-    assert code == 303
+    # manual Neteller flow: dentist clicks "I've paid" -> pending (still locked)
+    code, loc, _ = _post(c, live_server, "/api/billing/paid", {})
+    assert code == 303 and loc == "/subscribe"
+    code, loc2, _ = _get(c, live_server, "/app/patients")
+    assert code == 303 and loc2 == "/subscribe"  # pending != unlocked
+    code, body, _ = _get(c, live_server, "/subscribe")
+    assert code == 200 and "activating your account" in body.lower()
+    # founder activates via the admin path -> unlocked
+    accounts.mark_subscribed(acct["account_id"], "neteller-manual-001")
     code, body, _ = _get(c, live_server, "/app/patients")
     assert code == 200
-    assert "Subscribed" in body
 
 
 def test_cross_account_patient_access_forbidden(live_server):

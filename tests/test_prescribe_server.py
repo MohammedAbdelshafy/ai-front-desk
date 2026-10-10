@@ -17,6 +17,8 @@ def live_server(tmp_path_factory):
     srv.DB_PATH = tmp / "s.sqlite3"
     srv.STORE = None  # force re-init against the tmp db
     srv.ACCOUNTS = None  # force re-init against the tmp db
+    if hasattr(srv, "_SIGNUP_ATTEMPTS"):
+        srv._SIGNUP_ATTEMPTS.clear()
     import os
     os.environ["PRESCRIBE_STATE_DIR"] = str(tmp / "state")
     http = srv.HTTPServer(("127.0.0.1", 0), srv.Handler)
@@ -26,6 +28,17 @@ def live_server(tmp_path_factory):
     time.sleep(0.2)
     yield f"http://127.0.0.1:{port}"
     http.shutdown()
+
+
+@pytest.fixture(autouse=True)
+def _reset_signup_limiter(live_server):
+    # The per-IP signup throttle is DB-backed and shared across this module's
+    # tests (module-scoped DB); reset per test so the suite exercises
+    # validation logic instead of tripping the throttle.
+    accounts = srv.get_accounts()
+    accounts._db.execute("DELETE FROM prescribe_signup_attempts")
+    accounts._db.commit()
+    yield
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -71,6 +84,7 @@ def _signup(opener, base, name="Dr. Test", email=None, clinic="Test Dental",
     code, loc = _post(opener, base, "/api/signup", {
         "name": name, "email": email, "clinic_name": clinic,
         "password": password, "confirm": password,
+        "accept_terms": "1", "accept_privacy": "1",
     })
     assert code == 303, f"signup failed: {code} {loc}"
     assert loc == "/welcome"

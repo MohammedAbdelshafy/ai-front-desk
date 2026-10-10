@@ -30,7 +30,7 @@ from .accounts import (
     SESSION_TTL_SECONDS,
     verify_password,
 )
-from .billing import provider as billing_provider, TEST_MODE
+from .billing import provider as billing_provider, TEST_MODE, NETELLER_EMAIL
 from .checker import check_prescription
 from .reference_data import DRUGS, REFERENCE_DATE, SOURCES, GENERAL_SOURCES
 from .store import PrescribeStore, TenantMismatchError
@@ -121,6 +121,146 @@ ICONS = {
     "user": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='8' r='4'/><path d='M4.5 20.5a7.5 7.5 0 0 1 15 0'/></svg>",
     "arrow": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12h14M13 6l6 6-6 6'/></svg>",
 }
+
+# ---------------------------------------------------------------- legal ---
+
+LEGAL_VERSION = "0.1"
+LEGAL_DIR = Path(__file__).resolve().parents[3] / "docs" / "legal"
+LEGAL_DOCS = {
+    "privacy": ("Privacy Policy", "privacy-policy.md"),
+    "terms": ("Terms of Service", "terms-of-service.md"),
+    "security": ("Security Policy", "security-policy.md"),
+    "intended-use": ("Intended Use & Clinical Limitations", "intended-use-clinical-limitations.md"),
+    "refund": ("Refund & Cancellation Policy", "refund-cancellation.md"),
+    "retention": ("Data Retention & Deletion", "data-retention-deletion.md"),
+}
+# Public short routes; everything else lives under /legal/<slug>.
+LEGAL_ROUTES = {"/privacy": "privacy", "/terms": "terms", "/security": "security"}
+
+
+def _md_inline(text: str) -> str:
+    text = esc(text)
+    text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
+    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r"<a href='\2'>\1</a>", text)
+    return text
+
+
+def _md_table(rows: list) -> str:
+    def cells(r):
+        return [c.strip() for c in r.strip().strip("|").split("|")]
+    out = ["<table class='legal-table'><thead><tr>"]
+    out += ["<th>" + _md_inline(c) + "</th>" for c in cells(rows[0])]
+    out.append("</tr></thead><tbody>")
+    for r in rows[2:]:
+        out.append("<tr>" + "".join("<td>" + _md_inline(c) + "</td>" for c in cells(r)) + "</tr>")
+    out.append("</tbody></table>")
+    return "".join(out)
+
+
+def md_to_html(md: str) -> str:
+    """Minimal markdown -> HTML for our own legal docs (headers, quotes, lists, tables)."""
+    out: list = []
+    lines = md.split("\n")
+    i, in_list = 0, False
+    while i < len(lines):
+        s = lines[i].strip()
+        if not s:
+            if in_list:
+                out.append("</ul>")
+                in_list = False
+            i += 1
+            continue
+        if s.startswith("|") and i + 1 < len(lines) and re.match(r"^\|[\s:\-|]+\|?$", lines[i + 1].strip()):
+            if in_list:
+                out.append("</ul>")
+                in_list = False
+            rows = [s]
+            j = i + 1
+            while j < len(lines) and lines[j].strip().startswith("|"):
+                rows.append(lines[j].strip())
+                j += 1
+            out.append(_md_table(rows))
+            i = j
+            continue
+        if s.startswith(">"):
+            if in_list:
+                out.append("</ul>")
+                in_list = False
+            qs = []
+            while i < len(lines) and lines[i].strip().startswith(">"):
+                qs.append(lines[i].strip()[1:].strip())
+                i += 1
+            out.append("<div class='flag info'><b>DRAFT NOTICE</b> — " + " ".join(_md_inline(q) for q in qs) + "</div>")
+            continue
+        if s.startswith("## "):
+            if in_list:
+                out.append("</ul>")
+                in_list = False
+            out.append("<h2>" + _md_inline(s[3:]) + "</h2>")
+        elif s.startswith("# "):
+            if in_list:
+                out.append("</ul>")
+                in_list = False
+            out.append("<h1>" + _md_inline(s[2:]) + "</h1>")
+        elif s.startswith("- "):
+            if not in_list:
+                out.append("<ul>")
+                in_list = True
+            out.append("<li>" + _md_inline(s[2:]) + "</li>")
+        else:
+            if in_list:
+                out.append("</ul>")
+                in_list = False
+            out.append("<p>" + _md_inline(s) + "</p>")
+        i += 1
+    if in_list:
+        out.append("</ul>")
+    return "".join(out)
+
+
+def legal_footer() -> str:
+    return (
+        "<footer class='legal-foot'><div class='wrap'>"
+        "<a href='/legal'>Legal</a> \u00b7 <a href='/privacy'>Privacy</a> \u00b7 "
+        "<a href='/terms'>Terms</a> \u00b7 <a href='/security'>Security</a>"
+        "<span class='src'> \u00b7 Mia Dental OS \u2014 demo, not for real patient use</span>"
+        "</div></footer>"
+    )
+
+
+def legal_index_page() -> str:
+    items = "".join(
+        "<li><a href='/legal/" + slug + "'>" + esc(title) + "</a></li>"
+        for slug, (title, _fn) in LEGAL_DOCS.items()
+    )
+    body = (
+        "<div class='narrow'><p class='eyebrow'>Legal</p>"
+        "<h1>Legal &amp; compliance</h1>"
+        "<p class='src'>Draft documents (v" + esc(LEGAL_VERSION) + ") \u2014 they require qualified legal review "
+        "before production use or real patient data. Nothing here is legal advice.</p>"
+        "<div class='card'><ul>" + items + "</ul></div>"
+        "</div>" + legal_footer()
+    )
+    return ("<!doctype html><html><head><title>Legal \u2014 Mia Dental OS</title>"
+            + STYLE + "</head><body>" + banner() + body + "</body></html>")
+
+
+def legal_doc_page(slug: str):
+    if slug not in LEGAL_DOCS:
+        return None
+    title, filename = LEGAL_DOCS[slug]
+    path = LEGAL_DIR / filename
+    if not path.exists():
+        return None
+    md = path.read_text(encoding="utf-8")
+    body = (
+        "<div class='narrow legal-doc'><p class='eyebrow'><a href='/legal'>Legal</a></p>"
+        + md_to_html(md)
+        + "</div>" + legal_footer()
+    )
+    return ("<!doctype html><html><head><title>" + esc(title) + " \u2014 Mia Dental OS</title>"
+            + STYLE + "</head><body>" + banner() + body + "</body></html>")
+
 
 STYLE = """
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -257,6 +397,17 @@ th{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu
   h1{font-size:26px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+.legal-foot{border-top:1px solid var(--line);margin-top:32px;padding:14px 0;color:var(--mut);font-size:13px}
+.legal-foot a{color:var(--mut);text-decoration:none;margin-right:4px}
+.legal-foot a:hover{color:var(--brand);text-decoration:underline}
+.legal-doc h1{margin-top:8px}
+.legal-doc h2{margin-top:26px}
+.legal-doc .flag.info{margin:0 0 18px}
+table.legal-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+table.legal-table th,table.legal-table td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+table.legal-table th{background:var(--brand2)}
+label.check{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:14px;margin:0 0 10px;cursor:pointer}
+label.check input{width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:var(--brand)}
 </style>
 """
 
@@ -349,7 +500,8 @@ def shell(active: str, clinic_name: str, trial: dict, body: str, ctx: dict | Non
         "</div></div>"
         f"<div class='layout'><nav class='side' aria-label='Modules'>{''.join(mods)}</nav>"
         f"<div class='main'>{body}</div></div>"
-        "</body></html>"
+        + legal_footer()
+        + "</body></html>"
     )
 
 
@@ -385,7 +537,7 @@ def landing_page() -> str:
         "<li>Missing or uncertain patient data is never shown as verified-safe.</li>"
         "<li>Synthetic demo data only in this preview. Not HIPAA-compliant. Not for real patients.</li>"
         "</ul></div>"
-        + "</div></body></html>"
+        + "</div>" + legal_footer() + "</body></html>"
     )
 
 
@@ -400,7 +552,7 @@ def _auth_card(title: str, inner: str, switch: str) -> str:
         + "<div class='narrow' style='max-width:480px'>"
         + "<div style='text-align:center;margin:26px 0 6px'>" + mia_avatar(64) + "</div>"
         + "<div class='card'>" + inner + switch + "</div>"
-        + "</div></body></html>"
+        + "</div>" + legal_footer() + "</body></html>"
     )
 
 
@@ -430,6 +582,10 @@ def signup_page(errors: list[str] | None = None, values: dict | None = None) -> 
         "<input name='password' type='password' required minlength='10' autocomplete='new-password' id='pw'></label>"
         "<div class='src' id='pw-hint' aria-live='polite' style='margin:-8px 0 12px'></div>"
         "<label>Confirm password<input name='confirm' type='password' required autocomplete='new-password'></label>"
+        "<label class='check'><input type='checkbox' name='accept_terms' value='1' required>"
+        "<span>I agree to the <a href='/terms' target='_blank' rel='noopener'>Terms of Service</a> (draft v" + esc(LEGAL_VERSION) + ")</span></label>"
+        "<label class='check'><input type='checkbox' name='accept_privacy' value='1' required>"
+        "<span>I have read the <a href='/privacy' target='_blank' rel='noopener'>Privacy Policy</a> (draft v" + esc(LEGAL_VERSION) + ")</span></label>"
         "<button class='btn' type='submit' style='width:100%;justify-content:center'>Create account &amp; start trial</button>"
         "</form>"
         + _pw_strength_js()
@@ -510,33 +666,47 @@ def _trial_end_str(ctx: dict) -> str:
 
 def subscribe_page(trial: dict, ctx: dict | None = None) -> str:
     state = trial["state"]
+    price = trial["price_usd"]
     if state == "subscribed":
         headline = "You're subscribed"
-        sub = (
+        body = (
             "<p>The copilot module is unlocked. Cancel anytime — your records stay preserved.</p>"
             "<form method='POST' action='/api/billing/cancel'>"
-            "<button class='btn ghost' type='submit'>Cancel subscription (test mode)</button></form>"
+            "<button class='btn ghost' type='submit'>Cancel subscription</button></form>"
+        )
+    elif state == "pending":
+        headline = "Payment received — activating your account"
+        body = (
+            "<p>Thanks — we've got your Neteller payment on record. "
+            "The founder activates accounts personally, usually within a day. "
+            "You'll have full access as soon as it's confirmed.</p>"
+            "<p class='src'>Nothing is charged automatically. "
+            "Questions? Contact abdelshafyclapps@gmail.com.</p>"
         )
     else:
-        headline = "Your trial has expired" if state == "expired" else "Subscription cancelled"
-        sub = (
+        headline = "Your trial has expired" if state == "expired" else "Subscription"
+        body = (
             "<p>The copilot module is now locked. <b>Your patient records and check history are preserved</b> — "
-            "nothing was deleted and nothing was charged.</p>"
+            "nothing was deleted.</p>"
+            "<div class='card'><h3>Subscribe — Mia Dental OS Prescribing Copilot</h3>"
+            f"<p><b>${price}/month</b>, cancel anytime. No automatic charges, ever.</p>"
+            "<ol>"
+            f"<li>Send <b>${price}</b> via <b>Neteller</b> to <b>{esc(NETELLER_EMAIL)}</b></li>"
+            "<li>Click the button below so we know to activate you</li>"
+            "<li>We confirm your payment and unlock your account</li>"
+            "</ol>"
+            "<form method='POST' action='/api/billing/paid'>"
+            "<button class='btn' type='submit'>I've completed my Neteller payment</button></form>"
+            "<p class='src'>Manual billing — a human reviews every payment before activation. "
+            "No card details are entered or stored here.</p>"
+            "</div>"
         )
     return (
         "<!doctype html><html><head><title>Subscribe — Mia Dental OS</title>"
         + STYLE + "</head><body>" + banner()
         + "<div class='narrow'>" + mia_card()
         + f"<h1>{headline}</h1>"
-        + sub
-        + "<div class='card'><h3>Mia Dental OS — Prescribing Copilot</h3>"
-        f"<p><b>${trial['price_usd']}/month</b>, cancel anytime.</p>"
-        "<p class='src'>Billing is in TEST MODE — no real charges, no provider keys. "
-        "The founder wires the live provider before any real dentist is billed.</p>"
-        + ("" if state == "subscribed" else
-           "<form method='POST' action='/api/billing/checkout'>"
-           "<button class='btn' type='submit'>Continue (test checkout)</button></form>")
-        + "</div>"
+        + body
         + ("<p><a href='/app/start'>← Back to the app</a></p>" if ctx else "")
         + "</div></body></html>"
     )
@@ -802,11 +972,29 @@ def get_accounts() -> AccountStore:
     return ACCOUNTS
 
 
+def _security_headers(handler) -> None:
+    """Defense-in-depth headers on every response (inner + outer)."""
+    handler.send_header("X-Content-Type-Options", "nosniff")
+    handler.send_header("X-Frame-Options", "DENY")
+    handler.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
+    handler.send_header("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    # No JavaScript anywhere in the app; inline <style> blocks are used.
+    # Images: self + https (Mia's avatar hotlinks from the assets repo).
+    handler.send_header(
+        "Content-Security-Policy",
+        "default-src 'self'; script-src 'none'; style-src 'unsafe-inline'; "
+        "img-src 'self' https: data:; font-src 'self' https:; "
+        "connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; "
+        "form-action 'self'",
+    )
+
+
 def _send(handler, code: int, body: str, content_type="text/html; charset=utf-8"):
     data = body.encode("utf-8")
     handler.send_response(code)
     handler.send_header("Content-Type", content_type)
     handler.send_header("Content-Length", str(len(data)))
+    _security_headers(handler)
     handler.end_headers()
     handler.wfile.write(data)
 
@@ -816,6 +1004,7 @@ def _json(handler, code: int, obj: dict):
     handler.send_response(code)
     handler.send_header("Content-Type", "application/json; charset=utf-8")
     handler.send_header("Content-Length", str(len(data)))
+    _security_headers(handler)
     handler.end_headers()
     handler.wfile.write(data)
 
@@ -823,31 +1012,53 @@ def _json(handler, code: int, obj: dict):
 def _redirect(handler, location: str):
     handler.send_response(303)
     handler.send_header("Location", location)
+    _security_headers(handler)
     handler.end_headers()
+
+
+def _cookie_flags() -> str:
+    # Behind a TLS reverse proxy, set PRESCRIBE_SECURE_COOKIES=1 so the
+    # session cookie is never sent over plaintext.
+    secure = "; Secure" if os.environ.get("PRESCRIBE_SECURE_COOKIES") == "1" else ""
+    return f"HttpOnly; SameSite=Lax; Path=/;{secure}"
 
 
 def _set_session_cookie(handler, token: str, max_age: int = SESSION_TTL_SECONDS):
     handler.send_response(303)
     handler.send_header(
         "Set-Cookie",
-        f"{SESSION_COOKIE}={token}; HttpOnly; SameSite=Lax; Path=/; Max-Age={max_age}",
+        f"{SESSION_COOKIE}={token}; {_cookie_flags()}; Max-Age={max_age}",
     )
+    _security_headers(handler)
 
 
 def _redirect_with_cookie(handler, location: str, token: str,
                           max_age: int = SESSION_TTL_SECONDS):
     _set_session_cookie(handler, token, max_age)
     handler.send_header("Location", location)
+    _security_headers(handler)
     handler.end_headers()
 
 
 def _clear_session_cookie(handler, location: str = "/"):
     handler.send_response(303)
     handler.send_header(
-        "Set-Cookie", f"{SESSION_COOKIE}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0"
+        "Set-Cookie", f"{SESSION_COOKIE}=; {_cookie_flags()}; Max-Age=0"
     )
     handler.send_header("Location", location)
+    _security_headers(handler)
     handler.end_headers()
+
+
+# --- request hardening -------------------------------------------------
+# Maximum lengths for free-text fields (DoS/bloat protection).
+MAX_FIELD_LEN = 500
+MAX_TEXTAREA_LEN = 4000
+
+
+def _field(form: dict, key: str, max_len: int = MAX_FIELD_LEN) -> str:
+    """Trimmed form field, hard-capped in length."""
+    return (form.get(key, "") or "")[:max_len].strip()
 
 
 def _cookie_token(handler) -> str | None:
@@ -935,6 +1146,16 @@ def _valid_id(value: str) -> bool:
     return bool(ID_RE.match(value or ""))
 
 
+def _audit_auth(action: str, email: str, detail: str = "") -> None:
+    """Best-effort audit of auth/billing events (never breaks the request)."""
+    try:
+        store = get_store()
+        store._audit("auth", email.lower(), action, "account", detail[:500])
+        store._db.commit()
+    except Exception:
+        pass
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "MiaDentalOS/1.0"
 
@@ -964,6 +1185,9 @@ class Handler(BaseHTTPRequestHandler):
                 _send(self, 200, signin_page(next_url=_safe_next(q.get("next", [""])[0])))
                 return
             if path == "/signout":
+                ctx = _auth_ctx(self)
+                if ctx and not ctx.get("is_demo"):
+                    _audit_auth("signout", ctx.get("email", ""))
                 get_accounts().destroy_session(_cookie_token(self))
                 _clear_session_cookie(self, "/")
                 return
@@ -982,6 +1206,25 @@ class Handler(BaseHTTPRequestHandler):
                     _redirect(self, "/signin?next=" + quote(path, safe=""))
                     return
                 _send(self, 200, subscribe_page(ctx["trial"], ctx))
+                return
+            # ---- legal (public) ----
+            if path == "/legal":
+                _send(self, 200, legal_index_page())
+                return
+            if path in LEGAL_ROUTES:
+                page = legal_doc_page(LEGAL_ROUTES[path])
+                if page is None:
+                    _send(self, 404, "not found")
+                else:
+                    _send(self, 200, page)
+                return
+            if path.startswith("/legal/"):
+                slug = path[len("/legal/"):]
+                page = legal_doc_page(slug)
+                if page is None:
+                    _send(self, 404, "not found")
+                else:
+                    _send(self, 200, page)
                 return
             # ---- explore demo (no sign-up; synthetic data, separate namespace) ----
             if path == "/demo":
@@ -1072,8 +1315,10 @@ class Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", 0) or 0)
         _raw = self.rfile.read(min(length, MAX_BODY)).decode("utf-8", errors="replace")
         _parsed = parse_qs(_raw)
-        form = {k: v[0] for k, v in _parsed.items()}
-        form_multi = dict(_parsed)
+        # Hard-cap every incoming field (DoS/bloat protection) and bound the
+        # number of fields. No legitimate field needs more than this.
+        form = {k[:128]: v[0][:MAX_TEXTAREA_LEN] for k, v in list(_parsed.items())[:200]}
+        form_multi = {k[:128]: [x[:MAX_TEXTAREA_LEN] for x in v] for k, v in list(_parsed.items())[:200]}
         try:
             # ---- public auth endpoints (form posts -> page re-render on error) ----
             if path == "/api/signup":
@@ -1095,7 +1340,8 @@ class Handler(BaseHTTPRequestHandler):
                       "<p><a href='/'>← Back</a></p></div></body></html>")
                 return
             # ---- billing (session required) ----
-            if path == "/api/billing/checkout":
+            if path == "/api/billing/paid":
+                # Dentist clicked "I've completed my Neteller payment".
                 ctx = _auth_ctx(self)
                 if ctx is None:
                     _json(self, 401, {"code": "unauthorized",
@@ -1104,17 +1350,10 @@ class Handler(BaseHTTPRequestHandler):
                 if ctx["is_demo"]:
                     _redirect(self, "/signup")
                     return
-                if not isinstance(billing_provider, object):
-                    _json(self, 500, {"code": "billing_unavailable",
-                                      "message": "billing unavailable"})
-                    return
-                session = billing_provider.create_checkout(ctx["clinic_id"],
-                                                           SUBSCRIPTION_PRICE_USD)
-                # TEST MODE: simulate the dentist completing the test checkout.
-                if TEST_MODE and hasattr(billing_provider, "start_test_subscription"):
-                    ref = billing_provider.start_test_subscription(ctx["clinic_id"])
-                    get_accounts().mark_subscribed(ctx["account_id"], ref)
-                _redirect(self, "/app/start?test_checkout=" + session.session_id)
+                get_accounts().mark_payment_pending(ctx["account_id"])
+                _audit_auth("payment_pending_neteller", ctx.get("email", ""),
+                            f"${SUBSCRIPTION_PRICE_USD}/mo via {NETELLER_EMAIL}")
+                _redirect(self, "/subscribe")
                 return
             if path == "/api/billing/cancel":
                 ctx = _auth_ctx(self)
@@ -1330,6 +1569,11 @@ class Handler(BaseHTTPRequestHandler):
     # -- auth handlers ------------------------------------------------
     def _handle_signup(self, form: dict):
         accounts = get_accounts()
+        # DB-backed per-IP throttle (5/hour); isolated per test database.
+        if not accounts.signup_allowed(self.client_address[0]):
+            _send(self, 429, signup_page(
+                ["Too many signups from this address — try again later."], {}))
+            return
         values = {
             "name": form.get("name", "").strip(),
             "email": form.get("email", "").strip(),
@@ -1340,16 +1584,22 @@ class Handler(BaseHTTPRequestHandler):
         confirm = form.get("confirm", "")
         if password != confirm:
             errors.append("Passwords don't match.")
+        if form.get("accept_terms") != "1":
+            errors.append("Please agree to the Terms of Service to create an account.")
+        if form.get("accept_privacy") != "1":
+            errors.append("Please confirm you have read the Privacy Policy.")
         if errors:
             _send(self, 400, signup_page(errors, values))
             return
         try:
             acct = accounts.create_account(
-                values["name"], values["email"], values["clinic_name"], password)
+                values["name"], values["email"], values["clinic_name"], password,
+                legal_version=LEGAL_VERSION)
         except ValueError as e:
             _send(self, 400, signup_page([str(e)], values))
             return
         token = accounts.create_session(acct["account_id"])
+        _audit_auth("signup", values["email"])
         _redirect_with_cookie(self, "/welcome", token)
 
     def _handle_signin(self, form: dict):
@@ -1367,11 +1617,13 @@ class Handler(BaseHTTPRequestHandler):
         if acct is None or acct["is_demo"] or not verify_password(password, acct["password_hash"]):
             # Generic message: don't reveal whether the email exists.
             accounts.record_signin_failure(email)
+            _audit_auth("signin_failed", email)
             _send(self, 401, signin_page(
                 ["Email or password didn't match. Try again."], email, next_url))
             return
         accounts.reset_signin_failures(email)
         token = accounts.create_session(acct["account_id"])
+        _audit_auth("signin", email)
         _redirect_with_cookie(self, next_url or "/app/start", token)
 
 

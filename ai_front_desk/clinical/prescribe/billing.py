@@ -1,14 +1,13 @@
-"""Billing — provider-independent interface, TEST MODE ONLY.
+"""Billing — provider-independent interface, MANUAL NETELLER live path.
 
-No live charges are possible from this module. Every provider method
-runs against a test stub. The founder wires a real provider (Whop,
-Stripe, …) later by implementing BillingProvider; the app code calls
-only this interface.
+Live billing is manual: the dentist sends the subscription amount via
+Neteller to NETELLER_EMAIL, marks "I've paid" in the app, and the founder
+activates the account with the admin CLI. No provider API keys, no
+webhooks, no automatic charges — every activation is a deliberate,
+audited human decision.
 
-Test mode guarantees:
-- create_checkout() returns a fake checkout URL, never a real one.
-- No provider keys are read, stored, or required.
-- subscribe()/cancel() flip local test-mode state only.
+TestBillingProvider remains for the test suite only; the app never
+auto-subscribes from it anymore.
 """
 from __future__ import annotations
 
@@ -19,6 +18,8 @@ from typing import Protocol
 
 from .trial import SUBSCRIPTION_PRICE_USD
 
+# Manual Neteller is the live billing path. TEST_MODE stays True only for the
+# legacy test stub (kept for tests); the app no longer auto-subscribes.
 TEST_MODE = True
 
 
@@ -81,5 +82,36 @@ class TestBillingProvider:
         return None
 
 
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# FOUNDER'S CALL — where dentists send subscription payments.
+NETELLER_EMAIL = "abdelshafyclapps@gmail.com"
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+class ManualNetellerProvider:
+    """Manual billing via Neteller wallet transfer.
+
+    Flow: dentist sends SUBSCRIPTION_PRICE_USD via Neteller to NETELLER_EMAIL,
+    clicks "I've paid" in the app -> account becomes payment-pending ->
+    founder runs `python -m ai_front_desk.clinical.prescribe.admin activate
+    <email>` -> account subscribed. No API keys, no webhooks, no chargebacks
+    to handle in code. Honest and auditable.
+    """
+
+    def create_checkout(self, clinic_id: str, price_usd: int) -> CheckoutSession:
+        # No hosted checkout — the "checkout" is the Neteller instruction page.
+        return CheckoutSession(
+            session_id=f"neteller_{uuid.uuid4().hex[:12]}",
+            price_usd=price_usd,
+            test_mode=False,
+            fake_checkout_url="/subscribe",
+        )
+
+    def cancel_subscription(self, clinic_id: str, subscription_ref: str) -> bool:
+        # Manual: founder cancels via the admin CLI.
+        return False
+
+
 # The app uses this instance; swap for a real provider implementation later.
-provider: BillingProvider = TestBillingProvider()
+# Manual Neteller is the live path — no test-mode auto-subscribe anymore.
+provider: BillingProvider = ManualNetellerProvider()

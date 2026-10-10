@@ -121,6 +121,13 @@ def compute_status(
     if payload and payload.get("cancelled_at"):
         return {**base, "state": "cancelled", "days_remaining": 0.0}
 
+    # Manual billing: dentist paid via Neteller, awaiting founder activation.
+    # Locked like expired, but the UI explains payment was received.
+    if payload and payload.get("payment_pending_at") and not payload.get(
+        "subscription_ref"
+    ):
+        return {**base, "state": "pending", "days_remaining": 0.0}
+
     if not payload or not payload.get("activated_at"):
         return {**base, "state": "eligible", "days_remaining": 0.0}
 

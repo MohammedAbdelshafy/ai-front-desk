@@ -30,8 +30,11 @@ PBKDF2_ITERATIONS = 200_000
 MIN_PASSWORD_CHARS = 10
 SESSION_TTL_SECONDS = 24 * 3600
 DEMO_SESSION_TTL_SECONDS = 2 * 3600
+# Absolute cap: sliding refresh can never extend a session past this.
+SESSION_ABSOLUTE_MAX_SECONDS = 7 * 24 * 3600
 SLIDING_REFRESH_SECONDS = 300
 SIGNIN_MAX_FAILS = 10
+SIGNUP_MAX_PER_HOUR = 5
 SIGNIN_WINDOW_SECONDS = 600
 SIGNIN_LOCK_SECONDS = 600
 
@@ -76,6 +79,11 @@ CREATE TABLE IF NOT EXISTS prescribe_signin_attempts (
     first_fail_at REAL NOT NULL DEFAULT 0,
     locked_until REAL NOT NULL DEFAULT 0,
     updated_at   REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS prescribe_signup_attempts (
+    ip           TEXT PRIMARY KEY,
+    count        INTEGER NOT NULL DEFAULT 0,
+    window_start REAL NOT NULL DEFAULT 0
 );
 """
 
@@ -126,14 +134,39 @@ class AccountStore:
         self._db.row_factory = sqlite3.Row
         self._db.execute("PRAGMA foreign_keys = ON")
         self._db.executescript(SCHEMA)
+        self._migrate()
         self.ensure_demo_account()
+
+    def _migrate(self) -> None:
+        """Idempotent column migrations for prescribe_accounts."""
+        cols = {
+            r["name"]
+            for r in self._db.execute("PRAGMA table_info(prescribe_accounts)")
+        }
+        # Manual Neteller billing: dentist paid, awaiting founder activation.
+        if "payment_pending_at" not in cols:
+            self._db.execute(
+                "ALTER TABLE prescribe_accounts ADD COLUMN payment_pending_at REAL"
+            )
+            self._db.commit()
+        # Legal acceptance: doc version + timestamp recorded at sign-up.
+        if "legal_accepted_version" not in cols:
+            self._db.execute(
+                "ALTER TABLE prescribe_accounts ADD COLUMN legal_accepted_version TEXT"
+            )
+            self._db.commit()
+        if "legal_accepted_at" not in cols:
+            self._db.execute(
+                "ALTER TABLE prescribe_accounts ADD COLUMN legal_accepted_at REAL"
+            )
+            self._db.commit()
 
     def close(self):
         self._db.close()
 
     # -- accounts ------------------------------------------------------
     def create_account(self, name: str, email: str, clinic_name: str,
-                       password: str) -> dict[str, Any]:
+                       password: str, legal_version: str = "") -> dict[str, Any]:
         """Validate + create. Raises ValueError with a user-safe message."""
         name = (name or "").strip()
         email = (email or "").strip().lower()
@@ -153,10 +186,11 @@ class AccountStore:
         self._db.execute(
             """INSERT INTO prescribe_accounts
                (account_id, name, email, clinic_name, clinic_id, password_hash,
-                is_demo, trial_activated_at, trial_days, created_at)
-               VALUES (?, ?, ?, ?, ?, ?, 0, ?, 7, ?)""",
+                is_demo, trial_activated_at, trial_days, created_at,
+                legal_accepted_version, legal_accepted_at)
+               VALUES (?, ?, ?, ?, ?, ?, 0, ?, 7, ?, ?, ?)""",
             (account_id, name, email, clinic_name, account_id,
-             hash_password(password), now, now),
+             hash_password(password), now, now, legal_version, now),
         )
         self._db.commit()
         return self.get_account(account_id)
@@ -200,6 +234,9 @@ class AccountStore:
             "subscription_ref": acct["subscription_ref"],
             "subscribed_at": acct["subscribed_at"],
             "cancelled_at": acct["cancelled_at"],
+            "payment_pending_at": acct["payment_pending_at"]
+            if "payment_pending_at" in acct.keys()
+            else None,
         }
 
     def trial_status(self, account_id: str, now: float | None = None) -> dict:
@@ -223,10 +260,36 @@ class AccountStore:
         return self.trial_status(account_id, now)["state"] in (
             "active", "expiring", "subscribed")
 
+    def mark_payment_pending(self, account_id: str) -> None:
+        """Dentist clicked 'I've paid via Neteller' — awaiting founder activation."""
+        self._db.execute(
+            "UPDATE prescribe_accounts SET payment_pending_at = ? WHERE account_id = ?",
+            (time.time(), account_id),
+        )
+        self._db.commit()
+
+    def clear_payment_pending(self, account_id: str) -> None:
+        self._db.execute(
+            "UPDATE prescribe_accounts SET payment_pending_at = NULL WHERE account_id = ?",
+            (account_id,),
+        )
+        self._db.commit()
+
+    def pending_activations(self) -> list[dict[str, Any]]:
+        """Accounts awaiting founder activation (for the admin CLI)."""
+        return [
+            dict(r)
+            for r in self._db.execute(
+                "SELECT account_id, name, email, clinic_name, payment_pending_at, created_at"
+                " FROM prescribe_accounts WHERE payment_pending_at IS NOT NULL"
+                " AND subscription_ref IS NULL ORDER BY payment_pending_at"
+            )
+        ]
+
     def mark_subscribed(self, account_id: str, subscription_ref: str) -> None:
         self._db.execute(
             "UPDATE prescribe_accounts SET subscription_ref = ?, subscribed_at = ?, "
-            "cancelled_at = NULL WHERE account_id = ?",
+            "cancelled_at = NULL, payment_pending_at = NULL WHERE account_id = ?",
             (subscription_ref, time.time(), account_id),
         )
         self._db.commit()
@@ -273,7 +336,7 @@ class AccountStore:
         if row is None:
             return None
         now = time.time()
-        if row["expires_at"] <= now:
+        if row["expires_at"] <= now or now - row["created_at"] > SESSION_ABSOLUTE_MAX_SECONDS:
             self._db.execute(
                 "DELETE FROM prescribe_sessions WHERE token_hash = ?", (th,))
             self._db.commit()
@@ -343,3 +406,27 @@ class AccountStore:
             "DELETE FROM prescribe_signin_attempts WHERE email = ?",
             ((email or "").strip().lower(),))
         self._db.commit()
+
+    # -- sign-up rate limiting (per IP, DB-backed so tests stay isolated) --
+    def signup_allowed(self, ip: str) -> bool:
+        """Allow up to SIGNUP_MAX_PER_HOUR signups per IP per rolling hour."""
+        now = time.time()
+        row = self._db.execute(
+            "SELECT * FROM prescribe_signup_attempts WHERE ip = ?", (ip,)
+        ).fetchone()
+        if row is None or now - row["window_start"] > 3600:
+            self._db.execute(
+                "INSERT OR REPLACE INTO prescribe_signup_attempts "
+                "(ip, count, window_start) VALUES (?, 1, ?)",
+                (ip, now),
+            )
+            self._db.commit()
+            return True
+        if row["count"] >= SIGNUP_MAX_PER_HOUR:
+            return False
+        self._db.execute(
+            "UPDATE prescribe_signup_attempts SET count = count + 1 WHERE ip = ?",
+            (ip,),
+        )
+        self._db.commit()
+        return True
