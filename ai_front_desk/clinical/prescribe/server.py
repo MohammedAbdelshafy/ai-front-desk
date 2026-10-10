@@ -99,52 +99,160 @@ MODULES = [
     {"id": "command", "name": "Command Center", "icon": "📊", "locked": True},
 ]
 
+MIA_AVATAR_URL = (
+    "https://raw.githubusercontent.com/MohammedAbdelshafy/"
+    "mia-muse-assets/main/mia-hi-thumb-base.jpg"
+)
+
+# Inline stroke icons (currentColor) — no emoji as icon language in the workspace.
+ICONS = {
+    "copilot": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='3.5' y='8.5' width='17' height='7' rx='3.5' transform='rotate(-45 12 12)'/><path d='M12 6.8v10.4'/></svg>",
+    "intake": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='5' y='4' width='14' height='17' rx='2'/><path d='M9 4a3 3 0 0 1 6 0'/><path d='M9 11h6M9 15h6'/></svg>",
+    "dashboard": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round'><rect x='3.5' y='3.5' width='7' height='7' rx='1.5'/><rect x='13.5' y='3.5' width='7' height='7' rx='1.5'/><rect x='3.5' y='13.5' width='7' height='7' rx='1.5'/><rect x='13.5' y='13.5' width='7' height='7' rx='1.5'/></svg>",
+    "recall": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M18 9a6 6 0 1 0-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9'/><path d='M10 20a2.2 2.2 0 0 0 4 0'/></svg>",
+    "command": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round'><path d='M4 20V10M10 20V4M16 20v-8M22 20H2'/></svg>",
+    "lock": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='4.5' y='10.5' width='15' height='10' rx='2'/><path d='M8 10.5V7a4 4 0 0 1 8 0v3.5'/></svg>",
+    "up": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M12 19V5M5 12l7-7 7 7'/></svg>",
+    "check": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><path d='M8.5 12.5l2.5 2.5 4.5-5.5'/></svg>",
+    "alert": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 3.5L22 20H2z'/><path d='M12 10v4.5M12 17.5v.01'/></svg>",
+    "stop": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M7.9 3.5h8.2L20.5 7.9v8.2l-4.4 4.4H7.9L3.5 16.1V7.9z'/><path d='M9.5 9.5l5 5M14.5 9.5l-5 5'/></svg>",
+    "help": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><path d='M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.8.3-.9 1-.9 1.7'/><path d='M12 17v.01'/></svg>",
+    "users": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='9' cy='8' r='3.5'/><path d='M3.5 20a5.5 5.5 0 0 1 11 0'/><path d='M16 4.6a3.5 3.5 0 0 1 0 6.8M17.5 14.7a5.5 5.5 0 0 1 3 5.3'/></svg>",
+    "user": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='8' r='4'/><path d='M4.5 20.5a7.5 7.5 0 0 1 15 0'/></svg>",
+    "arrow": "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12h14M13 6l6 6-6 6'/></svg>",
+}
+
 STYLE = """
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-:root{--ink:#14161a;--mut:#5b6472;--line:#e6e9ef;--bg:#f6f8fb;--brand:#314ca3;--brand2:#eef2ff}
+:root{
+  --ink:#152238; --mut:#5d6f86; --line:#dfe7f0;
+  --bg:#f2f6fa; --surface:#ffffff;
+  --brand:#0d7d8c; --brand-deep:#0a616d; --brand-soft:#e2f2f4; --brand-ink:#074b54;
+  --green-bg:#e5f5ea; --green-ink:#166534; --green-line:#9fd8b4;
+  --yellow-bg:#fff7dc; --yellow-ink:#7c5200; --yellow-line:#e8c547;
+  --red-bg:#fdeceb; --red-ink:#b42318; --red-line:#f3b3ac;
+  --gray-bg:#eef2f7; --gray-ink:#5d6f86;
+  --r:16px; --shadow:0 1px 2px rgba(21,34,56,.05),0 10px 28px -14px rgba(21,34,56,.16);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
 *{box-sizing:border-box}
-body{font:16px/1.5 system-ui,-apple-system,sans-serif;margin:0;color:var(--ink);background:var(--bg)}
-a{color:var(--brand)}
+html{-webkit-text-size-adjust:100%}
+body{font:16px/1.55 var(--font);margin:0;color:var(--ink);background:var(--bg)}
+h1{font-size:30px;letter-spacing:-.015em;margin:.4em 0 .5em;line-height:1.2}
+h2{font-size:22px;letter-spacing:-.01em;margin:.3em 0 .6em}
+h3{font-size:17px;margin:.2em 0 .5em}
+h4{font-size:15px;margin:.2em 0 .4em}
+a{color:var(--brand-deep);text-decoration-thickness:1px;text-underline-offset:2px}
+a:hover{color:var(--brand)}
+::selection{background:var(--brand-soft)}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:6px}
 .wrap{max-width:1060px;margin:0 auto;padding:16px}
 .narrow{max-width:720px;margin:0 auto;padding:16px}
-.topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-.topbar .wrap{display:flex;align-items:center;gap:12px}
-.brand{font-weight:800;font-size:18px}
-.brand small{font-weight:400;color:var(--mut)}
-.pill{margin-left:auto;font-size:13px;padding:4px 12px;border-radius:999px;background:var(--brand2);color:var(--brand);border:1px solid #d7e0ff}
-.pill.warn{background:#fff3cd;color:#664d03;border-color:#ffe69c}
-.pill.bad{background:#fde8e8;color:#8a1f1f;border-color:#f5c2c2}
-.layout{display:flex;gap:0;align-items:stretch;min-height:calc(100vh - 57px)}
-.side{width:230px;background:#fff;border-right:1px solid var(--line);padding:14px 10px;flex-shrink:0}
-.side a.mod{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;color:var(--ink);text-decoration:none;margin-bottom:4px}
-.side a.mod.active{background:var(--brand2);font-weight:700}
-.side .mod.locked{opacity:.55;cursor:default}
-.locktag{font-size:11px;background:#eef1f6;color:var(--mut);border-radius:6px;padding:2px 8px;margin-left:auto}
-.main{flex:1;padding:18px;min-width:0}
-.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
-.btn{display:inline-block;background:var(--brand);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:16px;cursor:pointer;text-decoration:none}
-.btn.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
-.btn:disabled{opacity:.5;cursor:default}
-input,select,textarea{font:16px system-ui;width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;margin:4px 0 12px}
-label{font-weight:600;font-size:14px}
-.verdict{font-size:22px;font-weight:800;padding:10px 18px;border-radius:12px;display:inline-block;margin:8px 0}
-.v-green{background:#e6f6ec;color:#14632e}
-.v-yellow{background:#fff3cd;color:#664d03}
-.v-red{background:#fde8e8;color:#8a1f1f}
-.v-gray{background:#eef1f6;color:var(--mut)}
-.flag{border-left:4px solid var(--line);padding:8px 12px;margin:8px 0;background:#fbfcfe;border-radius:0 8px 8px 0}
-.flag.red{border-color:#d33}.flag.yellow{border-color:#e0a800}.flag.info{border-color:#8a94a6}
+/* Safety strip — always on top, never subtle */
+.safety{background:#152238;color:#fff;font-size:13.5px;padding:9px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center}
+.demo-chip{background:#f5b942;color:#152238;font-weight:800;font-size:11.5px;letter-spacing:.08em;padding:3px 10px;border-radius:999px;flex-shrink:0}
+/* Topbar */
+.topbar{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.topbar .wrap{display:flex;align-items:center;gap:12px;padding-top:10px;padding-bottom:10px}
+.brand{font-weight:800;font-size:18px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+.brand small{font-weight:500;color:var(--mut);font-size:14px}
+.pill{margin-left:auto;font-size:13px;font-weight:600;padding:5px 14px;border-radius:999px;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #bfe0e5;white-space:nowrap}
+.pill.warn{background:var(--yellow-bg);color:var(--yellow-ink);border-color:var(--yellow-line)}
+.pill.bad{background:var(--red-bg);color:var(--red-ink);border-color:var(--red-line)}
+/* Layout + nav */
+.layout{display:flex;gap:0;align-items:stretch;min-height:calc(100vh - 110px)}
+.side{width:238px;background:var(--surface);border-right:1px solid var(--line);padding:14px 10px;flex-shrink:0}
+.side a.mod{display:flex;gap:11px;align-items:center;padding:10px 12px;border-radius:12px;color:var(--ink);text-decoration:none;margin-bottom:4px;font-weight:500;font-size:15px;border:1px solid transparent}
+.side a.mod:hover{background:#f4f8fb}
+.side a.mod.active{background:var(--brand-soft);font-weight:700;color:var(--brand-ink);border-color:#cde9ec}
+.side a.mod svg{width:20px;height:20px;flex-shrink:0;color:var(--brand-deep)}
+.side a.mod.active svg{color:var(--brand-ink)}
+.side .mod.locked{opacity:.6;cursor:default}
+.side .mod.locked svg{color:var(--mut)}
+.locktag{font-size:11px;font-weight:600;background:var(--gray-bg);color:var(--mut);border-radius:6px;padding:2px 8px;margin-left:auto;white-space:nowrap}
+.main{flex:1;padding:20px;min-width:0;max-width:900px}
+/* Cards, buttons, forms */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card.tier{border-style:dashed;border-width:1.5px;background:#fbfdff}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--brand-deep);margin:0 0 6px}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--brand);color:#fff;border:0;border-radius:12px;padding:11px 20px;font:600 16px var(--font);cursor:pointer;text-decoration:none;box-shadow:0 4px 12px -4px rgba(13,125,140,.5)}
+.btn:hover{background:var(--brand-deep);color:#fff}
+.btn.ghost{background:var(--surface);color:var(--brand-deep);border:1.5px solid var(--brand);box-shadow:none}
+.btn.ghost:hover{background:var(--brand-soft)}
+.btn:disabled{opacity:.5;cursor:default;box-shadow:none}
+.btn svg{width:18px;height:18px}
+input,select,textarea{font:16px var(--font);color:var(--ink);width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;margin:4px 0 14px;background:#fff}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);outline:2px solid var(--brand-soft)}
+input[type=checkbox],input[type=radio]{width:auto;margin:0 8px 0 0;accent-color:var(--brand)}
+label{font-weight:600;font-size:14px;display:block}
+label>span.hint, .hint{font-weight:400;color:var(--mut)}
+/* Mia identity */
+.mia{display:flex;gap:14px;background:linear-gradient(135deg,#e2f2f4,#f4fafb);border:1px solid #cde9ec;border-radius:var(--r);padding:16px;margin-bottom:16px;align-items:center;box-shadow:var(--shadow)}
+.mia-avatar{position:relative;display:inline-block;width:var(--s,48px);height:var(--s,48px);border-radius:50%;flex-shrink:0;box-shadow:0 3px 10px rgba(10,97,109,.28)}
+.mia-avatar svg.mono{width:100%;height:100%;display:block;border-radius:50%}
+.mia-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.mia-name{font-weight:800;font-size:16px}
+.mia-role{font-weight:500;color:var(--brand-ink);font-size:14px}
+.mia-say{color:#33475f;font-size:15px;margin-top:2px}
+/* Verdict hero — decisive but calm */
+.verdict-hero{display:flex;gap:16px;align-items:center;border-radius:var(--r);padding:20px;margin:6px 0 14px;border:1.5px solid;box-shadow:var(--shadow)}
+.verdict-hero .v-icon{width:52px;height:52px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.65)}
+.verdict-hero .v-icon svg{width:30px;height:30px}
+.verdict-hero.v-green{background:var(--green-bg);border-color:var(--green-line);color:var(--green-ink)}
+.verdict-hero.v-yellow{background:var(--yellow-bg);border-color:var(--yellow-line);color:var(--yellow-ink)}
+.verdict-hero.v-red{background:var(--red-bg);border-color:var(--red-line);color:var(--red-ink)}
+.verdict-hero.v-gray{background:var(--gray-bg);border-color:var(--line);color:var(--gray-ink)}
+.v-word{font-size:30px;font-weight:800;letter-spacing:.04em;line-height:1.1}
+.v-sub{font-size:14px;margin-top:2px;opacity:.92}
+/* Flags */
+.flag{border-left:4px solid var(--line);padding:10px 14px;margin:10px 0;background:#fbfdff;border-radius:0 10px 10px 0;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.flag.red{border-left-color:var(--red-ink);background:#fff7f6}
+.flag.yellow{border-left-color:var(--yellow-line);background:#fffeF7}
+.flag.info{border-left-color:#9fb2c8}
+.flag b.sev{font-size:12.5px;letter-spacing:.06em}
+.flag.red b.sev{color:var(--red-ink)}.flag.yellow b.sev{color:var(--yellow-ink)}.flag.info b.sev{color:var(--mut)}
 .src{font-size:13px;color:var(--mut)}
-.mia{display:flex;gap:12px;background:linear-gradient(135deg,#eef2ff,#f8f9ff);border:1px solid #dce4ff;border-radius:14px;padding:14px;margin-bottom:14px}
-.mia .face{font-size:34px}
-.tier{border:1px dashed #b9c4d6;background:#fafbfe}
-.steps li{margin-bottom:8px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line)}
-.banner{background:#fff3cd;color:#664d03;padding:10px 14px;font-size:14px;border-bottom:1px solid #ffe69c}
-@media(max-width:760px){.side{display:none}.layout{display:block}}
+.src a{color:var(--brand-deep)}
+/* Wizard progress */
+.wsteps{list-style:none;display:flex;gap:4px;padding:0;margin:0 0 18px;counter-reset:step}
+.wsteps li{flex:1;text-align:center;font-size:12px;font-weight:600;color:var(--mut);position:relative;padding-top:26px;min-width:0}
+.wsteps li::before{content:counter(step);counter-increment:step;position:absolute;top:0;left:50%;transform:translateX(-50%);width:22px;height:22px;border-radius:50%;background:var(--gray-bg);color:var(--mut);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--line)}
+.wsteps li::after{content:"";position:absolute;top:11px;left:calc(-50% + 14px);right:calc(50% + 14px);height:2px;background:var(--line)}
+.wsteps li:first-child::after{display:none}
+.wsteps li.done{color:var(--brand-ink)}
+.wsteps li.done::before{background:var(--brand);border-color:var(--brand);color:#fff}
+.wsteps li.done::after{background:var(--brand)}
+.wsteps li.now{color:var(--brand-ink)}
+.wsteps li.now::before{background:var(--surface);border-color:var(--brand);color:var(--brand-ink);box-shadow:0 0 0 4px var(--brand-soft)}
+.wsteps li span.lbl{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Landing hero */
+.hero{display:flex;gap:20px;align-items:center;margin:26px 0 20px}
+.hero h1{margin:0 0 8px;font-size:34px}
+.hero .lede{font-size:18px;color:#33475f;margin:0}
+.howto{counter-reset:how}
+.howto li{margin-bottom:12px;padding-left:4px}
+/* Tables, misc */
+h3 svg{width:18px;height:18px;vertical-align:-3px;color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:15px}
+.kv dt{color:var(--mut);font-weight:600}.kv dd{margin:0}
+.divider{border:0;border-top:1px solid var(--line);margin:18px 0}
+@media(max-width:760px){
+  .layout{display:block}
+  .side{width:100%;border-right:0;border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;padding:10px}
+  .side a.mod{white-space:nowrap;margin-bottom:0;font-size:14px;padding:8px 12px}
+  .side .locktag{display:none}
+  .main{padding:14px;max-width:none}
+  .hero{flex-direction:column;align-items:flex-start}
+  .wsteps li span.lbl{display:none}
+  .wsteps li{padding-top:24px}
+  h1{font-size:26px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 """
 
@@ -153,16 +261,37 @@ def esc(s) -> str:
     return html.escape(str(s), quote=True)
 
 
+def mia_avatar(size: int = 48) -> str:
+    """Mia's identity mark: teal monogram with her photo layered on top.
+    If the hotlinked photo fails, the monogram remains — the page never breaks."""
+    return (
+        f"<span class='mia-avatar' style='--s:{size}px'>"
+        "<svg class='mono' viewBox='0 0 48 48' aria-hidden='true'>"
+        "<defs><linearGradient id='miag' x1='0' y1='0' x2='1' y2='1'>"
+        "<stop offset='0' stop-color='#14a4b6'/><stop offset='1' stop-color='#0a616d'/>"
+        "</linearGradient></defs>"
+        "<circle cx='24' cy='24' r='24' fill='url(#miag)'/>"
+        "<text x='24' y='32' text-anchor='middle' font-size='22' font-weight='700' "
+        "fill='#ffffff' font-family='inherit'>M</text></svg>"
+        f"<img src='{MIA_AVATAR_URL}' alt='' loading='lazy' onerror='this.remove()'>"
+        "</span>"
+    )
+
+
 def banner() -> str:
-    return ("<div class='banner'>DEMO — synthetic data only. Assistive reference aid; "
-            "not a substitute for clinical judgment. Not for real patient use.</div>")
+    return (
+        "<div class='safety' role='note'><span class='demo-chip'>DEMO</span>"
+        "<span>Synthetic data only · Assistive reference aid — not a substitute "
+        "for clinical judgment · Not for real patient use</span></div>"
+    )
 
 
 def mia_card(subtitle: str = "") -> str:
     return (
-        "<div class='mia'><div class='face'>👩‍⚕️</div><div>"
-        f"<b>{esc(PRESCRIBE_MIA.name)}</b> · {esc(PRESCRIBE_MIA.role)}<br>"
-        f"<span style='color:var(--mut)'>{esc(subtitle or PRESCRIBE_MIA.greeting)}</span>"
+        "<div class='mia'>" + mia_avatar(52)
+        + "<div><div class='mia-name'>Mia "
+        f"<span class='mia-role'>· {esc(PRESCRIBE_MIA.role)}</span></div>"
+        f"<div class='mia-say'>{esc(subtitle or PRESCRIBE_MIA.greeting)}</div>"
         "</div></div>"
     )
 
@@ -177,26 +306,28 @@ def shell(active: str, clinic_name: str, trial: dict, body: str) -> str:
         pill = "<span class='pill bad'>Trial expired</span>"
     mods = []
     for m in MODULES:
+        icon = ICONS.get(m["id"], ICONS["lock"])
         if m["locked"]:
             mods.append(
-                f"<a class='mod locked'><span>{m['icon']}</span>{esc(m['name'])}"
+                f"<a class='mod locked' aria-disabled='true'>{icon}<span>{esc(m['name'])}</span>"
                 f"<span class='locktag'>Full OS</span></a>"
             )
         else:
-            cls = "active" if m["id"] == active else ""
+            cls = " active" if m["id"] == active else ""
             mods.append(
-                f"<a class='mod {cls}' href='{m['href']}'><span>{m['icon']}</span>{esc(m['name'])}</a>"
+                f"<a class='mod{cls}' href='{m['href']}'><span aria-hidden='true'>{icon}</span>"
+                f"<span>{esc(m['name'])}</span></a>"
             )
     mods.append(
-        "<a class='mod' href='/app/upgrades'><span>⬆️</span>Upgrades</a>"
+        f"<a class='mod' href='/app/upgrades'>{ICONS['up']}<span>Upgrades</span></a>"
     )
     return (
         "<!doctype html><html><head><title>Mia Dental OS</title>" + STYLE + "</head><body>"
         + banner()
         + "<div class='topbar'><div class='wrap'>"
-        f"<div class='brand'>Mia Dental OS <small>· {esc(clinic_name)}</small></div>{pill}"
+        f"<div class='brand'>{mia_avatar(34)}Mia Dental OS <small>· {esc(clinic_name)}</small></div>{pill}"
         "</div></div>"
-        f"<div class='layout'><div class='side'>{''.join(mods)}</div>"
+        f"<div class='layout'><nav class='side' aria-label='Modules'>{''.join(mods)}</nav>"
         f"<div class='main'>{body}</div></div>"
         "</body></html>"
     )
@@ -207,26 +338,28 @@ def landing_page() -> str:
         "<!doctype html><html><head><title>Mia Dental OS — Mia Dental Prescribing Copilot</title>"
         + STYLE + "</head><body>" + banner()
         + "<div class='narrow'>"
-        + mia_card()
-        + "<h1>Mia Dental OS</h1>"
-        + "<p style='font-size:19px'>The <b>Mia Dental Prescribing Copilot</b> helps young dentists "
-        "prescribe correctly: every intended prescription is checked against the patient's "
-        "allergies, conditions, and current medications — with each flag citing its source.</p>"
-        + "<div class='card'><h3>How the copilot workflow works</h3><ol class='steps'>"
+        + "<div class='hero'>" + mia_avatar(88)
+        + "<div><p class='eyebrow'>Mia Dental OS</p>"
+        + "<h1>The prescribing copilot for young dentists</h1>"
+        + "<p class='lede'>Hi, I'm Mia. I'll double-check every intended prescription against your patient's "
+        "record before you sign — allergies, interactions, dosing. You always make the call; "
+        "I just make sure nothing gets missed.</p></div></div>"
+        + "<div class='card'><p class='eyebrow'>How the copilot workflow works</p><ol class='howto'>"
         "<li><b>Open the patient card</b> — allergies, conditions, current meds in one view.</li>"
-        "<li><b>Enter the intended prescription</b> — drug, strength, dose, frequency, duration.</li>"
+        "<li><b>Answer the guided questions</b> — indication, patient factors, allergies, meds, conditions.</li>"
+        "<li><b>Choose with cited references</b> — standard options for your indication, each with its source.</li>"
         "<li><b>Get a Green / Yellow / Red check</b> — every flag cites the patient record or the reference rule behind it.</li>"
         "<li><b>You decide.</b> The copilot never prescribes, transmits, or fills — it surfaces what you might have missed.</li>"
         "</ol></div>"
-        + "<div class='card'><h3>7-day free trial</h3>"
+        + "<div class='card'><p class='eyebrow'>7-day free trial</p>"
         "<p>Full copilot access for 7 days, free. After that, "
         f"<b>${SUBSCRIPTION_PRICE_USD}/month</b>. No charges without your explicit subscription — "
         "billing is in test mode while we onboard pilot clinics.</p>"
-        "<a class='btn' href='/app/start'>Start the guided demo</a> "
+        "<a class='btn' href='/app/start'>Start the guided demo " + ICONS["arrow"] + "</a> "
         "<a class='btn ghost' href='/invite'>Dentist sign-up</a></div>"
-        + "<div class='card'><h3>Scope & limitations — read this</h3><ul>"
+        + "<div class='card'><p class='eyebrow'>Scope &amp; limitations — read this</p><ul>"
         "<li>Assistive reference aid only. The dentist always decides and prescribes.</li>"
-        "<li>Reference dataset v1 (2026-10-11): standard dental prescribing references. Requires dentist review before clinical use.</li>"
+        "<li>Reference dataset " + esc(REFERENCE_VERSION) + ": standard dental prescribing references, each item source-cited. Requires dentist review before clinical use.</li>"
         "<li>Missing or uncertain patient data is never shown as verified-safe.</li>"
         "<li>Synthetic demo data only in this preview. Not HIPAA-compliant. Not for real patients.</li>"
         "</ul></div>"
@@ -280,7 +413,7 @@ def patients_page(store, clinic_id, clinic_name, trial) -> str:
     ) or "<tr><td colspan=3 style='color:var(--mut)'>No patients yet — add one below, or run the guided demo.</td></tr>"
     body = (
         mia_card("Pick a patient to open their card, or run a safety check.")
-        + "<div class='card'><h2>👥 Patients</h2>"
+        + "<div class='card'><p class='eyebrow'>Patients</p>"
         f"<table><tr><th>Patient</th><th>Allergies</th><th>Meds</th></tr>{rows}</table></div>"
         + "<div class='card'><h3>Add patient (synthetic demo data)</h3>"
         f"<form method='POST' action='/api/patient?clinic={clinic_id}'>"
@@ -320,13 +453,13 @@ def patient_detail_page(store, clinic_id, clinic_name, trial, patient_id) -> str
     drug_opts = "".join(f"<option value='{k}'>{v['display']}</option>" for k, v in sorted(DRUGS.items(), key=lambda x: x[1]["display"]))
     body = (
         mia_card(f"Patient card for {p['label']}. Enter what you intend to prescribe — I'll check it against this record.")
-        + f"<div class='card'><h2>🧑 {esc(p['label'])}</h2>"
+        + f"<div class='card'><p class='eyebrow'>Patient card</p><h2 style='margin-top:0'>{esc(p['label'])}</h2>"
         f"<h4>Allergies</h4><ul>{allergies}</ul>"
         f"<h4>Conditions</h4><ul>{conds}</ul>"
         f"<h4>Current medications</h4><ul>{meds}</ul></div>"
-        + f"<p><a class='btn' href='/app/wizard/start?patient={patient_id}'>🧭 Start guided check</a> "
+        + f"<p><a class='btn' href='/app/wizard/start?patient={patient_id}'>Start guided check {ICONS['arrow']}</a> "
         "<span class='src'>Walks through indication → factors → allergies → meds → conditions → your choice.</span></p>"
-        + f"<div class='card'><h3>Quick safety check (skip wizard)</h3>"
+        + f"<div class='card'><p class='eyebrow'>Quick safety check <span class='hint'>(skip wizard)</span></p>"
         f"<form method='POST' action='/api/check?clinic={clinic_id}'>"
         f"<input type='hidden' name='patient_id' value='{patient_id}'>"
         f"<label>Drug<input name='drug_name' list='drugs' required placeholder='ibuprofen'></label>"
@@ -346,15 +479,24 @@ def patient_detail_page(store, clinic_id, clinic_name, trial, patient_id) -> str
 def check_result_page(store, clinic_id, clinic_name, trial, check_id) -> str:
     c = store.get_check(clinic_id, check_id)
     vcls = {"GREEN": "v-green", "YELLOW": "v-yellow", "RED": "v-red"}.get(c["verdict"], "v-gray")
+    vicon = {"GREEN": ICONS["check"], "YELLOW": ICONS["alert"],
+             "RED": ICONS["stop"]}.get(c["verdict"], ICONS["help"])
     flags = ""
     for f in c["flags"]:
         sev = f["severity"] if f["severity"] in ("red", "yellow") else "info"
         rule = f"<br><span class='src'>Rule: {esc(f['rule_id'])}</span>" if f.get("rule_id") else ""
         flags += (
-            f"<div class='flag {sev}'><b>{sev.upper()}</b> — {esc(f['reason'])}"
+            f"<div class='flag {sev}'><b class='sev'>{sev.upper()}</b> — {esc(f['reason'])}"
             f"<br><span class='src'>Source: {esc(f['source'])}</span>{rule}</div>"
         )
     intended = c["intended"]
+    hero = (
+        f"<div class='verdict-hero {vcls}' role='status'>"
+        f"<span class='v-icon'>{vicon}</span>"
+        f"<div><div class='v-word'>{esc(c['verdict'])}</div>"
+        "<div class='v-sub'>Assistive reference aid — review the flags, then you decide.</div></div>"
+        "</div>"
+    )
     review = (
         f"<div class='card'><h3>Clinician review</h3>"
         f"<p>State: <b>{esc(c['review_state'].replace('_', ' '))}</b>"
@@ -372,9 +514,9 @@ def check_result_page(store, clinic_id, clinic_name, trial, check_id) -> str:
     )
     body = (
         mia_card("Check complete. Every flag below cites its source — you make the call.")
-        + f"<div class='card'><h2>Safety check — {esc(intended.get('drug_name',''))}</h2>"
-        f"<span class='verdict {vcls}'>{esc(c['verdict'])}</span>"
-        f"<p class='src'>Intended: {esc(str(intended.get('strength_mg','—')))} mg × "
+        + f"<div class='card'><p class='eyebrow'>Safety check — {esc(intended.get('drug_name',''))}</p>"
+        + hero
+        + f"<p class='src'>Intended: {esc(str(intended.get('strength_mg','—')))} mg × "
         f"{esc(str(intended.get('times_per_day','—')))} /day"
         + (f", {esc(intended.get('duration',''))}" if intended.get("duration") else "")
         + (f" — {esc(intended.get('reason',''))}" if intended.get("reason") else "")
@@ -427,19 +569,19 @@ def reference_page(clinic_id, clinic_name, trial) -> str:
 
 def upgrades_page(clinic_id, clinic_name, trial) -> str:
     tiers = "".join(
-        f"<div class='card tier'><h3>🔒 {esc(t['name'])}</h3><p>{esc(t['blurb'])}</p>"
+        f"<div class='card tier'><h3>{ICONS['lock']} {esc(t['name'])}</h3><p>{esc(t['blurb'])}</p>"
         "<p class='src'>Available in the full Mia Dental OS — ask about the pilot.</p>"
         "<button class='btn' disabled>Locked</button></div>"
         for t in UPSELL_TIERS
     )
     body = (
         mia_card("The Prescribing Copilot is your wedge. Here's where Mia Dental OS goes next.")
-        + "<h2>Upgrades</h2>" + tiers
+        + "<p class='eyebrow'>Upgrades</p>" + tiers
         + "<div class='card'><h3>Also in the full OS</h3><ul>"
-        "<li>📋 Patient Intake — locked teaser</li>"
-        "<li>🖥️ Dentist Dashboard — locked teaser</li>"
-        "<li>🔔 Recall &amp; Follow-up — locked teaser</li>"
-        "<li>📊 Command Center — locked teaser</li></ul>"
+        f"<li>{esc('Patient Intake')} — locked teaser</li>"
+        f"<li>{esc('Dentist Dashboard')} — locked teaser</li>"
+        f"<li>{esc('Recall & Follow-up')} — locked teaser</li>"
+        f"<li>{esc('Command Center')} — locked teaser</li></ul>"
         "<p class='src'>These modules are not built yet. The copilot is the working product today.</p></div>"
     )
     return shell("", clinic_name, trial, body)
@@ -465,8 +607,8 @@ def invite_page() -> str:
 def start_page(store, clinic_id, clinic_name, trial) -> str:
     body = (
         mia_card("60 seconds to get it. Three steps — trial, sample patient, sample check.")
-        + "<div class='card'><h2>Guided first run</h2><ol class='steps'>"
-        "<li><b>Trial active ✅</b> — you're inside the 7-day free trial.</li>"
+        + "<div class='card'><p class='eyebrow'>Guided first run</p><ol class='howto'>"
+        "<li><b>Trial active</b> <span class='pill' style='margin:0'>You're inside the 7-day free trial</span></li>"
         "<li><b>Load a sample patient</b> — synthetic record with a penicillin allergy and warfarin on board."
         f"<form method='POST' action='/api/sample-patient?clinic={clinic_id}' style='margin-top:8px'>"
         "<button class='btn ghost' type='submit'>Load sample patient</button></form></li>"
@@ -911,6 +1053,30 @@ def _select(name: str, options: list[str], current: str) -> str:
     return f"<select name='{name}'><option value=''>— choose —</option>{opts}</select>"
 
 
+WIZ_STEP_LABELS = {
+    "indication": "Indication", "factors": "Factors", "allergies": "Allergies",
+    "medications": "Meds", "conditions": "Conditions",
+    "summary": "Summary", "choose": "Choice",
+}
+
+
+def wizard_progress(current: str) -> str:
+    """7-step progress rail. Done / current / upcoming states."""
+    items = []
+    seen_current = False
+    for s in STEPS:
+        if s == current:
+            cls, seen_current = "now", True
+        elif not seen_current:
+            cls = "done"
+        else:
+            cls = ""
+        items.append(
+            f"<li class='{cls}'><span class='lbl'>{WIZ_STEP_LABELS.get(s, s)}</span></li>"
+        )
+    return f"<ol class='wsteps' aria-label='Check progress'>{''.join(items)}</ol>"
+
+
 def wizard_step_page(state: dict, step: str, clinic_name: str, trial: dict) -> str:
     idx = STEPS.index(step)
     nxt = STEPS[idx + 1] if idx + 1 < len(STEPS) else None
@@ -961,9 +1127,10 @@ def wizard_step_page(state: dict, step: str, clinic_name: str, trial: dict) -> s
 
     body = (
         mia_card(f"Guided check for {state['patient_label'] or 'new patient'} — step {idx + 1} of 7.")
+        + wizard_progress(step)
         + f"<div class='card'><form method='POST' action='/api/wizard/{token}/{step}'>"
         + inner
-        + f"<button class='btn' type='submit'>Continue →</button></form></div>"
+        + f"<button class='btn' type='submit'>Continue {ICONS['arrow']}</button></form></div>"
         + (f"<p><a href='/app/wizard/{token}/{STEPS[idx-1]}'>← Back</a></p>" if idx > 0 else "")
     )
     return shell("copilot", clinic_name, trial, body)
@@ -978,7 +1145,7 @@ def wizard_summary_page(state: dict, clinic_name: str, trial: dict) -> str:
     ind_label = dict(indication_options()).get(state["indication"], "—")
     missing = missing_info_flags(state)
     mflags = "".join(
-        f"<div class='flag info'><b>INFO</b> — {esc(m['reason'])}<br><span class='src'>Source: {esc(m['source'])}</span></div>"
+        f"<div class='flag info'><b class='sev'>INFO</b> — {esc(m['reason'])}<br><span class='src'>Source: {esc(m['source'])}</span></div>"
         for m in missing
     )
     rows = [
@@ -999,10 +1166,11 @@ def wizard_summary_page(state: dict, clinic_name: str, trial: dict) -> str:
     )
     body = (
         mia_card("Review everything before choosing. Missing-info flags are shown, never hidden.")
-        + f"<div class='card'><h2>Step 6 of 7 — Summary</h2>"
-        f"<table>{table}</table></div>"
-        + (f"<h3>Missing information</h3>{mflags}" if mflags else "<p>No missing-info flags.</p>")
-        + f"<p><a class='btn' href='/app/wizard/{token}/choose'>Continue to prescription choice →</a></p>"
+        + wizard_progress("summary")
+        + f"<div class='card'><p class='eyebrow'>Step 6 of 7 — Summary</p>"
+        f"<table><tr><th>Item</th><th>Answer</th><th></th></tr>{table}</table></div>"
+        + (f"<p class='eyebrow'>Missing information</p>{mflags}" if mflags else "<p>No missing-info flags.</p>")
+        + f"<p><a class='btn' href='/app/wizard/{token}/choose'>Continue to prescription choice {ICONS['arrow']}</a></p>"
     )
     return shell("copilot", clinic_name, trial, body)
 
@@ -1034,8 +1202,9 @@ def wizard_choose_page(state: dict, clinic_name: str, trial: dict) -> str:
     )
     body = (
         mia_card("Reference options for your indication. You choose — I check your choice.")
+        + wizard_progress("choose")
         + f"<div class='card'>{panel}</div>"
-        + f"<div class='card'><h2>Step 7 of 7 — Your prescription choice</h2>"
+        + f"<div class='card'><p class='eyebrow'>Step 7 of 7 — Your prescription choice</p>"
         f"<form method='POST' action='/api/wizard/{token}/finish'>"
         f"<label>Drug — your choice<input name='drug_name' list='drugs2' required></label>"
         f"<datalist id='drugs2'>{drug_opts}</datalist>"
