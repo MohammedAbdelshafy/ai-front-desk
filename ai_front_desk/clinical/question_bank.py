@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import copy
 import json
+import math
+from datetime import date
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -49,26 +51,46 @@ class Question:
 
     def validate(self, value: Any) -> list[str]:
         errors: list[str] = []
-        if value is None or (isinstance(value, str) and not value.strip()):
+        if value is None or (isinstance(value, str) and not value.strip()) or value == []:
             if self.required:
                 errors.append(f"{self.qid}: answer required")
             return errors
+        if self.qtype not in QUESTION_TYPES:
+            return [f"{self.qid}: unsupported question type '{self.qtype}'"]
         if isinstance(value, str) and value in ESCAPE_OPTIONS:
-            return errors  # escape answers are always acceptable
-        if self.qtype == "choice" or self.qtype == "yes_no":
+            if self.allow_escape:
+                return errors
+            return [f"{self.qid}: escape answer is not allowed"]
+        if self.qtype in ("choice", "yes_no"):
             allowed = set(self.options) | (set(ESCAPE_OPTIONS) if self.allow_escape else set())
-            if value not in allowed:
-                errors.append(f"{self.qid}: '{value}' not an allowed option")
+            if not isinstance(value, str) or value not in allowed:
+                errors.append(f"{self.qid}: answer is not an allowed option")
         elif self.qtype == "multi_choice":
+            if not isinstance(value, (list, tuple)):
+                return [f"{self.qid}: expected a list of selections"]
             allowed = set(self.options) | (set(ESCAPE_OPTIONS) if self.allow_escape else set())
-            bad = [v for v in (value or []) if v not in allowed]
+            bad = [v for v in value if not isinstance(v, str) or v not in allowed]
             if bad:
-                errors.append(f"{self.qid}: invalid selections {bad}")
+                errors.append(f"{self.qid}: one or more selections are invalid")
+            if any(v in ESCAPE_OPTIONS for v in value) and len(value) > 1:
+                errors.append(f"{self.qid}: an escape answer cannot be combined with other selections")
+        elif self.qtype in ("text", "date"):
+            if not isinstance(value, str):
+                errors.append(f"{self.qid}: expected text")
+            elif self.qtype == "date":
+                try:
+                    date.fromisoformat(value)
+                except ValueError:
+                    errors.append(f"{self.qid}: expected an ISO date (YYYY-MM-DD)")
         elif self.qtype == "number":
+            if isinstance(value, bool):
+                return [f"{self.qid}: expected a finite number"]
             try:
-                float(value)
-            except (TypeError, ValueError):
-                errors.append(f"{self.qid}: expected a number")
+                numeric = float(value)
+                if not math.isfinite(numeric):
+                    errors.append(f"{self.qid}: expected a finite number")
+            except (TypeError, ValueError, OverflowError):
+                errors.append(f"{self.qid}: expected a finite number")
         return errors
 
 
@@ -94,7 +116,12 @@ class QuestionBank:
         return None
 
     def validate_answers(self, answers: dict[str, Any]) -> list[str]:
+        if not isinstance(answers, dict):
+            return ["answers: expected an object keyed by question id"]
         errors: list[str] = []
+        known = {q.qid for q in self.questions}
+        for qid in sorted(set(answers) - known):
+            errors.append(f"{qid}: unknown question id")
         visible = {q.qid for q in self.visible_questions(answers)}
         for q in self.questions:
             if q.qid in visible:
@@ -125,12 +152,16 @@ class QuestionBank:
                 item["answerOption"] = [
                     {"valueString": o} for o in q.options
                 ] + ([{"valueString": e} for e in ESCAPE_OPTIONS] if q.allow_escape else [])
+            if q.qtype == "multi_choice":
+                item["repeats"] = True
             if q.show_if:
-                item["enableWhen"] = [{
-                    "question": q.show_if["qid"],
-                    "operator": "=",
-                    "answerString": str(q.show_if.get("equals", q.show_if.get("in", [""])[0] if q.show_if.get("in") else "")),
-                }]
+                values = [q.show_if["equals"]] if "equals" in q.show_if else list(q.show_if.get("in", []))
+                item["enableWhen"] = [
+                    {"question": q.show_if["qid"], "operator": "=", "answerString": str(value)}
+                    for value in values
+                ]
+                if len(values) > 1:
+                    item["enableBehavior"] = "any"
             if q.fhir_code:
                 item["code"] = [{"code": q.fhir_code}]
             items.append(item)
@@ -150,7 +181,7 @@ def _fhir_type(qtype: str) -> str:
         "text": "string",
         "choice": "choice",
         "multi_choice": "choice",
-        "yes_no": "boolean",
+        "yes_no": "choice",
         "number": "decimal",
         "date": "date",
     }.get(qtype, "string")
