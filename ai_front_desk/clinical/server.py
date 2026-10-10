@@ -36,8 +36,8 @@ BASE = Path(__file__).resolve().parent
 BANK = load_bank(BASE / "dental_intake_v1.json")
 DB_PATH = Path(os.environ.get("CLINICAL_DB", str(Path.home() / ".mia-clinical-demo" / "clinical-demo.sqlite3")))
 MAX_REQUEST_BODY = 64 * 1024
-DEMO_PATIENT_LABEL_RE = re.compile(r"(?:Demo|Test|Sample) [A-Za-z0-9][A-Za-z0-9 _-]{0,44}\\Z", re.IGNORECASE)
-SUBMISSION_ID_RE = re.compile(r"sub_[a-f0-9]{12}\\Z")
+DEMO_PATIENT_LABEL_RE = re.compile(r"(?:Demo|Test|Sample) [A-Za-z0-9][A-Za-z0-9 _-]{0,44}\Z", re.IGNORECASE)
+SUBMISSION_ID_RE = re.compile(r"sub_[a-f0-9]{12}\Z")
 
 DEMO_CLINICS = [
     ("demo-smile-arts", "Smile Arts Dental (demo)"),
