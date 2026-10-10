@@ -351,8 +351,7 @@
       if (textarea) {
         textarea.required = active;
         textarea.disabled = !active;
-        const star = $(".conditional-star", wrapper);
-        if (star) star.style.display = active ? "inline" : "none";
+        wrapper.classList.toggle("is-active", active);
         if (!active) textarea.value = "";
       }
     });
@@ -421,13 +420,13 @@
   function initImages() {
     $("img").forEach(img => {
       img.addEventListener("error", () => {
-        img.style.display = "none";
+        img.classList.add("is-hidden");
         if (img.classList.contains("mia-hero-image")) {
           const fallback = $("#mia-hero-fallback");
-          if (fallback) fallback.style.display = "grid";
+          if (fallback) fallback.classList.add("is-visible");
         }
         const avatarFallback = img.parentElement ? $(".avatar-fallback", img.parentElement) : null;
-        if (avatarFallback) avatarFallback.style.display = "grid";
+        if (avatarFallback) avatarFallback.classList.add("is-visible");
       });
     });
   }
