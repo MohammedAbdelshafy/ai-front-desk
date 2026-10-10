@@ -152,6 +152,33 @@ def test_cross_tenant_record_denied_over_http(live_server):
         assert e.code == 403
 
 
+def test_fhir_questionnaire_endpoint(live_server):
+    code, body = _get(live_server, "/api/fhir/questionnaire")
+    assert code == 200
+    questionnaire = json.loads(body)
+    assert questionnaire["resourceType"] == "Questionnaire"
+    assert questionnaire["status"] == "draft"
+    taking = next(item for item in questionnaire["item"] if item["linkId"] == "med.taking_any")
+    assert taking["type"] == "choice"
+
+
+def test_fhir_response_endpoint_preserves_patient_choices(live_server):
+    code, resp = _post_json(
+        live_server, "/api/intake",
+        {"clinic_id": "demo-smile-arts", "answers": _answers()},
+    )
+    assert code == 201 and resp["ok"]
+    sid = resp["submission_id"]
+    code, body = _get(
+        live_server, f"/api/fhir/questionnaire-response?clinic=demo-smile-arts&sub={sid}"
+    )
+    assert code == 200
+    response = json.loads(body)
+    assert response["resourceType"] == "QuestionnaireResponse"
+    item = next(item for item in response["item"] if item["linkId"] == "med.taking_any")
+    assert item["answer"] == [{"valueString": "No"}]
+
+
 def test_mia_manifest_endpoint(live_server):
     code, body = _get(live_server, "/api/manifest")
     assert code == 200
