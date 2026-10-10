@@ -93,8 +93,20 @@ def mark_cancelled() -> dict:
 def status(now: float | None = None) -> dict:
     """Full state machine. Pure function of the state file + clock."""
     now = time.time() if now is None else now
-    payload = _read()
-    base = {"price_usd": SUBSCRIPTION_PRICE_USD}
+    return compute_status(_read(), now)
+
+
+def compute_status(
+    payload: dict | None, now: float, price_usd: int = SUBSCRIPTION_PRICE_USD
+) -> dict:
+    """Pure state machine over a payload dict.
+
+    The file-based status() below and the per-account trial state in
+    accounts.py both run through this function, so the semantics are
+    identical everywhere. Payload keys: activated_at, trial_days,
+    subscription_ref, subscribed_at, cancelled_at.
+    """
+    base = {"price_usd": price_usd}
 
     if payload and payload.get("cancelled_at") and not payload.get("subscription_ref"):
         # Cancelled without an active subscription -> locked like expired.

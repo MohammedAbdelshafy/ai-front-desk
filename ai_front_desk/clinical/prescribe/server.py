@@ -19,21 +19,22 @@ import re
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, quote
 
 from ..mia_shell import CharacterManifest
 from . import REFERENCE_DISCLAIMER, REFERENCE_VERSION
+from .accounts import (
+    AccountStore,
+    DEMO_ACCOUNT_ID,
+    DEMO_SESSION_TTL_SECONDS,
+    SESSION_TTL_SECONDS,
+    verify_password,
+)
 from .billing import provider as billing_provider, TEST_MODE
 from .checker import check_prescription
 from .reference_data import DRUGS, REFERENCE_DATE, SOURCES, GENERAL_SOURCES
 from .store import PrescribeStore, TenantMismatchError
-from .trial import (
-    SUBSCRIPTION_PRICE_USD,
-    activate as trial_activate,
-    mark_subscribed,
-    paid_features_unlocked,
-    status as trial_status,
-)
+from .trial import SUBSCRIPTION_PRICE_USD
 
 BASE = Path(__file__).resolve().parent
 DB_PATH = Path(
@@ -44,9 +45,8 @@ DB_PATH = Path(
 )
 PORT = int(os.environ.get("PRESCRIBE_PORT", "8767"))
 MAX_BODY = 64 * 1024
+SESSION_COOKIE = "mia_session"
 
-DEMO_CLINIC_ID = "demo-smile-arts"
-DEMO_CLINIC_NAME = "Smile Arts Dental (demo)"
 DEMO_LABEL_RE = re.compile(r"(?:Demo|Test|Sample) [A-Za-z0-9][A-Za-z0-9 _-]{0,44}\Z", re.IGNORECASE)
 ID_RE = re.compile(r"(pat|chk)_[a-f0-9]{12}\Z")
 
@@ -160,6 +160,10 @@ a:hover{color:var(--brand)}
 .pill{margin-left:auto;font-size:13px;font-weight:600;padding:5px 14px;border-radius:999px;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #bfe0e5;white-space:nowrap}
 .pill.warn{background:var(--yellow-bg);color:var(--yellow-ink);border-color:var(--yellow-line)}
 .pill.bad{background:var(--red-bg);color:var(--red-ink);border-color:var(--red-line)}
+.acct-chip{display:inline-flex;align-items:center;gap:8px;margin-left:auto;font-size:13.5px;font-weight:600;color:var(--ink);background:#f4f8fb;border:1px solid var(--line);border-radius:999px;padding:4px 8px 4px 12px;white-space:nowrap}
+.acct-chip svg{width:17px;height:17px;color:var(--brand-deep)}
+.acct-chip a{font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px;text-decoration:none}
+.acct-chip + .pill{margin-left:0}
 /* Layout + nav */
 .layout{display:flex;gap:0;align-items:stretch;min-height:calc(100vh - 110px)}
 .side{width:238px;background:var(--surface);border-right:1px solid var(--line);padding:14px 10px;flex-shrink:0}
@@ -296,14 +300,30 @@ def mia_card(subtitle: str = "") -> str:
     )
 
 
-def shell(active: str, clinic_name: str, trial: dict, body: str) -> str:
+def shell(active: str, clinic_name: str, trial: dict, body: str, ctx: dict | None = None) -> str:
     state = trial["state"]
-    if state in ("active", "expiring"):
+    if trial.get("is_demo"):
+        pill = "<span class='pill'>Explore demo</span>"
+    elif state in ("active", "expiring"):
         pill = f"<span class='pill{' warn' if state == 'expiring' else ''}'>Trial: {trial['days_remaining']:.1f} days left</span>"
     elif state == "subscribed":
         pill = "<span class='pill'>Subscribed</span>"
     else:
         pill = "<span class='pill bad'>Trial expired</span>"
+    if ctx is None:
+        acct = ""
+    elif ctx.get("is_demo"):
+        acct = (
+            "<span class='acct-chip'>" + ICONS["user"]
+            + "<span>Demo Explorer</span>"
+            + "<a href='/signup'>Save my work — sign up</a></span>"
+        )
+    else:
+        acct = (
+            "<span class='acct-chip'>" + ICONS["user"]
+            + f"<span>{esc(ctx['name'])} · {esc(ctx['clinic_name'])}</span>"
+            + "<a href='/signout'>Sign out</a></span>"
+        )
     mods = []
     for m in MODULES:
         icon = ICONS.get(m["id"], ICONS["lock"])
@@ -325,7 +345,7 @@ def shell(active: str, clinic_name: str, trial: dict, body: str) -> str:
         "<!doctype html><html><head><title>Mia Dental OS</title>" + STYLE + "</head><body>"
         + banner()
         + "<div class='topbar'><div class='wrap'>"
-        f"<div class='brand'>{mia_avatar(34)}Mia Dental OS <small>· {esc(clinic_name)}</small></div>{pill}"
+        f"<div class='brand'>{mia_avatar(34)}Mia Dental OS <small>· {esc(clinic_name)}</small></div>{acct}{pill}"
         "</div></div>"
         f"<div class='layout'><nav class='side' aria-label='Modules'>{''.join(mods)}</nav>"
         f"<div class='main'>{body}</div></div>"
@@ -352,11 +372,13 @@ def landing_page() -> str:
         "<li><b>You decide.</b> The copilot never prescribes, transmits, or fills — it surfaces what you might have missed.</li>"
         "</ol></div>"
         + "<div class='card'><p class='eyebrow'>7-day free trial</p>"
-        "<p>Full copilot access for 7 days, free. After that, "
+        "<p>Full copilot access for 7 days, free — trial starts when you create your account. After that, "
         f"<b>${SUBSCRIPTION_PRICE_USD}/month</b>. No charges without your explicit subscription — "
         "billing is in test mode while we onboard pilot clinics.</p>"
-        "<a class='btn' href='/app/start'>Start the guided demo " + ICONS["arrow"] + "</a> "
-        "<a class='btn ghost' href='/invite'>Dentist sign-up</a></div>"
+        "<a class='btn' href='/demo'>Explore the demo — no sign-up " + ICONS["arrow"] + "</a> "
+        "<a class='btn ghost' href='/signup'>Create account — free trial</a>"
+        "<p class='src' style='margin-top:10px'>Already have an account? <a href='/signin'>Sign in</a> · "
+        "A dentist? <a href='/invite'>Request a pilot invite</a></p></div>"
         + "<div class='card'><p class='eyebrow'>Scope &amp; limitations — read this</p><ul>"
         "<li>Assistive reference aid only. The dentist always decides and prescribes.</li>"
         "<li>Reference dataset " + esc(REFERENCE_VERSION) + ": standard dental prescribing references, each item source-cited. Requires dentist review before clinical use.</li>"
@@ -369,45 +391,164 @@ def landing_page() -> str:
 
 # ---------------------------------------------------------------- pages ---
 
-def trial_page(trial: dict) -> str:
+# ---------------------------------------------------------------- auth ---
+
+def _auth_card(title: str, inner: str, switch: str) -> str:
     return (
-        "<!doctype html><html><head><title>Start your trial — Mia Dental OS</title>"
+        "<!doctype html><html><head><title>" + esc(title) + " — Mia Dental OS</title>"
         + STYLE + "</head><body>" + banner()
-        + "<div class='narrow'>" + mia_card()
-        + "<h1>7-day free trial</h1>"
-        + "<p>The <b>Mia Dental Prescribing Copilot</b> runs free for 7 days from activation. "
-        f"After that it's <b>${trial['price_usd']}/month</b> — no charges without your explicit subscription.</p>"
-        + "<form method='POST' action='/api/trial/activate'>"
-        "<button class='btn' type='submit'>Activate my 7-day trial</button></form>"
-        + "<p class='src'>Server-side clock. Reinstalling can't restart the trial.</p>"
+        + "<div class='narrow' style='max-width:480px'>"
+        + "<div style='text-align:center;margin:26px 0 6px'>" + mia_avatar(64) + "</div>"
+        + "<div class='card'>" + inner + switch + "</div>"
         + "</div></body></html>"
     )
 
 
-def subscribe_page(trial: dict) -> str:
+def _field_errors(errors: list[str]) -> str:
+    if not errors:
+        return ""
+    items = "".join(f"<li>{esc(e)}</li>" for e in errors)
+    return (
+        "<div class='flag red' role='alert' style='margin:0 0 14px'>"
+        f"<b class='sev'>PLEASE CHECK</b><ul style='margin:6px 0 0;padding-left:18px'>{items}</ul></div>"
+    )
+
+
+def signup_page(errors: list[str] | None = None, values: dict | None = None) -> str:
+    v = values or {}
+    inner = (
+        _field_errors(errors or [])
+        + "<p class='eyebrow'>Create your account</p>"
+        + "<h2 style='margin-top:0'>Start your 7-day free trial</h2>"
+        + "<p class='src'>Full Prescribing Copilot access for 7 days from sign-up. "
+        f"Then <b>${SUBSCRIPTION_PRICE_USD}/month</b> — no charges without your explicit subscription.</p>"
+        + "<form method='POST' action='/api/signup' id='signup-form'>"
+        f"<label>Full name<input name='name' required maxlength='80' placeholder='Dr. Jane Rivera' value='{esc(v.get('name', ''))}'></label>"
+        f"<label>Work email<input name='email' type='email' required maxlength='254' placeholder='jane@riveradental.com' value='{esc(v.get('email', ''))}'></label>"
+        f"<label>Clinic name<input name='clinic_name' required maxlength='80' placeholder='Rivera Dental' value='{esc(v.get('clinic_name', ''))}'></label>"
+        "<label>Password <span class='hint'>(10+ characters — a phrase works great)</span>"
+        "<input name='password' type='password' required minlength='10' autocomplete='new-password' id='pw'></label>"
+        "<div class='src' id='pw-hint' aria-live='polite' style='margin:-8px 0 12px'></div>"
+        "<label>Confirm password<input name='confirm' type='password' required autocomplete='new-password'></label>"
+        "<button class='btn' type='submit' style='width:100%;justify-content:center'>Create account &amp; start trial</button>"
+        "</form>"
+        + _pw_strength_js()
+    )
+    switch = (
+        "<p class='src' style='text-align:center'>Already have an account? "
+        "<a href='/signin'>Sign in</a></p>"
+    )
+    return _auth_card("Sign up", inner, switch)
+
+
+def _pw_strength_js() -> str:
+    return """<script>
+(function(){
+  var pw=document.getElementById('pw'), hint=document.getElementById('pw-hint');
+  if(!pw||!hint) return;
+  pw.addEventListener('input', function(){
+    var v=pw.value, score=0;
+    if(v.length>=10) score++;
+    if(v.length>=14) score++;
+    if(/[A-Z]/.test(v)&&/[a-z]/.test(v)) score++;
+    if(/[0-9]/.test(v)||/[^A-Za-z0-9]/.test(v)) score++;
+    var label=['Too short','Weak','Okay','Good','Strong'][score];
+    var color=['#b42318','#b42318','#7c5200','#0d7d8c','#166534'][score];
+    hint.innerHTML='Strength: <b style="color:'+color+'">'+label+'</b>';
+  });
+})();
+</script>"""
+
+
+def signin_page(errors: list[str] | None = None, email: str = "", next_url: str = "") -> str:
+    inner = (
+        _field_errors(errors or [])
+        + "<p class='eyebrow'>Welcome back</p>"
+        + "<h2 style='margin-top:0'>Sign in</h2>"
+        + "<form method='POST' action='/api/signin'>"
+        f"<label>Email<input name='email' type='email' required placeholder='jane@riveradental.com' value='{esc(email)}'></label>"
+        "<label>Password<input name='password' type='password' required autocomplete='current-password'></label>"
+        + (f"<input type='hidden' name='next' value='{esc(next_url)}'>" if next_url else "")
+        + "<button class='btn' type='submit' style='width:100%;justify-content:center'>Sign in</button>"
+        "</form>"
+    )
+    switch = (
+        "<p class='src' style='text-align:center'>New here? "
+        "<a href='/signup'>Create an account — 7-day free trial</a></p>"
+    )
+    return _auth_card("Sign in", inner, switch)
+
+
+def welcome_page(ctx: dict) -> str:
+    trial = ctx["trial"]
+    days = trial["days_remaining"]
+    body = (
+        mia_card(f"Welcome, {ctx['name']} — your 7-day free trial is active.")
+        + "<div class='card'><p class='eyebrow'>You're in</p>"
+        f"<p>Your trial runs until <b>{esc(_trial_end_str(ctx))}</b> "
+        f"({days:.1f} days left). Full Prescribing Copilot access — nothing is charged without your say-so.</p>"
+        "<p><b>First, see Mia work — 60 seconds:</b></p><ol class='howto'>"
+        "<li><b>Load a sample patient</b> — synthetic record with a penicillin allergy and warfarin on board."
+        "<form method='POST' action='/api/sample-patient' style='margin-top:8px'>"
+        "<button class='btn ghost' type='submit'>Load sample patient</button></form></li>"
+        "<li><b>Start a guided check</b> — Mia walks through indication → factors → allergies → meds → conditions → your choice."
+        "<p style='margin-top:8px'><a class='btn ghost' href='/app/wizard/start'>Start guided check</a></p></li>"
+        "</ol>"
+        "<p><a class='btn' href='/app/patients'>Open the copilot " + ICONS["arrow"] + "</a></p></div>"
+    )
+    return shell("copilot", ctx["clinic_name"], trial, body, ctx)
+
+
+def _trial_end_str(ctx: dict) -> str:
+    import datetime
+    acct = get_accounts().get_account(ctx["account_id"])
+    if not acct:
+        return "—"
+    end = acct["trial_activated_at"] + (acct["trial_days"] or 7) * 86400
+    return datetime.datetime.fromtimestamp(end).strftime("%Y-%m-%d")
+
+
+def subscribe_page(trial: dict, ctx: dict | None = None) -> str:
     state = trial["state"]
-    headline = "Your trial has expired" if state == "expired" else "Subscription cancelled"
+    if state == "subscribed":
+        headline = "You're subscribed"
+        sub = (
+            "<p>The copilot module is unlocked. Cancel anytime — your records stay preserved.</p>"
+            "<form method='POST' action='/api/billing/cancel'>"
+            "<button class='btn ghost' type='submit'>Cancel subscription (test mode)</button></form>"
+        )
+    else:
+        headline = "Your trial has expired" if state == "expired" else "Subscription cancelled"
+        sub = (
+            "<p>The copilot module is now locked. <b>Your patient records and check history are preserved</b> — "
+            "nothing was deleted and nothing was charged.</p>"
+        )
     return (
         "<!doctype html><html><head><title>Subscribe — Mia Dental OS</title>"
         + STYLE + "</head><body>" + banner()
         + "<div class='narrow'>" + mia_card()
         + f"<h1>{headline}</h1>"
-        + "<p>The copilot module is now locked. <b>Your patient records and check history are preserved</b> — "
-        "nothing was deleted and nothing was charged.</p>"
+        + sub
         + "<div class='card'><h3>Mia Dental OS — Prescribing Copilot</h3>"
         f"<p><b>${trial['price_usd']}/month</b>, cancel anytime.</p>"
         "<p class='src'>Billing is in TEST MODE — no real charges, no provider keys. "
         "The founder wires the live provider before any real dentist is billed.</p>"
-        + "<form method='POST' action='/api/billing/checkout'>"
-        "<button class='btn' type='submit'>Continue (test checkout)</button></form></div>"
+        + ("" if state == "subscribed" else
+           "<form method='POST' action='/api/billing/checkout'>"
+           "<button class='btn' type='submit'>Continue (test checkout)</button></form>")
+        + "</div>"
+        + ("<p><a href='/app/start'>← Back to the app</a></p>" if ctx else "")
         + "</div></body></html>"
     )
 
 
-def patients_page(store, clinic_id, clinic_name, trial) -> str:
+def patients_page(store, ctx: dict) -> str:
+    trial = ctx["trial"]
+    clinic_id = ctx["clinic_id"]
+    px = ctx["prefix"]
     patients = store.list_patients(clinic_id)
     rows = "".join(
-        f"<tr><td><a href='/app/patient?clinic={clinic_id}&id={p['patient_id']}'>{esc(p['label'])}</a></td>"
+        f"<tr><td><a href='{px}/patient?id={p['patient_id']}'>{esc(p['label'])}</a></td>"
         f"<td>{len(p['allergies'])}</td><td>{len(p['current_meds'])}</td></tr>"
         for p in patients
     ) or "<tr><td colspan=3 style='color:var(--mut)'>No patients yet — add one below, or run the guided demo.</td></tr>"
@@ -416,7 +557,7 @@ def patients_page(store, clinic_id, clinic_name, trial) -> str:
         + "<div class='card'><p class='eyebrow'>Patients</p>"
         f"<table><tr><th>Patient</th><th>Allergies</th><th>Meds</th></tr>{rows}</table></div>"
         + "<div class='card'><h3>Add patient (synthetic demo data)</h3>"
-        f"<form method='POST' action='/api/patient?clinic={clinic_id}'>"
+        f"<form method='POST' action='/api/patient'>"
         "<label>Label (must start with Demo/Test/Sample)<input name='label' value='Demo Patient ' required></label>"
         "<label>Allergies — one per line: substance | reaction<input name='allergies' placeholder='penicillin | rash'></label>"
         "<label><input type='checkbox' name='no_known_allergies' value='1' style='width:auto'> No known allergies (explicit)</label>"
@@ -425,10 +566,13 @@ def patients_page(store, clinic_id, clinic_name, trial) -> str:
         "<label>Reports alcohol use <input type='checkbox' name='alcohol_use' value='1' style='width:auto'></label>"
         "<button class='btn' type='submit'>Add patient</button></form></div>"
     )
-    return shell("copilot", clinic_name, trial, body)
+    return shell("copilot", ctx["clinic_name"], trial, body, ctx)
 
 
-def patient_detail_page(store, clinic_id, clinic_name, trial, patient_id) -> str:
+def patient_detail_page(store, ctx: dict, patient_id: str) -> str:
+    trial = ctx["trial"]
+    clinic_id = ctx["clinic_id"]
+    px = ctx["prefix"]
     p = store.get_patient(clinic_id, patient_id)
     allergies = "".join(
         f"<li><b>{esc(a.get('substance',''))}</b> — {esc(a.get('reaction',''))} "
@@ -444,7 +588,7 @@ def patient_detail_page(store, clinic_id, clinic_name, trial, patient_id) -> str
     ) or "<li style='color:var(--mut)'>None recorded.</li>"
     history = store.check_history(clinic_id, patient_id)
     hrows = "".join(
-        f"<tr><td><a href='/app/check?clinic={clinic_id}&id={h['check_id']}'>{h['verdict']}</a></td>"
+        f"<tr><td><a href='{px}/check?id={h['check_id']}'>{h['verdict']}</a></td>"
         f"<td>{esc(h['intended'].get('drug_name',''))}</td>"
         f"<td>{esc(h['review_state'].replace('_',' '))}</td>"
         f"<td class='src'>{time.strftime('%Y-%m-%d %H:%M', time.localtime(h['created_at']))}</td></tr>"
@@ -457,10 +601,10 @@ def patient_detail_page(store, clinic_id, clinic_name, trial, patient_id) -> str
         f"<h4>Allergies</h4><ul>{allergies}</ul>"
         f"<h4>Conditions</h4><ul>{conds}</ul>"
         f"<h4>Current medications</h4><ul>{meds}</ul></div>"
-        + f"<p><a class='btn' href='/app/wizard/start?patient={patient_id}'>Start guided check {ICONS['arrow']}</a> "
+        + f"<p><a class='btn' href='{px}/wizard/start?patient={patient_id}'>Start guided check {ICONS['arrow']}</a> "
         "<span class='src'>Walks through indication → factors → allergies → meds → conditions → your choice.</span></p>"
         + f"<div class='card'><p class='eyebrow'>Quick safety check <span class='hint'>(skip wizard)</span></p>"
-        f"<form method='POST' action='/api/check?clinic={clinic_id}'>"
+        f"<form method='POST' action='/api/check'>"
         f"<input type='hidden' name='patient_id' value='{patient_id}'>"
         f"<label>Drug<input name='drug_name' list='drugs' required placeholder='ibuprofen'></label>"
         f"<datalist id='drugs'>{drug_opts}</datalist>"
@@ -473,10 +617,13 @@ def patient_detail_page(store, clinic_id, clinic_name, trial, patient_id) -> str
         f"<p class='src'>{esc(REFERENCE_DISCLAIMER)}</p></div>"
         + f"<div class='card'><h3>Check history</h3><table><tr><th>Verdict</th><th>Drug</th><th>Review</th><th>When</th></tr>{hrows}</table></div>"
     )
-    return shell("copilot", clinic_name, trial, body)
+    return shell("copilot", ctx["clinic_name"], trial, body, ctx)
 
 
-def check_result_page(store, clinic_id, clinic_name, trial, check_id) -> str:
+def check_result_page(store, ctx: dict, check_id: str) -> str:
+    trial = ctx["trial"]
+    clinic_id = ctx["clinic_id"]
+    px = ctx["prefix"]
     c = store.get_check(clinic_id, check_id)
     vcls = {"GREEN": "v-green", "YELLOW": "v-yellow", "RED": "v-red"}.get(c["verdict"], "v-gray")
     vicon = {"GREEN": ICONS["check"], "YELLOW": ICONS["alert"],
@@ -502,7 +649,7 @@ def check_result_page(store, clinic_id, clinic_name, trial, check_id) -> str:
         f"<p>State: <b>{esc(c['review_state'].replace('_', ' '))}</b>"
         + (f" — by {esc(c['reviewed_by'])}" if c["reviewed_by"] else "")
         + (f"<br><span class='src'>{esc(c['review_note'])}</span>" if c["review_note"] else "")
-        + "</p><form method='POST' action='/api/review?clinic=" + clinic_id + "'>"
+        + "</p><form method='POST' action='/api/review'>"
         f"<input type='hidden' name='check_id' value='{check_id}'>"
         "<label>Your conclusion (recorded with timestamp + audit)<textarea name='note' rows='2' placeholder='Reviewed — proceeding with alternative…'></textarea></label>"
         "<label>Mark as<select name='state'>"
@@ -524,12 +671,13 @@ def check_result_page(store, clinic_id, clinic_name, trial, check_id) -> str:
         + (flags or "<p>No flags.</p>")
         + f"<p class='src'>{esc(REFERENCE_DISCLAIMER)}</p></div>"
         + review
-        + f"<p><a href='/app/patient?clinic={clinic_id}&id={c['patient_id']}'>← Back to patient card</a></p>"
+        + f"<p><a href='{px}/patient?id={c['patient_id']}'>← Back to patient card</a></p>"
     )
-    return shell("copilot", clinic_name, trial, body)
+    return shell("copilot", ctx["clinic_name"], trial, body, ctx)
 
 
-def reference_page(clinic_id, clinic_name, trial) -> str:
+def reference_page(ctx: dict) -> str:
+    trial = ctx["trial"]
     cats: dict[str, list] = {}
     for key, d in DRUGS.items():
         cats.setdefault(d["category"], []).append((key, d))
@@ -564,10 +712,11 @@ def reference_page(clinic_id, clinic_name, trial) -> str:
         f"<br><span class='src'><b>Guidance sources:</b>{gen}</span></p></div>"
         + sections
     )
-    return shell("copilot", clinic_name, trial, body)
+    return shell("copilot", ctx["clinic_name"], trial, body, ctx)
 
 
-def upgrades_page(clinic_id, clinic_name, trial) -> str:
+def upgrades_page(ctx: dict) -> str:
+    trial = ctx["trial"]
     tiers = "".join(
         f"<div class='card tier'><h3>{ICONS['lock']} {esc(t['name'])}</h3><p>{esc(t['blurb'])}</p>"
         "<p class='src'>Available in the full Mia Dental OS — ask about the pilot.</p>"
@@ -584,7 +733,7 @@ def upgrades_page(clinic_id, clinic_name, trial) -> str:
         f"<li>{esc('Command Center')} — locked teaser</li></ul>"
         "<p class='src'>These modules are not built yet. The copilot is the working product today.</p></div>"
     )
-    return shell("", clinic_name, trial, body)
+    return shell("", ctx["clinic_name"], trial, body, ctx)
 
 
 def invite_page() -> str:
@@ -604,26 +753,39 @@ def invite_page() -> str:
     )
 
 
-def start_page(store, clinic_id, clinic_name, trial) -> str:
+def start_page(store, ctx: dict) -> str:
+    trial = ctx["trial"]
+    if ctx.get("is_demo"):
+        first = (
+            "<li><b>You're exploring the demo</b> — synthetic data, nothing is saved to a real account. "
+            "<span class='pill' style='margin:0'>Demo mode</span><br>"
+            "<span class='src'>Like what you see? <a href='/signup'>Create an account</a> to keep your work.</span></li>"
+        )
+    else:
+        first = (
+            "<li><b>Trial active</b> <span class='pill' style='margin:0'>"
+            f"{trial['days_remaining']:.1f} days left</span></li>"
+        )
     body = (
-        mia_card("60 seconds to get it. Three steps — trial, sample patient, sample check.")
+        mia_card("60 seconds to get it. Three steps — sample patient, sample check, your own checks.")
         + "<div class='card'><p class='eyebrow'>Guided first run</p><ol class='howto'>"
-        "<li><b>Trial active</b> <span class='pill' style='margin:0'>You're inside the 7-day free trial</span></li>"
-        "<li><b>Load a sample patient</b> — synthetic record with a penicillin allergy and warfarin on board."
-        f"<form method='POST' action='/api/sample-patient?clinic={clinic_id}' style='margin-top:8px'>"
+        + first
+        + "<li><b>Load a sample patient</b> — synthetic record with a penicillin allergy and warfarin on board."
+        f"<form method='POST' action='/api/sample-patient' style='margin-top:8px'>"
         "<button class='btn ghost' type='submit'>Load sample patient</button></form></li>"
         "<li><b>Run the sample check</b> — ibuprofen 400 mg three times daily. Watch Mia flag it."
-        f"<form method='POST' action='/api/sample-check?clinic={clinic_id}' style='margin-top:8px'>"
+        f"<form method='POST' action='/api/sample-check' style='margin-top:8px'>"
         "<button class='btn ghost' type='submit'>Run sample check</button></form></li>"
         "</ol>"
-        f"<p><a class='btn' href='/app/patients?clinic={clinic_id}'>Or explore patients →</a></p></div>"
+        f"<p><a class='btn' href='{ctx['prefix']}/patients'>Or explore patients →</a></p></div>"
     )
-    return shell("copilot", clinic_name, trial, body)
+    return shell("copilot", ctx["clinic_name"], trial, body, ctx)
 
 
 # ------------------------------------------------------------- handler ---
 
 STORE: PrescribeStore | None = None
+ACCOUNTS: AccountStore | None = None
 
 
 def get_store() -> PrescribeStore:
@@ -633,8 +795,11 @@ def get_store() -> PrescribeStore:
     return STORE
 
 
-def _clinic_name() -> str:
-    return DEMO_CLINIC_NAME
+def get_accounts() -> AccountStore:
+    global ACCOUNTS
+    if ACCOUNTS is None:
+        ACCOUNTS = AccountStore(DB_PATH)
+    return ACCOUNTS
 
 
 def _send(handler, code: int, body: str, content_type="text/html; charset=utf-8"):
@@ -646,26 +811,128 @@ def _send(handler, code: int, body: str, content_type="text/html; charset=utf-8"
     handler.wfile.write(data)
 
 
+def _json(handler, code: int, obj: dict):
+    data = json.dumps(obj).encode("utf-8")
+    handler.send_response(code)
+    handler.send_header("Content-Type", "application/json; charset=utf-8")
+    handler.send_header("Content-Length", str(len(data)))
+    handler.end_headers()
+    handler.wfile.write(data)
+
+
 def _redirect(handler, location: str):
     handler.send_response(303)
     handler.send_header("Location", location)
     handler.end_headers()
 
 
+def _set_session_cookie(handler, token: str, max_age: int = SESSION_TTL_SECONDS):
+    handler.send_response(303)
+    handler.send_header(
+        "Set-Cookie",
+        f"{SESSION_COOKIE}={token}; HttpOnly; SameSite=Lax; Path=/; Max-Age={max_age}",
+    )
+
+
+def _redirect_with_cookie(handler, location: str, token: str,
+                          max_age: int = SESSION_TTL_SECONDS):
+    _set_session_cookie(handler, token, max_age)
+    handler.send_header("Location", location)
+    handler.end_headers()
+
+
+def _clear_session_cookie(handler, location: str = "/"):
+    handler.send_response(303)
+    handler.send_header(
+        "Set-Cookie", f"{SESSION_COOKIE}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0"
+    )
+    handler.send_header("Location", location)
+    handler.end_headers()
+
+
+def _cookie_token(handler) -> str | None:
+    raw = handler.headers.get("Cookie") or ""
+    for part in raw.split(";"):
+        name, _, value = part.strip().partition("=")
+        if name.strip() == SESSION_COOKIE and value.strip():
+            return value.strip()
+    return None
+
+
+def _auth_ctx(handler) -> dict | None:
+    """Auth context from the session cookie, or None. Sliding refresh inside."""
+    token = _cookie_token(handler)
+    if not token:
+        return None
+    ctx = get_accounts().session_ctx(token)
+    if ctx is None:
+        return None
+    ctx["prefix"] = "/demo" if ctx["is_demo"] else "/app"
+    return ctx
+
+
+def _safe_next(value: str) -> str:
+    v = (value or "").strip()
+    if v.startswith("/") and not v.startswith("//"):
+        return v
+    return ""
+
+
+def _require_page(handler, path: str, *, allow_demo: bool = True) -> dict | None:
+    """Gate for /app/* and /demo/* pages. Redirects to signin/demo on failure."""
+    ctx = _auth_ctx(handler)
+    if ctx is None:
+        if path.startswith("/demo/"):
+            _redirect(handler, "/demo")
+        else:
+            _redirect(handler, "/signin?next=" + quote(path, safe=""))
+        return None
+    if not allow_demo and ctx["is_demo"]:
+        _redirect(handler, "/demo/start")
+        return None
+    if not ctx["unlocked"]:
+        _redirect(handler, "/subscribe")
+        return None
+    handler._ctx = ctx  # for the audit trail in the except block
+    return ctx
+
+
+def _require_api(handler) -> dict | None:
+    """Gate for /api/* app routes. JSON errors, never redirects."""
+    ctx = _auth_ctx(handler)
+    if ctx is None:
+        _json(handler, 401, {"code": "unauthorized",
+                             "message": "Sign in required."})
+        return None
+    if not ctx["unlocked"]:
+        _json(handler, 402, {"code": "subscription_required",
+                             "message": "Trial expired — subscribe to continue."})
+        return None
+    handler._ctx = ctx
+    return ctx
+
+
+def _demo_enter(handler):
+    """Start an explore-demo session (no sign-up): clearly labeled synthetic demo."""
+    accounts = get_accounts()
+    accounts.ensure_demo_account()
+    token = accounts.create_session(DEMO_ACCOUNT_ID, DEMO_SESSION_TTL_SECONDS)
+    _redirect_with_cookie(handler, "/demo/start", token, DEMO_SESSION_TTL_SECONDS)
+
+
+def _audit_denied(handler, target: str, detail: str):
+    ctx = getattr(handler, "_ctx", None)
+    clinic = ctx["clinic_id"] if ctx else "unknown"
+    actor = ctx["email"] if ctx else "anonymous"
+    try:
+        get_store()._audit(clinic, actor, "access_denied", target, detail)
+        get_store()._db.commit()
+    except Exception:
+        pass
+
+
 def _valid_id(value: str) -> bool:
     return bool(ID_RE.match(value or ""))
-
-
-def _gate(handler, path: str) -> dict | None:
-    """Trial gate for /app/* routes. Returns trial dict or sends redirect."""
-    t = trial_status()
-    if paid_features_unlocked():
-        return t
-    if t["state"] in ("eligible",):
-        _redirect(handler, "/trial")
-    else:
-        _redirect(handler, "/subscribe")
-    return None
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -678,126 +945,203 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         url = urlparse(self.path)
         q = parse_qs(url.query)
-        clinic = DEMO_CLINIC_ID
+        path = url.path
         try:
-            if url.path == "/":
+            # ---- public pages ----
+            if path == "/":
                 _send(self, 200, landing_page())
-            elif url.path == "/trial":
-                _send(self, 200, trial_page(trial_status()))
-            elif url.path == "/subscribe":
-                _send(self, 200, subscribe_page(trial_status()))
-            elif url.path == "/invite":
+                return
+            if path == "/signup":
+                if _auth_ctx(self) is not None:
+                    _redirect(self, "/app/start")
+                    return
+                _send(self, 200, signup_page())
+                return
+            if path == "/signin":
+                if _auth_ctx(self) is not None:
+                    _redirect(self, "/app/start")
+                    return
+                _send(self, 200, signin_page(next_url=_safe_next(q.get("next", [""])[0])))
+                return
+            if path == "/signout":
+                get_accounts().destroy_session(_cookie_token(self))
+                _clear_session_cookie(self, "/")
+                return
+            if path == "/invite":
                 _send(self, 200, invite_page())
-            elif url.path == "/app/start":
-                t = _gate(self, url.path)
-                if t is None:
+                return
+            if path == "/welcome":
+                ctx = _require_page(self, path, allow_demo=False)
+                if ctx is None:
                     return
-                _send(self, 200, start_page(get_store(), clinic, _clinic_name(), t))
-            elif url.path == "/app/patients":
-                t = _gate(self, url.path)
-                if t is None:
+                _send(self, 200, welcome_page(ctx))
+                return
+            if path == "/subscribe":
+                ctx = _auth_ctx(self)
+                if ctx is None:
+                    _redirect(self, "/signin?next=" + quote(path, safe=""))
                     return
-                _send(self, 200, patients_page(get_store(), clinic, _clinic_name(), t))
-            elif url.path == "/app/patient":
-                t = _gate(self, url.path)
-                if t is None:
-                    return
-                pid = q.get("id", [""])[0]
+                _send(self, 200, subscribe_page(ctx["trial"], ctx))
+                return
+            # ---- explore demo (no sign-up; synthetic data, separate namespace) ----
+            if path == "/demo":
+                _demo_enter(self)
+                return
+            if path == "/demo/" or path.startswith("/demo/"):
+                self._app_get("/app" + path[len("/demo"):], q)
+                return
+            # ---- authenticated app ----
+            if path == "/app/" or path.startswith("/app/"):
+                self._app_get(path, q)
+                return
+            _send(self, 404, "not found")
+        except (KeyError, TenantMismatchError) as e:
+            if isinstance(e, TenantMismatchError):
+                _audit_denied(self, self.path, str(e))
+                _send(self, 403, esc(str(e)))
+            else:
+                _send(self, 404, esc(str(e)))
+
+    def _app_get(self, app_path: str, q: dict):
+        """Route table shared by /app/* (accounts) and /demo/* (demo ctx)."""
+        ctx = _require_page(self, app_path)
+        if ctx is None:
+            return
+        store = get_store()
+        clinic = ctx["clinic_id"]
+        if app_path == "/app/start":
+            _send(self, 200, start_page(store, ctx))
+        elif app_path == "/app/patients":
+            _send(self, 200, patients_page(store, ctx))
+        elif app_path == "/app/patient":
+            pid = q.get("id", [""])[0]
+            if not _valid_id(pid):
+                _send(self, 400, "bad patient id")
+                return
+            _send(self, 200, patient_detail_page(store, ctx, pid))
+        elif app_path == "/app/check":
+            cid = q.get("id", [""])[0]
+            if not _valid_id(cid):
+                _send(self, 400, "bad check id")
+                return
+            _send(self, 200, check_result_page(store, ctx, cid))
+        elif app_path == "/app/reference":
+            _send(self, 200, reference_page(ctx))
+        elif app_path == "/app/upgrades":
+            _send(self, 200, upgrades_page(ctx))
+        elif app_path == "/app/wizard/start":
+            pid = q.get("patient", [""])[0]
+            patient = None
+            if pid:
                 if not _valid_id(pid):
                     _send(self, 400, "bad patient id")
                     return
-                _send(self, 200, patient_detail_page(get_store(), clinic, _clinic_name(), t, pid))
-            elif url.path == "/app/check":
-                t = _gate(self, url.path)
-                if t is None:
-                    return
-                cid = q.get("id", [""])[0]
-                if not _valid_id(cid):
-                    _send(self, 400, "bad check id")
-                    return
-                _send(self, 200, check_result_page(get_store(), clinic, _clinic_name(), t, cid))
-            elif url.path == "/app/reference":
-                t = _gate(self, url.path)
-                if t is None:
-                    return
-                _send(self, 200, reference_page(clinic, _clinic_name(), t))
-            elif url.path == "/app/upgrades":
-                t = _gate(self, url.path)
-                if t is None:
-                    return
-                _send(self, 200, upgrades_page(clinic, _clinic_name(), t))
-            elif url.path == "/app/wizard/start":
-                t = _gate(self, url.path)
-                if t is None:
-                    return
-                pid = q.get("patient", [""])[0]
-                patient = None
-                if pid:
-                    if not _valid_id(pid):
-                        _send(self, 400, "bad patient id")
-                        return
-                    patient = get_store().get_patient(clinic, pid)
-                state = WIZARDS.create(clinic, patient)
-                _redirect(self, f"/app/wizard/{state['token']}/{STEPS[0]}")
-            elif url.path.startswith("/app/wizard/"):
-                t = _gate(self, url.path)
-                if t is None:
-                    return
-                m = re.match(r"/app/wizard/(wz_[a-f0-9]{12})/([a-z]+)\Z", url.path)
-                if not m:
-                    _send(self, 404, "not found")
-                    return
-                state = _wizard_or_404(m.group(1))
-                if state is None:
-                    _send(self, 404, "wizard session expired")
-                    return
-                step = m.group(2)
-                if step == "summary":
-                    _send(self, 200, wizard_summary_page(state, _clinic_name(), t))
-                elif step == "choose":
-                    _send(self, 200, wizard_choose_page(state, _clinic_name(), t))
-                elif step in STEPS:
-                    _send(self, 200, wizard_step_page(state, step, _clinic_name(), t))
-                else:
-                    _send(self, 404, "not found")
+                patient = store.get_patient(clinic, pid)
+            state = WIZARDS.create(clinic, patient)
+            _redirect(self, f"{ctx['prefix']}/wizard/{state['token']}/{STEPS[0]}")
+        elif app_path.startswith("/app/wizard/"):
+            m = re.match(r"/app/wizard/(wz_[a-f0-9]{12})/([a-z]+)\Z", app_path)
+            if not m:
+                _send(self, 404, "not found")
+                return
+            state = _wizard_or_404(m.group(1))
+            if state is None:
+                _send(self, 404, "wizard session expired")
+                return
+            if state.get("clinic_id") != clinic:
+                _audit_denied(self, m.group(1), "cross-account wizard access denied")
+                _send(self, 403, "cross-account wizard access denied")
+                return
+            step = m.group(2)
+            if step == "summary":
+                _send(self, 200, wizard_summary_page(state, ctx))
+            elif step == "choose":
+                _send(self, 200, wizard_choose_page(state, ctx))
+            elif step in STEPS:
+                _send(self, 200, wizard_step_page(state, step, ctx))
             else:
                 _send(self, 404, "not found")
-        except (KeyError, TenantMismatchError) as e:
-            _send(self, 403 if isinstance(e, TenantMismatchError) else 404, esc(str(e)))
+        else:
+            _send(self, 404, "not found")
 
     # -- POST -----------------------------------------------------
     def do_POST(self):
         url = urlparse(self.path)
-        q = parse_qs(url.query)
-        clinic = DEMO_CLINIC_ID
+        path = url.path
         # Read the request body ONCE (a second rfile read would block forever).
         length = int(self.headers.get("Content-Length", 0) or 0)
         _raw = self.rfile.read(min(length, MAX_BODY)).decode("utf-8", errors="replace")
         _parsed = parse_qs(_raw)
         form = {k: v[0] for k, v in _parsed.items()}
         form_multi = dict(_parsed)
-        store = get_store()
         try:
-            if url.path == "/api/trial/activate":
-                trial_activate()
-                _redirect(self, "/app/start")
-            elif url.path == "/api/billing/checkout":
-                if not isinstance(billing_provider, object):
-                    _send(self, 500, "billing unavailable")
+            # ---- public auth endpoints (form posts -> page re-render on error) ----
+            if path == "/api/signup":
+                return self._handle_signup(form)
+            if path == "/api/signin":
+                return self._handle_signin(form)
+            if path == "/api/invite":
+                # Stored locally; the pilot team follows up personally.
+                invites = BASE / "invites.jsonl"
+                with open(invites, "a") as f:
+                    f.write(json.dumps({
+                        "name": form.get("name", ""), "clinic": form.get("clinic", ""),
+                        "email": form.get("email", ""), "at": time.time(),
+                    }) + "\n")
+                _send(self, 200,
+                      "<!doctype html><html><head><title>Thanks</title>" + STYLE +
+                      "</head><body><div class='narrow'><h1>You're on the list.</h1>"
+                      "<p>We'll reach out personally about the pilot. No spam, no drip sequence.</p>"
+                      "<p><a href='/'>← Back</a></p></div></body></html>")
+                return
+            # ---- billing (session required) ----
+            if path == "/api/billing/checkout":
+                ctx = _auth_ctx(self)
+                if ctx is None:
+                    _json(self, 401, {"code": "unauthorized",
+                                      "message": "Sign in required."})
                     return
-                session = billing_provider.create_checkout(clinic, SUBSCRIPTION_PRICE_USD)
+                if ctx["is_demo"]:
+                    _redirect(self, "/signup")
+                    return
+                if not isinstance(billing_provider, object):
+                    _json(self, 500, {"code": "billing_unavailable",
+                                      "message": "billing unavailable"})
+                    return
+                session = billing_provider.create_checkout(ctx["clinic_id"],
+                                                           SUBSCRIPTION_PRICE_USD)
                 # TEST MODE: simulate the dentist completing the test checkout.
                 if TEST_MODE and hasattr(billing_provider, "start_test_subscription"):
-                    ref = billing_provider.start_test_subscription(clinic)
-                    mark_subscribed(ref)
-                _redirect(self, f"/app/start?test_checkout={session.session_id}")
-            elif url.path == "/api/patient":
-                t = _gate(self, url.path)
-                if t is None:
+                    ref = billing_provider.start_test_subscription(ctx["clinic_id"])
+                    get_accounts().mark_subscribed(ctx["account_id"], ref)
+                _redirect(self, "/app/start?test_checkout=" + session.session_id)
+                return
+            if path == "/api/billing/cancel":
+                ctx = _auth_ctx(self)
+                if ctx is None:
+                    _json(self, 401, {"code": "unauthorized",
+                                      "message": "Sign in required."})
                     return
+                if ctx["is_demo"]:
+                    _redirect(self, "/signup")
+                    return
+                get_accounts().mark_cancelled(ctx["account_id"])
+                _redirect(self, "/subscribe")
+                return
+            # ---- app APIs (session required; JSON errors) ----
+            ctx = _require_api(self)
+            if ctx is None:
+                return
+            self._ctx = ctx
+            store = get_store()
+            clinic = ctx["clinic_id"]
+            px = ctx["prefix"]
+            dentist_default = ctx["name"]
+            if path == "/api/patient":
                 label = form.get("label", "").strip()
                 if not DEMO_LABEL_RE.match(label):
-                    _send(self, 400, "patient label must look synthetic (Demo/Test/Sample …)")
+                    _json(self, 400, {"code": "bad_label",
+                                      "message": "patient label must look synthetic (Demo/Test/Sample …)"})
                     return
                 allergies = _parse_lines(form.get("allergies", ""), 2)
                 meds = _parse_lines(form.get("meds", ""), 2)
@@ -811,11 +1155,8 @@ class Handler(BaseHTTPRequestHandler):
                     reports=reports,
                     no_known_allergies=bool(form.get("no_known_allergies")),
                 )
-                _redirect(self, f"/app/patient?clinic={clinic}&id={pid}")
-            elif url.path == "/api/sample-patient":
-                t = _gate(self, url.path)
-                if t is None:
-                    return
+                _redirect(self, f"{px}/patient?id={pid}")
+            elif path == "/api/sample-patient":
                 pid = store.add_patient(
                     clinic, "Demo Patient Rivera",
                     allergies=[{"substance": "penicillin", "reaction": "rash",
@@ -824,31 +1165,27 @@ class Handler(BaseHTTPRequestHandler):
                     current_meds=[{"name": "warfarin", "dose": "5 mg daily"}],
                     reports={},
                 )
-                _redirect(self, f"/app/patient?clinic={clinic}&id={pid}")
-            elif url.path == "/api/sample-check":
-                t = _gate(self, url.path)
-                if t is None:
-                    return
+                _redirect(self, f"{px}/patient?id={pid}")
+            elif path == "/api/sample-check":
                 patients = store.list_patients(clinic)
                 if not patients:
-                    _send(self, 400, "load the sample patient first")
+                    _json(self, 400, {"code": "no_patients",
+                                      "message": "load the sample patient first"})
                     return
                 pid = patients[0]["patient_id"]
                 intended = {"drug_name": "ibuprofen", "strength_mg": 400,
                             "times_per_day": 3, "duration": "5 days",
                             "reason": "post-extraction pain"}
                 result = check_prescription(store.get_patient(clinic, pid), intended)
-                cid = store.record_check(clinic, pid, "Dr. Demo", intended,
+                cid = store.record_check(clinic, pid, dentist_default, intended,
                                          result.verdict,
                                          [f.__dict__ for f in result.flags])
-                _redirect(self, f"/app/check?clinic={clinic}&id={cid}")
-            elif url.path == "/api/check":
-                t = _gate(self, url.path)
-                if t is None:
-                    return
+                _redirect(self, f"{px}/check?id={cid}")
+            elif path == "/api/check":
                 pid = form.get("patient_id", "")
                 if not _valid_id(pid):
-                    _send(self, 400, "bad patient id")
+                    _json(self, 400, {"code": "bad_patient_id",
+                                      "message": "bad patient id"})
                     return
                 intended = {
                     "drug_name": form.get("drug_name", "").strip(),
@@ -858,38 +1195,45 @@ class Handler(BaseHTTPRequestHandler):
                     "reason": form.get("reason", "").strip(),
                 }
                 if not intended["drug_name"]:
-                    _send(self, 400, "drug name is required")
+                    _json(self, 400, {"code": "missing_drug",
+                                      "message": "drug name is required"})
                     return
                 patient = store.get_patient(clinic, pid)
                 result = check_prescription(patient, intended)
                 cid = store.record_check(
-                    clinic, pid, form.get("dentist", "").strip() or "Dr. Demo",
+                    clinic, pid, form.get("dentist", "").strip() or dentist_default,
                     intended, result.verdict, [f.__dict__ for f in result.flags],
                 )
-                _redirect(self, f"/app/check?clinic={clinic}&id={cid}")
-            elif url.path == "/api/review":
-                t = _gate(self, url.path)
-                if t is None:
-                    return
+                _redirect(self, f"{px}/check?id={cid}")
+            elif path == "/api/review":
                 cid = form.get("check_id", "")
                 state = form.get("state", "")
-                by = form.get("by", "").strip() or "dentist"
+                by = form.get("by", "").strip() or dentist_default
                 if not _valid_id(cid):
-                    _send(self, 400, "bad check id")
+                    _json(self, 400, {"code": "bad_check_id",
+                                      "message": "bad check id"})
                     return
-                store.set_review_state(clinic, cid, state, by, form.get("note", "").strip())
-                _redirect(self, f"/app/check?clinic={clinic}&id={cid}")
-            elif url.path.startswith("/api/wizard/"):
-                t = _gate(self, url.path)
-                if t is None:
+                try:
+                    store.set_review_state(clinic, cid, state, by,
+                                           form.get("note", "").strip())
+                except ValueError as e:
+                    _json(self, 400, {"code": "bad_review_state", "message": str(e)})
                     return
-                m = re.match(r"/api/wizard/(wz_[a-f0-9]{12})/([a-z]+)\Z", url.path)
+                _redirect(self, f"{px}/check?id={cid}")
+            elif path.startswith("/api/wizard/"):
+                m = re.match(r"/api/wizard/(wz_[a-f0-9]{12})/([a-z]+)\Z", path)
                 if not m:
-                    _send(self, 404, "not found")
+                    _json(self, 404, {"code": "not_found", "message": "not found"})
                     return
                 state = _wizard_or_404(m.group(1))
                 if state is None:
-                    _send(self, 404, "wizard session expired")
+                    _json(self, 404, {"code": "wizard_expired",
+                                      "message": "wizard session expired"})
+                    return
+                if state.get("clinic_id") != clinic:
+                    _audit_denied(self, m.group(1), "cross-account wizard access denied")
+                    _json(self, 403, {"code": "forbidden",
+                                      "message": "cross-account wizard access denied"})
                     return
                 token, step = m.group(1), m.group(2)
                 multi = form_multi
@@ -898,7 +1242,7 @@ class Handler(BaseHTTPRequestHandler):
                         "indication": form.get("indication", ""),
                         "indication_notes": form.get("indication_notes", "").strip(),
                     })
-                    _redirect(self, f"/app/wizard/{token}/factors")
+                    _redirect(self, f"{px}/wizard/{token}/factors")
                 elif step == "factors":
                     WIZARDS.update(token, {"factors": {
                         "age_band": form.get("age_band", ""),
@@ -908,7 +1252,7 @@ class Handler(BaseHTTPRequestHandler):
                         "hepatic": form.get("hepatic", ""),
                         "weight_kg": form.get("weight_kg", "").strip(),
                     }})
-                    _redirect(self, f"/app/wizard/{token}/allergies")
+                    _redirect(self, f"{px}/wizard/{token}/allergies")
                 elif step == "allergies":
                     allergies = [
                         {"substance": b[0], "reaction": b[1], "recorded_at": "wizard"}
@@ -920,22 +1264,23 @@ class Handler(BaseHTTPRequestHandler):
                         "latex_allergy": form.get("latex_allergy", ""),
                         "anesthesia_history": form.get("anesthesia_history", "").strip(),
                     })
-                    _redirect(self, f"/app/wizard/{token}/medications")
+                    _redirect(self, f"{px}/wizard/{token}/medications")
                 elif step == "medications":
                     meds = [
                         {"name": b[0], "dose": b[1]}
                         for b in _parse_lines(form.get("meds", ""), 2) if b[0]
                     ]
                     WIZARDS.update(token, {"meds": meds})
-                    _redirect(self, f"/app/wizard/{token}/conditions")
+                    _redirect(self, f"{px}/wizard/{token}/conditions")
                 elif step == "conditions":
                     conds = [c for c in multi.get("cond", []) if c in CONDITION_CHECKLIST]
                     WIZARDS.update(token, {"conditions": conds})
-                    _redirect(self, f"/app/wizard/{token}/summary")
+                    _redirect(self, f"{px}/wizard/{token}/summary")
                 elif step == "finish":
                     drug_name = form.get("drug_name", "").strip()
                     if not drug_name:
-                        _send(self, 400, "drug name is required")
+                        _json(self, 400, {"code": "missing_drug",
+                                          "message": "drug name is required"})
                         return
                     intended = {
                         "drug_name": drug_name,
@@ -957,38 +1302,77 @@ class Handler(BaseHTTPRequestHandler):
                     patient_id = state.get("patient_id")
                     if not patient_id:
                         patient_id = store.add_patient(
-                            clinic, f"Demo Patient Wizard",
+                            clinic, "Demo Patient Wizard",
                             allergies=context["allergies"],
                             conditions=context["conditions"],
                             current_meds=context["current_meds"],
                         )
                     cid = store.record_check(
                         clinic, patient_id,
-                        form.get("dentist", "").strip() or "Dr. Demo",
+                        form.get("dentist", "").strip() or dentist_default,
                         intended, result.verdict,
                         [f.__dict__ for f in result.flags],
                     )
-                    _redirect(self, f"/app/check?clinic={clinic}&id={cid}")
+                    _redirect(self, f"{px}/check?id={cid}")
                 else:
-                    _send(self, 404, "not found")
-            elif url.path == "/api/invite":
-                # Stored locally; the pilot team follows up personally.
-                invites = BASE / "invites.jsonl"
-                with open(invites, "a") as f:
-                    f.write(json.dumps({
-                        "name": form.get("name", ""), "clinic": form.get("clinic", ""),
-                        "email": form.get("email", ""), "at": time.time(),
-                    }) + "\n")
-                _send(self, 200,
-                      "<!doctype html><html><head><title>Thanks</title>" + STYLE +
-                      "</head><body><div class='narrow'><h1>You're on the list.</h1>"
-                      "<p>We'll reach out personally about the pilot. No spam, no drip sequence.</p>"
-                      "<p><a href='/'>← Back</a></p></div></body></html>")
+                    _json(self, 404, {"code": "not_found", "message": "not found"})
             else:
-                _send(self, 404, "not found")
+                _json(self, 404, {"code": "not_found", "message": "not found"})
         except (KeyError, TenantMismatchError, ValueError) as e:
-            code = 403 if isinstance(e, TenantMismatchError) else 400
-            _send(self, code, esc(str(e)))
+            if isinstance(e, TenantMismatchError):
+                _audit_denied(self, path, str(e))
+                _json(self, 403, {"code": "forbidden", "message": str(e)})
+            elif isinstance(e, ValueError):
+                _json(self, 400, {"code": "bad_request", "message": str(e)})
+            else:
+                _json(self, 404, {"code": "not_found", "message": str(e)})
+
+    # -- auth handlers ------------------------------------------------
+    def _handle_signup(self, form: dict):
+        accounts = get_accounts()
+        values = {
+            "name": form.get("name", "").strip(),
+            "email": form.get("email", "").strip(),
+            "clinic_name": form.get("clinic_name", "").strip(),
+        }
+        errors: list[str] = []
+        password = form.get("password", "")
+        confirm = form.get("confirm", "")
+        if password != confirm:
+            errors.append("Passwords don't match.")
+        if errors:
+            _send(self, 400, signup_page(errors, values))
+            return
+        try:
+            acct = accounts.create_account(
+                values["name"], values["email"], values["clinic_name"], password)
+        except ValueError as e:
+            _send(self, 400, signup_page([str(e)], values))
+            return
+        token = accounts.create_session(acct["account_id"])
+        _redirect_with_cookie(self, "/welcome", token)
+
+    def _handle_signin(self, form: dict):
+        accounts = get_accounts()
+        email = (form.get("email", "") or "").strip().lower()
+        password = form.get("password", "")
+        next_url = _safe_next(form.get("next", ""))
+        allowed, wait = accounts.signin_allowed(email)
+        if not allowed:
+            _send(self, 429, signin_page(
+                [f"Too many failed attempts — try again in {int(wait // 60) + 1} minutes."],
+                email, next_url))
+            return
+        acct = accounts.get_account_by_email(email)
+        if acct is None or acct["is_demo"] or not verify_password(password, acct["password_hash"]):
+            # Generic message: don't reveal whether the email exists.
+            accounts.record_signin_failure(email)
+            _send(self, 401, signin_page(
+                ["Email or password didn't match. Try again."], email, next_url))
+            return
+        accounts.reset_signin_failures(email)
+        token = accounts.create_session(acct["account_id"])
+        _redirect_with_cookie(self, next_url or "/app/start", token)
 
 
 def _parse_lines(text: str, parts: int) -> list[list[str]]:
@@ -1073,7 +1457,9 @@ def wizard_progress(current: str) -> str:
     return f"<ol class='wsteps' aria-label='Check progress'>{''.join(items)}</ol>"
 
 
-def wizard_step_page(state: dict, step: str, clinic_name: str, trial: dict) -> str:
+def wizard_step_page(state: dict, step: str, ctx: dict) -> str:
+    trial = ctx["trial"]
+    px = ctx["prefix"]
     idx = STEPS.index(step)
     nxt = STEPS[idx + 1] if idx + 1 < len(STEPS) else None
     token = state["token"]
@@ -1127,12 +1513,14 @@ def wizard_step_page(state: dict, step: str, clinic_name: str, trial: dict) -> s
         + f"<div class='card'><form method='POST' action='/api/wizard/{token}/{step}'>"
         + inner
         + f"<button class='btn' type='submit'>Continue {ICONS['arrow']}</button></form></div>"
-        + (f"<p><a href='/app/wizard/{token}/{STEPS[idx-1]}'>← Back</a></p>" if idx > 0 else "")
+        + (f"<p><a href='{px}/wizard/{token}/{STEPS[idx-1]}'>← Back</a></p>" if idx > 0 else "")
     )
-    return shell("copilot", clinic_name, trial, body)
+    return shell("copilot", ctx["clinic_name"], trial, body, ctx)
 
 
-def wizard_summary_page(state: dict, clinic_name: str, trial: dict) -> str:
+def wizard_summary_page(state: dict, ctx: dict) -> str:
+    trial = ctx["trial"]
+    px = ctx["prefix"]
     token = state["token"]
     f = state["factors"]
     allergies = ", ".join(a.get("substance", "") for a in state["allergies"]) or "—"
@@ -1157,7 +1545,7 @@ def wizard_summary_page(state: dict, clinic_name: str, trial: dict) -> str:
     ]
     table = "".join(
         f"<tr><td><b>{esc(k)}</b></td><td>{esc(v)}</td>"
-        f"<td><a href='/app/wizard/{token}/{step}'>edit</a></td></tr>"
+        f"<td><a href='{px}/wizard/{token}/{step}'>edit</a></td></tr>"
         for k, v, step in rows
     )
     body = (
@@ -1166,12 +1554,13 @@ def wizard_summary_page(state: dict, clinic_name: str, trial: dict) -> str:
         + f"<div class='card'><p class='eyebrow'>Step 6 of 7 — Summary</p>"
         f"<table><tr><th>Item</th><th>Answer</th><th></th></tr>{table}</table></div>"
         + (f"<p class='eyebrow'>Missing information</p>{mflags}" if mflags else "<p>No missing-info flags.</p>")
-        + f"<p><a class='btn' href='/app/wizard/{token}/choose'>Continue to prescription choice {ICONS['arrow']}</a></p>"
+        + f"<p><a class='btn' href='{px}/wizard/{token}/choose'>Continue to prescription choice {ICONS['arrow']}</a></p>"
     )
-    return shell("copilot", clinic_name, trial, body)
+    return shell("copilot", ctx["clinic_name"], trial, body, ctx)
 
 
-def wizard_choose_page(state: dict, clinic_name: str, trial: dict) -> str:
+def wizard_choose_page(state: dict, ctx: dict) -> str:
+    trial = ctx["trial"]
     token = state["token"]
     ind = INDICATIONS.get(state["indication"] or "other", INDICATIONS["other"])
     ref_tag = f"{REFERENCE_VERSION} ({REFERENCE_DATE})"
@@ -1212,7 +1601,7 @@ def wizard_choose_page(state: dict, clinic_name: str, trial: dict) -> str:
         "<button class='btn' type='submit'>Run safety check on my choice</button></form>"
         "<p class='src'>Mia never auto-selects or issues a prescription. Unknown safety = “cannot verify”, never green.</p></div>"
     )
-    return shell("copilot", clinic_name, trial, body)
+    return shell("copilot", ctx["clinic_name"], trial, body, ctx)
 
 
 if __name__ == "__main__":
