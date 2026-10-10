@@ -107,6 +107,39 @@ def test_record_brief_shows_flags_and_sources(live_server):
     assert "ai_summary" in body
 
 
+def test_unknown_clinic_selector_is_not_reflected(live_server):
+    try:
+        _get(live_server, "/intake?clinic=%22%3E%3Cscript%3Ealert(1)%3C/script%3E")
+        raise AssertionError("expected an unknown clinic to be rejected")
+    except urllib.error.HTTPError as e:
+        assert e.code == 404
+
+
+def test_demo_rejects_non_synthetic_patient_label(live_server):
+    answers = _answers()
+    answers["id.demo_label"] = "Jane Doe"
+    code, resp = _post_json(
+        live_server, "/api/intake",
+        {"clinic_id": "demo-smile-arts", "patient_ref": "Jane Doe", "answers": answers},
+    )
+    assert code == 422
+    assert any("fictional patient label" in item for item in resp["errors"])
+
+
+def test_intake_rejects_unknown_clinic_id(live_server):
+    code, resp = _post_json(
+        live_server, "/api/intake",
+        {"clinic_id": "attacker-selected-tenant", "patient_ref": "Demo Patient E2E", "answers": _answers()},
+    )
+    assert code == 404
+    assert resp["ok"] is False
+
+
+def test_server_refuses_non_loopback_binding():
+    with pytest.raises(ValueError, match="127.0.0.1 only"):
+        srv.run(host="0.0.0.0", port=8766)
+
+
 def test_cross_tenant_record_denied_over_http(live_server):
     code, resp = _post_json(live_server, "/api/intake",
                             {"clinic_id": "demo-smile-arts",
