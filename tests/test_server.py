@@ -104,7 +104,8 @@ def test_record_brief_shows_flags_and_sources(live_server):
     code, body = _get(live_server, f"/record?clinic=demo-smile-arts&sub={sub}")
     assert code == 200
     assert "patient_reported" in body
-    assert "ai_summary" in body
+    assert "Structured rollup" in body
+    assert "not AI-generated" in body
 
 
 def test_unknown_clinic_selector_is_not_reflected(live_server):
