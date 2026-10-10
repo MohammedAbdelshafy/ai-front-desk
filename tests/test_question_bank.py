@@ -79,6 +79,28 @@ def test_fhir_questionnaire_export_shape(bank):
     values = [o["valueString"] for o in contact["answerOption"]]
     assert "I don't know" in values
 
+    # Yes/no questions use choice semantics so unknown answers remain explicit.
+    taking = next(i for i in fhir["item"] if i["linkId"] == "med.taking_any")
+    assert taking["type"] == "choice"
+    assert {o["valueString"] for o in taking["answerOption"]} >= {"Yes", "No", "I don't know"}
+    heart = next(i for i in fhir["item"] if i["linkId"] == "cond.heart")
+    assert heart["repeats"] is True
+
+
+def test_unknown_question_ids_are_rejected(bank):
+    errors = bank.validate_answers({"not.in.bank": "anything"})
+    assert any("unknown question id" in error for error in errors)
+
+
+def test_date_and_number_types_are_validated():
+    date_question = Question(qid="x.date", section="test", text="Date", qtype="date")
+    number_question = Question(qid="x.number", section="test", text="Number", qtype="number")
+    assert date_question.validate("2026-02-28") == []
+    assert date_question.validate("2026-02-31")
+    assert number_question.validate("2.5") == []
+    assert number_question.validate(float("inf"))
+    assert number_question.validate(True)
+
 
 def test_bank_snapshot_immutable_provenance(bank):
     snap = bank_snapshot(bank)
