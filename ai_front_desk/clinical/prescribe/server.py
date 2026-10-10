@@ -324,7 +324,9 @@ def patient_detail_page(store, clinic_id, clinic_name, trial, patient_id) -> str
         f"<h4>Allergies</h4><ul>{allergies}</ul>"
         f"<h4>Conditions</h4><ul>{conds}</ul>"
         f"<h4>Current medications</h4><ul>{meds}</ul></div>"
-        + f"<div class='card'><h3>New safety check</h3>"
+        + f"<p><a class='btn' href='/app/wizard/start?patient={patient_id}'>🧭 Start guided check</a> "
+        "<span class='src'>Walks through indication → factors → allergies → meds → conditions → your choice.</span></p>"
+        + f"<div class='card'><h3>Quick safety check (skip wizard)</h3>"
         f"<form method='POST' action='/api/check?clinic={clinic_id}'>"
         f"<input type='hidden' name='patient_id' value='{patient_id}'>"
         f"<label>Drug<input name='drug_name' list='drugs' required placeholder='ibuprofen'></label>"
@@ -478,12 +480,6 @@ def _clinic_name() -> str:
     return DEMO_CLINIC_NAME
 
 
-def _read_form(handler) -> dict:
-    length = int(handler.headers.get("Content-Length", 0) or 0)
-    raw = handler.rfile.read(min(length, MAX_BODY)).decode("utf-8", errors="replace")
-    return {k: v[0] for k, v in parse_qs(raw).items()}
-
-
 def _send(handler, code: int, body: str, content_type="text/html; charset=utf-8"):
     data = body.encode("utf-8")
     handler.send_response(code)
@@ -573,6 +569,40 @@ class Handler(BaseHTTPRequestHandler):
                 if t is None:
                     return
                 _send(self, 200, upgrades_page(clinic, _clinic_name(), t))
+            elif url.path == "/app/wizard/start":
+                t = _gate(self, url.path)
+                if t is None:
+                    return
+                pid = q.get("patient", [""])[0]
+                patient = None
+                if pid:
+                    if not _valid_id(pid):
+                        _send(self, 400, "bad patient id")
+                        return
+                    patient = get_store().get_patient(clinic, pid)
+                state = WIZARDS.create(clinic, patient)
+                _redirect(self, f"/app/wizard/{state['token']}/{STEPS[0]}")
+            elif url.path.startswith("/app/wizard/"):
+                t = _gate(self, url.path)
+                if t is None:
+                    return
+                m = re.match(r"/app/wizard/(wz_[a-f0-9]{12})/([a-z]+)\Z", url.path)
+                if not m:
+                    _send(self, 404, "not found")
+                    return
+                state = _wizard_or_404(m.group(1))
+                if state is None:
+                    _send(self, 404, "wizard session expired")
+                    return
+                step = m.group(2)
+                if step == "summary":
+                    _send(self, 200, wizard_summary_page(state, _clinic_name(), t))
+                elif step == "choose":
+                    _send(self, 200, wizard_choose_page(state, _clinic_name(), t))
+                elif step in STEPS:
+                    _send(self, 200, wizard_step_page(state, step, _clinic_name(), t))
+                else:
+                    _send(self, 404, "not found")
             else:
                 _send(self, 404, "not found")
         except (KeyError, TenantMismatchError) as e:
@@ -583,7 +613,12 @@ class Handler(BaseHTTPRequestHandler):
         url = urlparse(self.path)
         q = parse_qs(url.query)
         clinic = DEMO_CLINIC_ID
-        form = _read_form(self)
+        # Read the request body ONCE (a second rfile read would block forever).
+        length = int(self.headers.get("Content-Length", 0) or 0)
+        _raw = self.rfile.read(min(length, MAX_BODY)).decode("utf-8", errors="replace")
+        _parsed = parse_qs(_raw)
+        form = {k: v[0] for k, v in _parsed.items()}
+        form_multi = dict(_parsed)
         store = get_store()
         try:
             if url.path == "/api/trial/activate":
@@ -687,6 +722,98 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 store.set_review_state(clinic, cid, state, by, form.get("note", "").strip())
                 _redirect(self, f"/app/check?clinic={clinic}&id={cid}")
+            elif url.path.startswith("/api/wizard/"):
+                t = _gate(self, url.path)
+                if t is None:
+                    return
+                m = re.match(r"/api/wizard/(wz_[a-f0-9]{12})/([a-z]+)\Z", url.path)
+                if not m:
+                    _send(self, 404, "not found")
+                    return
+                state = _wizard_or_404(m.group(1))
+                if state is None:
+                    _send(self, 404, "wizard session expired")
+                    return
+                token, step = m.group(1), m.group(2)
+                multi = form_multi
+                if step == "indication":
+                    WIZARDS.update(token, {
+                        "indication": form.get("indication", ""),
+                        "indication_notes": form.get("indication_notes", "").strip(),
+                    })
+                    _redirect(self, f"/app/wizard/{token}/factors")
+                elif step == "factors":
+                    WIZARDS.update(token, {"factors": {
+                        "age_band": form.get("age_band", ""),
+                        "pregnancy": form.get("pregnancy", ""),
+                        "lactation": form.get("lactation", ""),
+                        "renal": form.get("renal", ""),
+                        "hepatic": form.get("hepatic", ""),
+                        "weight_kg": form.get("weight_kg", "").strip(),
+                    }})
+                    _redirect(self, f"/app/wizard/{token}/allergies")
+                elif step == "allergies":
+                    allergies = [
+                        {"substance": b[0], "reaction": b[1], "recorded_at": "wizard"}
+                        for b in _parse_lines(form.get("allergies", ""), 2) if b[0]
+                    ]
+                    WIZARDS.update(token, {
+                        "allergies": allergies,
+                        "no_known_allergies": bool(form.get("no_known_allergies")),
+                        "latex_allergy": form.get("latex_allergy", ""),
+                        "anesthesia_history": form.get("anesthesia_history", "").strip(),
+                    })
+                    _redirect(self, f"/app/wizard/{token}/medications")
+                elif step == "medications":
+                    meds = [
+                        {"name": b[0], "dose": b[1]}
+                        for b in _parse_lines(form.get("meds", ""), 2) if b[0]
+                    ]
+                    WIZARDS.update(token, {"meds": meds})
+                    _redirect(self, f"/app/wizard/{token}/conditions")
+                elif step == "conditions":
+                    conds = [c for c in multi.get("cond", []) if c in CONDITION_CHECKLIST]
+                    WIZARDS.update(token, {"conditions": conds})
+                    _redirect(self, f"/app/wizard/{token}/summary")
+                elif step == "finish":
+                    drug_name = form.get("drug_name", "").strip()
+                    if not drug_name:
+                        _send(self, 400, "drug name is required")
+                        return
+                    intended = {
+                        "drug_name": drug_name,
+                        "strength_mg": _num(form.get("strength_mg")),
+                        "times_per_day": _num(form.get("times_per_day")),
+                        "duration": form.get("duration", "").strip(),
+                        "reason": form.get("reason", "").strip(),
+                        "indication": state["indication"],
+                    }
+                    from .checker import Flag as _Flag
+                    context = build_patient_context(state)
+                    result = check_prescription(context, intended)
+                    # Attach missing-info flags so unknowns are visible, never
+                    # hidden. They are info-severity: they never change a
+                    # red/yellow verdict and never turn CANNOT_VERIFY green.
+                    for mf in missing_info_flags(state):
+                        result.flags.append(_Flag(
+                            mf["severity"], mf["reason"], mf["source"], mf["rule_id"]))
+                    patient_id = state.get("patient_id")
+                    if not patient_id:
+                        patient_id = store.add_patient(
+                            clinic, f"Demo Patient Wizard",
+                            allergies=context["allergies"],
+                            conditions=context["conditions"],
+                            current_meds=context["current_meds"],
+                        )
+                    cid = store.record_check(
+                        clinic, patient_id,
+                        form.get("dentist", "").strip() or "Dr. Demo",
+                        intended, result.verdict,
+                        [f.__dict__ for f in result.flags],
+                    )
+                    _redirect(self, f"/app/check?clinic={clinic}&id={cid}")
+                else:
+                    _send(self, 404, "not found")
             elif url.path == "/api/invite":
                 # Stored locally; the pilot team follows up personally.
                 invites = BASE / "invites.jsonl"
@@ -735,3 +862,174 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# --------------------------------------------------------------- wizard ---
+
+from .wizard import (  # noqa: E402
+    WizardSessions,
+    STEPS,
+    missing_info_flags,
+    build_patient_context,
+    indication_options,
+    AGE_BANDS,
+    YES_NO_UNK,
+    CONDITION_CHECKLIST,
+    UNKNOWN,
+)
+from .reference_data import INDICATIONS  # noqa: E402
+
+WIZARDS = WizardSessions()
+WIZ_TOKEN_RE = re.compile(r"wz_[a-f0-9]{12}\Z")
+
+
+def _wizard_or_404(token: str):
+    state = WIZARDS.get(token)
+    return state
+
+
+def _select(name: str, options: list[str], current: str) -> str:
+    opts = "".join(
+        f"<option value='{esc(o)}'{' selected' if o == current else ''}>{esc(o)}</option>"
+        for o in options
+    )
+    return f"<select name='{name}'><option value=''>— choose —</option>{opts}</select>"
+
+
+def wizard_step_page(state: dict, step: str, clinic_name: str, trial: dict) -> str:
+    idx = STEPS.index(step)
+    nxt = STEPS[idx + 1] if idx + 1 < len(STEPS) else None
+    token = state["token"]
+    inner = ""
+    if step == "indication":
+        radios = "".join(
+            f"<label style='display:block;font-weight:400;margin:6px 0'>"
+            f"<input type='radio' name='indication' value='{k}' style='width:auto'"
+            f"{' checked' if state['indication'] == k else ''}> {esc(label)}</label>"
+            for k, label in indication_options()
+        )
+        inner = (f"<h2>Step 1 of 7 — Indication</h2><p>What are you treating?</p>{radios}"
+                 f"<label>Procedure / context notes<textarea name='indication_notes' rows='2'>"
+                 f"{esc(state['indication_notes'])}</textarea></label>")
+    elif step == "factors":
+        f = state["factors"]
+        inner = ("<h2>Step 2 of 7 — Patient factors</h2>"
+                 f"<label>Age band{_select('age_band', AGE_BANDS, f['age_band'])}</label>"
+                 f"<label>Pregnancy{_select('pregnancy', YES_NO_UNK, f['pregnancy'])}</label>"
+                 f"<label>Lactation{_select('lactation', YES_NO_UNK, f['lactation'])}</label>"
+                 f"<label>Renal issues{_select('renal', YES_NO_UNK, f['renal'])}</label>"
+                 f"<label>Hepatic issues{_select('hepatic', YES_NO_UNK, f['hepatic'])}</label>"
+                 f"<label>Weight (kg, if relevant)<input name='weight_kg' value='{esc(f['weight_kg'])}' placeholder=\"don't know\"></label>"
+                 "<p class='src'>Every question offers “don't know / not applicable”. Unknowns are flagged, never assumed safe.</p>")
+    elif step == "allergies":
+        lines = "\n".join(f"{a.get('substance','')} | {a.get('reaction','')}" for a in state["allergies"])
+        inner = ("<h2>Step 3 of 7 — Allergies</h2>"
+                 f"<label>Drug allergies — one per line: substance | reaction<textarea name='allergies' rows='3'>{esc(lines)}</textarea></label>"
+                 f"<label><input type='checkbox' name='no_known_allergies' value='1' style='width:auto'{' checked' if state['no_known_allergies'] else ''}> No known drug allergies (explicit)</label>"
+                 f"<label>Latex allergy{_select('latex_allergy', YES_NO_UNK, state['latex_allergy'])}</label>"
+                 f"<label>Anesthesia history / complications<input name='anesthesia_history' value='{esc(state['anesthesia_history'])}' placeholder=\"don't know\"></label>")
+    elif step == "medications":
+        lines = "\n".join(f"{m.get('name','')} | {m.get('dose','')}" for m in state["meds"])
+        inner = ("<h2>Step 4 of 7 — Current medications</h2>"
+                 f"<label>One per line: name | dose/frequency<textarea name='meds' rows='4'>{esc(lines)}</textarea></label>"
+                 "<p class='src'>Include OTC, vitamins, and herbal products — interactions don't care about the source.</p>")
+    elif step == "conditions":
+        boxes = "".join(
+            f"<label style='display:block;font-weight:400;margin:4px 0'>"
+            f"<input type='checkbox' name='cond' value='{esc(c)}' style='width:auto'"
+            f"{' checked' if c in state['conditions'] else ''}> {esc(c)}</label>"
+            for c in CONDITION_CHECKLIST
+        )
+        inner = f"<h2>Step 5 of 7 — Conditions</h2><p>Tick all that apply.</p>{boxes}"
+    else:
+        inner = "<p>Unknown step.</p>"
+
+    body = (
+        mia_card(f"Guided check for {state['patient_label'] or 'new patient'} — step {idx + 1} of 7.")
+        + f"<div class='card'><form method='POST' action='/api/wizard/{token}/{step}'>"
+        + inner
+        + f"<button class='btn' type='submit'>Continue →</button></form></div>"
+        + (f"<p><a href='/app/wizard/{token}/{STEPS[idx-1]}'>← Back</a></p>" if idx > 0 else "")
+    )
+    return shell("copilot", clinic_name, trial, body)
+
+
+def wizard_summary_page(state: dict, clinic_name: str, trial: dict) -> str:
+    token = state["token"]
+    f = state["factors"]
+    allergies = ", ".join(a.get("substance", "") for a in state["allergies"]) or "—"
+    meds = ", ".join(m.get("name", "") for m in state["meds"]) or "—"
+    conds = ", ".join(state["conditions"]) or "—"
+    ind_label = dict(indication_options()).get(state["indication"], "—")
+    missing = missing_info_flags(state)
+    mflags = "".join(
+        f"<div class='flag info'><b>INFO</b> — {esc(m['reason'])}<br><span class='src'>Source: {esc(m['source'])}</span></div>"
+        for m in missing
+    )
+    rows = [
+        ("Indication", f"{ind_label}" + (f" — {state['indication_notes']}" if state["indication_notes"] else ""), "indication"),
+        ("Age band", f["age_band"] or "—", "factors"),
+        ("Pregnancy / lactation", f"{f['pregnancy'] or '—'} / {f['lactation'] or '—'}", "factors"),
+        ("Renal / hepatic", f"{f['renal'] or '—'} / {f['hepatic'] or '—'}", "factors"),
+        ("Weight", f["weight_kg"] or "—", "factors"),
+        ("Allergies", allergies + (f" (latex: {state['latex_allergy'] or '—'})"), "allergies"),
+        ("Anesthesia history", state["anesthesia_history"] or "—", "allergies"),
+        ("Medications", meds, "medications"),
+        ("Conditions", conds, "conditions"),
+    ]
+    table = "".join(
+        f"<tr><td><b>{esc(k)}</b></td><td>{esc(v)}</td>"
+        f"<td><a href='/app/wizard/{token}/{step}'>edit</a></td></tr>"
+        for k, v, step in rows
+    )
+    body = (
+        mia_card("Review everything before choosing. Missing-info flags are shown, never hidden.")
+        + f"<div class='card'><h2>Step 6 of 7 — Summary</h2>"
+        f"<table>{table}</table></div>"
+        + (f"<h3>Missing information</h3>{mflags}" if mflags else "<p>No missing-info flags.</p>")
+        + f"<p><a class='btn' href='/app/wizard/{token}/choose'>Continue to prescription choice →</a></p>"
+    )
+    return shell("copilot", clinic_name, trial, body)
+
+
+def wizard_choose_page(state: dict, clinic_name: str, trial: dict) -> str:
+    token = state["token"]
+    ind = INDICATIONS.get(state["indication"] or "other", INDICATIONS["other"])
+    ref_tag = f"{REFERENCE_VERSION} ({REFERENCE_DATE})"
+
+    def _drug_rows(items):
+        return "".join(
+            f"<div class='flag info'><b>{esc(DRUGS[i['drug']]['display'])}</b> — {esc(i['dosing'])}"
+            + (f"<br><span class='src'>When: {esc(i['when'])}</span>" if i.get("when") else "")
+            + (f"<br><span class='src'>{esc(i['note'])}</span>" if i.get("note") else "")
+            + f"<br><span class='src'>Source: {ref_tag} — reference info</span></div>"
+            for i in items
+        )
+
+    panel = (
+        f"<h3>Reference — {esc(ind['display'])}</h3>"
+        + (_drug_rows(ind["first_line"]) if ind["first_line"] else "")
+        + ("<h4>Alternatives</h4>" + _drug_rows(ind["alternatives"]) if ind["alternatives"] else "")
+        + "".join(f"<p class='src'>⚠ {esc(c)}</p>" for c in ind["cautions"])
+        + f"<p class='src'>Reference info only ({ref_tag}) — requires dentist review. The dentist selects and decides.</p>"
+    )
+    drug_opts = "".join(
+        f"<option value='{k}'>{esc(v['display'])}</option>"
+        for k, v in sorted(DRUGS.items(), key=lambda x: x[1]["display"])
+    )
+    body = (
+        mia_card("Reference options for your indication. You choose — I check your choice.")
+        + f"<div class='card'>{panel}</div>"
+        + f"<div class='card'><h2>Step 7 of 7 — Your prescription choice</h2>"
+        f"<form method='POST' action='/api/wizard/{token}/finish'>"
+        f"<label>Drug — your choice<input name='drug_name' list='drugs2' required></label>"
+        f"<datalist id='drugs2'>{drug_opts}</datalist>"
+        "<label>Strength (mg)<input name='strength_mg' type='number' step='any'></label>"
+        "<label>Times per day<input name='times_per_day' type='number' step='any'></label>"
+        "<label>Duration<input name='duration' placeholder='5 days'></label>"
+        "<label>Reason<input name='reason' placeholder='acute apical abscess'></label>"
+        "<label>Your name (dentist)<input name='dentist' placeholder='Dr. Rivera'></label>"
+        "<button class='btn' type='submit'>Run safety check on my choice</button></form>"
+        "<p class='src'>Mia never auto-selects or issues a prescription. Unknown safety = “cannot verify”, never green.</p></div>"
+    )
+    return shell("copilot", clinic_name, trial, body)

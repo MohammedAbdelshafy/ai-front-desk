@@ -124,6 +124,89 @@ REFERENCE_DATE = "2026-10-11"
 # "reference v1 (2026-10-11) — drug interaction".
 
 
+# Indication-based prescribing guidance. EDUCATES the choice; the dentist
+# always selects and decides. Every item is reference info, source-cited.
+INDICATIONS: dict[str, dict] = {
+    "infection": {
+        "display": "Dental infection",
+        "first_line": [
+            {"drug": "amoxicillin", "dosing": "500 mg three times daily, 3–5 days",
+             "note": "First-line for odontogenic infections in non-allergic adults."},
+        ],
+        "alternatives": [
+            {"drug": "azithromycin", "dosing": "500 mg day 1, then 250 mg days 2–5",
+             "when": "Penicillin allergy."},
+            {"drug": "clindamycin", "dosing": "300 mg four times daily, 3–5 days",
+             "when": "True penicillin allergy (reserve; counsel on diarrhoea risk)."},
+            {"drug": "metronidazole", "dosing": "400 mg three times daily, 3–5 days",
+             "when": "Anaerobic cover; often added to amoxicillin."},
+        ],
+        "cautions": [
+            "Confirm penicillin-allergy history before choosing a macrolide or clindamycin.",
+            "Metronidazole: patient must avoid alcohol during treatment and 48h after.",
+        ],
+    },
+    "prophylaxis": {
+        "display": "Antibiotic prophylaxis (e.g. endocarditis-risk procedures)",
+        "first_line": [
+            {"drug": "amoxicillin", "dosing": "2 g orally, single dose 30–60 min before procedure",
+             "note": "Standard single-dose prophylaxis in non-allergic adults."},
+        ],
+        "alternatives": [
+            {"drug": "azithromycin", "dosing": "500 mg orally, single dose 30–60 min before",
+             "when": "Penicillin allergy."},
+            {"drug": "clindamycin", "dosing": "600 mg orally, single dose 30–60 min before",
+             "when": "Penicillin allergy (reserve option)."},
+        ],
+        "cautions": [
+            "Prophylaxis is indicated only for defined at-risk patients — confirm the indication, not just the drug.",
+        ],
+    },
+    "post_op_pain": {
+        "display": "Post-operative pain",
+        "first_line": [
+            {"drug": "ibuprofen", "dosing": "400 mg three times daily with food, shortest course",
+             "note": "First-line dental pain control."},
+        ],
+        "alternatives": [
+            {"drug": "paracetamol", "dosing": "500–1000 mg every 4–6 hours as needed (max 4 g/day)",
+             "when": "NSAID contraindicated or not tolerated."},
+            {"drug": "naproxen", "dosing": "500 mg twice daily with food",
+             "when": "Longer-acting NSAID preferred."},
+        ],
+        "cautions": [
+            "Avoid NSAIDs with anticoagulants, significant renal impairment, or active ulcer disease.",
+            "Paracetamol: reduce maximum in liver disease.",
+        ],
+    },
+    "anxiety": {
+        "display": "Dental anxiety (conscious sedation)",
+        "first_line": [
+            {"drug": "triazolam", "dosing": "0.25 mg orally, 1 hour before appointment (single dose)",
+             "note": "Short-acting; patient must be escorted."},
+        ],
+        "alternatives": [
+            {"drug": "diazepam", "dosing": "5 mg the night before and/or 1 hour before",
+             "when": "Longer anxiolytic effect desired."},
+        ],
+        "cautions": [
+            "Single preoperative dosing only. Patient must not drive for 24 hours.",
+            "Avoid combining with alcohol (additive CNS depression).",
+        ],
+    },
+    "other": {
+        "display": "Other / not listed",
+        "first_line": [],
+        "alternatives": [],
+        "cautions": [
+            "No indication-specific guidance in reference v1 — use the full reference panel and your clinical judgment.",
+        ],
+    },
+}
+
+INDICATION_ORDER = ["infection", "prophylaxis", "post_op_pain", "anxiety", "other"]
+
+
 # name -> drug_key lookup including aliases
 NAME_INDEX: dict[str, str] = {}
 for _key, _entry in DRUGS.items():
