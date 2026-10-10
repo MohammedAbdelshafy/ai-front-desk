@@ -5,18 +5,19 @@ WhatsApp intake → qualification → human escalation → follow-up. No vendor 
 
 ## What's inside
 
-- `ai_front_desk/logic.py` — the qualification state machine as pure, importable
-  Python: greet → name → service → urgency → done, with FAQ answers and
-  escalation triggers. No network calls — reuse it anywhere (n8n Code node,
-  your own server, tests).
-- `ai_front_desk/webhook.py` — local dev/test server (stdlib only) emulating the
-  Meta webhook contract: GET verify (hub.mode/hub.verify_token/hub.challenge)
-  and POST message callbacks. `DRY_RUN=1` (default) writes the would-be Graph
-  reply payload instead of sending anything.
-- `ai_front_desk/n8n_workflow.json` — the **production** workflow. Import into
-  n8n: Webhook (Meta callbacks) → IF (verify challenge vs message event) →
-  Set (extract sender/text) → OpenAI node (front-desk brain) →
-  HTTP Request (POST reply to Graph API) → Respond 200.
+- `ai_front_desk/logic.py` — the generic qualification state machine as pure, importable Python. No network calls — reusable in n8n Code nodes, your server, and tests.
+- `ai_front_desk/webhook.py` — local dev/test harness emulating the Meta webhook contract. `DRY_RUN=1` by default, so it doesn't send real replies.
+- `ai_front_desk/n8n_workflow.json` — reference workflow for WhatsApp Cloud API webhook → extraction → assistant → Graph API reply.
+- `ai_front_desk/dental_logic.py` — early dental-specific administrative intake state machine, clinic-approved FAQ handling, explicit follow-up permission, and staff handoff. Pure logic only, no external side effects.
+- `tests/test_dental_logic.py` — focused guardrail tests for the dental prototype.
+- `docs/DENTAL_AI_MVP_BUILD_SPEC.md` — product scope and deployment acceptance checklist.
+- `docs/DENTAL_AI_GITHUB_RESEARCH.md` and `docs/DENTAL_AI_PRODUCTION_REFERENCE.md` — repository/product research and architecture references.
+
+## Dental MVP status
+
+The dental module is an early prototype, **not production clinic software**. It is not wired into the WhatsApp webhook and it does not persist conversations, send patient messages, book appointments, or provide clinical decision support. A user asking for an appointment is creating a request, not a confirmed booking.
+
+Before a clinic pilot: connect persistent tenant-scoped storage, webhook signature verification, inbound message idempotency, a durable outbound queue, visible staff handoff, retention/deletion controls, and clinic-approved configuration. Complete the actual deployment's privacy/security and telecom review. Use synthetic data for demos; keep live message sending disabled until the clinic explicitly approves the configuration.
 
 ## Install
 
@@ -30,31 +31,21 @@ pip install ai-front-desk
 VERIFY_TOKEN=mysecret PORT=8765 ai-front-desk-webhook
 # then in another shell:
 curl "http://127.0.0.1:8765/webhook?hub.mode=subscribe&hub.verify_token=mysecret&hub.challenge=ping"
+pytest
 ```
-
-Run the test suite: `pytest` (unit tests) — the webhook contract e2e spins up the
-real server on localhost.
 
 ## Going live — Meta app setup checklist
 
-1. Create an app at developers.facebook.com → add the **WhatsApp** product.
-2. In WhatsApp → API Setup: note the **test phone number** and generate a
-   **temporary access token** (later: a permanent system-user token).
-3. Note the **Phone Number ID** from the same page.
-4. Configure the webhook: callback URL = your public n8n webhook URL,
-   verify token = your `VERIFY_TOKEN`, subscribe to the **messages** field.
-5. On the n8n host set env vars: `VERIFY_TOKEN`, `WHATSAPP_TOKEN`,
-   `PHONE_NUMBER_ID`. Add the OpenAI credential to the Front Desk Brain node
-   and the HTTP Header Auth credential to the Reply node.
-6. For production traffic beyond the test number, complete Meta's business
-   verification and request messaging limits upgrades in the app dashboard.
+1. Create an app at developers.facebook.com → add the WhatsApp product.
+2. In WhatsApp API Setup, note the test phone number, Phone Number ID, and temporary access token.
+3. Configure the webhook callback URL and verify token, and subscribe to the messages field.
+4. Configure secrets only in the host's secret store. Never commit access tokens.
+5. Complete Meta business verification and messaging limit steps before production traffic.
+6. For a dental deployment, finish the tenant persistence, idempotency, approved FAQ, staff handoff and privacy/security gates documented above before enabling any real messages.
 
-## What it does not do
+## Scope and claims
 
-This is a reference build, not a managed service. You bring your own Meta app,
-phone number, n8n host, and OpenAI key. No guaranteed response quality, lead
-volume, or revenue — the state machine is deterministic and test-covered; the
-AI reply quality depends on your own OpenAI configuration.
+This repository is a reference build, not a managed service. No guaranteed response quality, lead volume, patient recovery, or revenue. Generic FAQ examples are not clinic facts. Do not make HIPAA or other compliance claims without verifying the actual deployment and contracts.
 
 ## License
 

@@ -32,8 +32,8 @@ def test_welcome_is_clinic_specific_and_not_generic():
 
 def test_no_unapproved_hours_or_prices_are_invented():
     state = new_dental_session("s", "demo-clinic")
-    state, reply, _, _ = turn(state, "hello")
-    state, reply, _, _ = turn(state, "What are your hours?", cfg=config_without_faq())
+    state, _, _, _ = turn(state, "hello")
+    _, reply, _, _ = turn(state, "What are your hours?", cfg=config_without_faq())
     assert "Monday to Saturday" not in reply
     assert "9:00 to 18:00" not in reply
 
@@ -56,22 +56,20 @@ def config_without_faq():
 
 def test_approved_faq_is_returned_exactly():
     state = new_dental_session("s", "demo-clinic")
-    state, reply, _, _ = turn(state, "hello")
-    state, reply, handoff, stage = turn(state, "What are your hours?")
+    state, _, _, _ = turn(state, "hello")
+    _, reply, handoff, _ = turn(state, "What are your hours?")
     assert reply == "DEMO: clinic hours are configured by clinic staff."
     assert not handoff
 
 
 def test_explicit_human_request_always_handoffs():
-    state = new_dental_session("s", "demo-clinic")
-    _, reply, handoff, stage = turn(state, "please speak to a human")
+    _, _, handoff, stage = turn(new_dental_session("s", "demo-clinic"), "please speak to a human")
     assert handoff is True
     assert stage == "handoff"
 
 
 def test_clinical_concern_never_gets_diagnosis():
-    state = new_dental_session("s", "demo-clinic")
-    _, reply, handoff, stage = turn(state, "My toothache is severe")
+    _, reply, handoff, stage = turn(new_dental_session("s", "demo-clinic"), "My toothache is severe")
     assert handoff is True
     assert stage == "clinical_handoff"
     assert "not a clinician" in reply
@@ -80,11 +78,11 @@ def test_clinical_concern_never_gets_diagnosis():
 
 def test_tenant_mismatch_fails_closed():
     state = new_dental_session("s", "clinic-a")
-    state, reply, handoff, stage = process_dental_message(
-        state, "hello", config()
-    )
+    state, _, handoff, stage = process_dental_message(state, "hello", config())
     assert handoff is True
+    assert stage == "handoff"
     assert state["clinic_id"] == "demo-clinic"
+    assert state["handoff_required"] is True
 
 
 def test_appointment_request_never_claims_booking_confirmation():
@@ -99,7 +97,7 @@ def test_appointment_request_never_claims_booking_confirmation():
 def test_followup_permission_is_explicit():
     state = new_dental_session("s", "demo-clinic")
     for msg in ["hello", "checkup", "tomorrow", "phone", "no"]:
-        state, reply, handoff, stage = turn(state, msg)
+        state, _, handoff, stage = turn(state, msg)
     assert not handoff
     assert state["consent_to_follow_up"] is False
 
@@ -109,3 +107,12 @@ def test_session_serializable():
     state = new_dental_session("s", "demo-clinic")
     state, _, _, _ = turn(state, "hello")
     json.dumps(state)
+
+
+def test_handoff_state_stays_handed_off():
+    state = new_dental_session("s", "demo-clinic")
+    state, _, handoff, stage = turn(state, "please speak to a human")
+    assert handoff and stage == "handoff"
+    state, _, handoff, stage = turn(state, "what are your hours?")
+    assert handoff and stage == "handoff"
+    assert state["handoff_required"] is True
