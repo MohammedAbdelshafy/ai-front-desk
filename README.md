@@ -34,6 +34,25 @@ curl "http://127.0.0.1:8765/webhook?hub.mode=subscribe&hub.verify_token=mysecret
 pytest
 ```
 
+## Local dental intake demo
+
+This prototype includes a local, end-to-end fictional patient intake and dentist-review workflow.
+
+Install the project, then run the demo command:
+
+    python -m pip install -e .
+    ai-front-desk-demo
+
+Open http://127.0.0.1:8765 in your browser. The server is deliberately restricted to
+127.0.0.1 and stores its synthetic demo database at
+~/.ai-front-desk/dental-demo.sqlite3 by default. Set DENTAL_DEMO_DB to choose a different
+local path. Use fictional records only. The demo has no production authentication,
+no messaging or booking integration, and no clinical decision-support or prescribing.
+
+The dashboard includes a preloaded set of fictional records, a patient questionnaire,
+a dentist-facing history summary, review outcomes, and a local audit trail. This is a
+development prototype, not an EHR and not suitable for actual patient information.
+
 ## Going live — Meta app setup checklist
 
 1. Create an app at developers.facebook.com → add the WhatsApp product.
