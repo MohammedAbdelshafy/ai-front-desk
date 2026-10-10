@@ -76,8 +76,16 @@ def test_fhir_questionnaire_response(bank):
     assert resp["id"] == "sub_abc123"
     assert resp["status"] == "completed"
     assert resp["questionnaire"].endswith("/dental-intake/1.0.0")
-    # yes_no answers map to booleans
+    # Yes/no answers remain a choice so unknown/escape answers are not coerced to "No".
     med = next(i for i in resp["item"] if i["linkId"] == "med.taking_any")
-    assert med["answer"] == [{"valueBoolean": False}]
+    assert med["answer"] == [{"valueString": "No"}]
     # unanswered optional questions are omitted, not fabricated
     assert not any(i["linkId"] == "med.list" for i in resp["item"])
+
+
+def test_escape_on_yes_no_is_not_converted_to_no(bank):
+    answers = valid_answers()
+    answers["med.taking_any"] = "I don't know"
+    response = to_fhir_questionnaire_response(bank, answers, "sub_escape")
+    med = next(item for item in response["item"] if item["linkId"] == "med.taking_any")
+    assert med["answer"] == [{"valueString": "I don't know"}]
