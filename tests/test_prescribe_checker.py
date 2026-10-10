@@ -43,7 +43,7 @@ def test_nsaid_warfarin_interaction_is_red_with_rule_id():
     assert r.verdict == "RED"
     rule_flags = [f for f in r.flags if f.rule_id == "nsaid-anticoagulant"]
     assert rule_flags, [f.rule_id for f in r.flags]
-    assert "reference v1" in rule_flags[0].source
+    assert "reference v2" in rule_flags[0].source
     assert "2026-10-11" in rule_flags[0].source
 
 

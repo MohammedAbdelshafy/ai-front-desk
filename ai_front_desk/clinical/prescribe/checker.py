@@ -2,7 +2,7 @@
 
 Given a patient record and an intended prescription, returns a verdict
 (GREEN / YELLOW / RED / CANNOT_VERIFY) plus a list of flags. Every flag
-cites its source: the patient record or reference v1. No silent
+cites its source: the patient record or the reference dataset. No silent
 inference is ever presented as fact.
 
 Verdict rules:
@@ -34,7 +34,7 @@ REFERENCE_TAG = f"{REFERENCE_VERSION} ({REFERENCE_DATE})"
 class Flag:
     severity: str  # "red" | "yellow" | "info"
     reason: str
-    source: str  # e.g. "patient record — allergy" or "reference v1 (2026-10-11) — ..."
+    source: str  # e.g. "patient record — allergy" or "reference v2 (2026-10-11) — ..."
     rule_id: str | None = None  # reference rule id, when the flag comes from RULES
 
 
@@ -196,7 +196,7 @@ def check_prescription(patient: dict, intended: dict) -> CheckResult:
         result.flags.append(
             Flag(
                 "info",
-                f"'{drug_name}' is not in reference v1 — cannot verify safety. "
+                f"'{drug_name}' is not in {REFERENCE_VERSION} — cannot verify safety. "
                 "Ask the dentist to check a full reference.",
                 f"{REFERENCE_TAG} — coverage",
             )

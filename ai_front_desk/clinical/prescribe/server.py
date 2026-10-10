@@ -25,7 +25,7 @@ from ..mia_shell import CharacterManifest
 from . import REFERENCE_DISCLAIMER, REFERENCE_VERSION
 from .billing import provider as billing_provider, TEST_MODE
 from .checker import check_prescription
-from .reference_data import DRUGS, REFERENCE_DATE
+from .reference_data import DRUGS, REFERENCE_DATE, SOURCES, GENERAL_SOURCES
 from .store import PrescribeStore, TenantMismatchError
 from .trial import (
     SUBSCRIPTION_PRICE_USD,
@@ -60,7 +60,7 @@ PRESCRIBE_MIA = CharacterManifest(
         "make the call; I just make sure nothing gets missed."
     ),
     allowed_actions=("safety_check", "show_reference", "show_history"),
-    domain_pack_ids=("dental-prescribing@reference-v1",),
+    domain_pack_ids=("dental-prescribing@reference-v2",),
     handoff_rules=(
         "On any clinical question beyond the safety check, or any request to "
         "prescribe, transmit, or fill: stop, show the boundary, and direct the "
@@ -391,20 +391,35 @@ def reference_page(clinic_id, clinic_name, trial) -> str:
     cats: dict[str, list] = {}
     for key, d in DRUGS.items():
         cats.setdefault(d["category"], []).append((key, d))
+
+    def _src_links(key: str) -> str:
+        links = "".join(
+            f"<br>· <a href='{esc(s['url'])}' target='_blank' rel='noopener'>{esc(s['name'])}</a>"
+            f" <span class='src'>(accessed {esc(s['accessed'])}) — {esc(s['supports'])}</span>"
+            for s in SOURCES.get(key, [])
+        )
+        return f"<span class='src'><b>Cited sources:</b>{links}</span>" if links else ""
+
     sections = ""
     for cat in ("Antibiotic", "Analgesic", "Anxiolytic"):
         items = "".join(
             f"<div class='card'><h4>{esc(d['display'])}</h4>"
             f"<p><b>Standard adult:</b> {esc(d['standard_adult'])}<br>"
             f"<b>Reference max:</b> {d['max_daily_mg']:g} mg/day<br>"
-            f"<span class='src'>{esc(d['notes'])}</span></p></div>"
-            for _, d in sorted(cats.get(cat, []), key=lambda x: x[1]["display"])
+            f"<span class='src'>{esc(d['notes'])}</span><br>{_src_links(key)}</p></div>"
+            for key, d in sorted(cats.get(cat, []), key=lambda x: x[1]["display"])
         )
         sections += f"<h3>{cat}s</h3>{items}"
+    gen = "".join(
+        f"<br>· <a href='{esc(s['url'])}' target='_blank' rel='noopener'>{esc(s['name'])}</a>"
+        f" <span class='src'>(accessed {esc(s['accessed'])}) — {esc(s['supports'])}</span>"
+        for s in GENERAL_SOURCES
+    )
     body = (
         mia_card("Standard dental prescribing references. Reference info — not recommendations.")
         + f"<div class='card'><p><b>Dataset:</b> {REFERENCE_VERSION} ({REFERENCE_DATE}) — "
-        "requires dentist review before clinical use. Uncertain rules are omitted, not guessed.</p></div>"
+        "requires dentist review before clinical use. Uncertain rules are omitted, not guessed."
+        f"<br><span class='src'><b>Guidance sources:</b>{gen}</span></p></div>"
         + sections
     )
     return shell("copilot", clinic_name, trial, body)

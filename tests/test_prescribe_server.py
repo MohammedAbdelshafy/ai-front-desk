@@ -1,4 +1,5 @@
 """HTTP smoke tests for the Mia Dental OS demo server."""
+import re
 import threading
 import time
 import urllib.parse
@@ -84,10 +85,15 @@ def test_sample_flow_end_to_end(live_server):
     assert code == 303 and "id=pat_" in loc
     code, loc = _post(live_server, "/api/sample-check?clinic=x", {})
     assert code == 303 and "id=chk_" in loc
+    # The redirect target must be a well-formed check URL — regression guard:
+    # following it must resolve to the recorded check (HTTP 200), never 404.
+    assert re.fullmatch(
+        r"/app/check\?clinic=demo-smile-arts&id=chk_[a-f0-9]{12}", loc
+    ), f"unexpected redirect target: {loc}"
     code, body = _get(live_server, loc)
     assert code == 200
     assert "RED" in body
-    assert "reference v1" in body
+    assert "reference v2" in body
     assert "warfarin" in body.lower() or "nsaid" in body.lower()
 
 
@@ -110,7 +116,7 @@ def test_reference_page_lists_drugs(live_server):
     code, body = _get(live_server, "/app/reference")
     assert code == 200
     assert "Amoxicillin" in body
-    assert "reference v1 (2026-10-11)" in body
+    assert "reference v2 (2026-10-11)" in body
 
 
 def test_wizard_guided_flow(live_server):
@@ -144,7 +150,7 @@ def test_wizard_guided_flow(live_server):
     assert code == 200 and "Summary" in body
     # choose page shows indication reference
     code, body = _get(live_server, f"/app/wizard/{token}/choose")
-    assert code == 200 and "Amoxicillin" in body and "reference v1" in body
+    assert code == 200 and "Amoxicillin" in body and "reference v2" in body
     # finish with the dentist's own choice -> RED via penicillin allergy
     code, loc = _post(live_server, f"/api/wizard/{token}/finish",
                       {"drug_name": "amoxicillin", "strength_mg": "500",
