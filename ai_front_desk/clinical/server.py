@@ -62,7 +62,16 @@ body{font:16px/1.5 system-ui,-apple-system,sans-serif;margin:0;color:#1a1a1a}
 .mia-stage-content{min-width:0;flex:1}.mia-stage-head{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}
 .mia-stage-head strong{font-size:15px;letter-spacing:-.2px;color:#26365a}.mia-stage>div p{font-size:13px;color:#586784;line-height:1.55;margin:7px 0 0}
 .mia-stage .stage{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;padding:4px 8px;color:#3554bf;background:#e1e9ff;border:1px solid #cedaff;border-radius:20px}
-.mia-help{margin-top:9px;font-size:12px;color:#596985}.mia-help summary{cursor:pointer;font-weight:700;color:#4560c6}.mia-help p{font-size:12px!important;color:#6b7790!important;margin-top:8px!important}
+.mia-help{margin-top:9px;font-size:12px;color:#596985}.mia-help summary{cursor:pointer;font-weight:700;color:#4560c6}
+.mia-model-note{font-size:11px!important;color:#8994a8!important;margin-top:8px!important}
+.mia-chat-log{display:flex;flex-direction:column;gap:7px;max-height:220px;overflow:auto;margin:10px 0}
+.mia-chat-line{max-width:95%;border-radius:10px;padding:9px 10px;margin:0;font-size:12px;line-height:1.5}
+.mia-chat-assistant{align-self:flex-start;background:#fff;border:1px solid #e3e8f7;color:#4b5b78}
+.mia-chat-user{align-self:flex-end;background:#3c5ed1;color:#fff}
+.mia-chat-form label{display:block;font-size:11px;font-weight:700;color:#5b6780;margin-bottom:5px}
+.mia-chat-entry{display:flex;gap:7px;align-items:stretch}
+.mia-chat-entry input{flex:1;min-width:0;border:1px solid #d2dbef;border-radius:8px;padding:9px 10px;font-size:12px}
+.mia-chat-entry button{padding:9px 13px;font-size:12px;white-space:nowrap}
 h1{font-size:22px} h2{font-size:18px;margin-top:28px}
 .q{border:1px solid #ddd;border-radius:10px;padding:12px;margin:10px 0}
 .q>label{font-weight:600;display:block;margin-bottom:6px}
@@ -103,13 +112,65 @@ def mia_stage_html(manifest_name="Dental Mia", stage="listening", reason=""):
         f"<span class='stage'>{esc(stage)}</span>"
         "</div>"
         f"<p>{esc(message)}</p>"
-        "<details class='mia-help'><summary>What can Mia help with?</summary>"
-        "<p>I can explain how to complete the form, help you find the right section, "
-        "and organize patient-reported answers. I can't diagnose symptoms, recommend "
-        "medicines, or send a message to clinic staff from this local demo. "
-        "For clinical concerns, contact the clinic directly.</p>"
+        "<details class='mia-help'><summary>Talk with Mia (local demo guide)</summary>"
+        "<p class='mia-model-note'>This prototype uses fixed, local workflow answers. "
+        "It is not connected to a live AI model and does not send your question anywhere.</p>"
+        "<div class='mia-chat-log' role='log' aria-live='polite'>"
+        "<p class='mia-chat-line mia-chat-assistant'>Hi, I'm Mia. Ask me how to complete this form or what information to include.</p>"
+        "</div>"
+        "<form class='mia-chat-form'>"
+        "<label for='mia-question'>Your question</label>"
+        "<div class='mia-chat-entry'><input id='mia-question' name='question' type='text' maxlength='280' "
+        "autocomplete='off' required placeholder='Ask about the intake process…'>"
+        "<button type='submit'>Ask Mia</button></div>"
+        "</form>"
         "</details></div></section>"
+        + MIA_CHAT_SCRIPT
     )
+
+
+MIA_CHAT_SCRIPT = r"""<script>
+(function () {
+  if (window.__miaClinicalGuideBound) return;
+  window.__miaClinicalGuideBound = true;
+  document.addEventListener("submit", function (event) {
+    const form = event.target;
+    if (!form || !form.classList || !form.classList.contains("mia-chat-form")) return;
+    event.preventDefault();
+    const input = form.querySelector("input[name='question']");
+    const log = form.parentElement.querySelector(".mia-chat-log");
+    const question = (input && input.value || "").trim();
+    if (!question || !log) return;
+    const q = question.toLowerCase();
+    let answer = "I can explain the form and the intake workflow. I can't interpret symptoms or make medical decisions. For personal clinical questions, contact your dentist or another qualified clinician.";
+    if (/(which medicine|what medicine should|what drug should|should i take|which antibiotic|dose should i|prescribe|diagnos|what disease|treat my|is this serious)/.test(q)) {
+      answer = "I can't diagnose a condition or recommend a medicine or dose. Please ask the dentist or another qualified clinician, who can consider your history and examination.";
+    } else if (/(don't know|do not know|not sure|unsure|unknown|leave blank|skip this)/.test(q)) {
+      answer = "Choose “I don't know”, “Not applicable”, or “Prefer not to answer” where those options are available. If the answer is important and you are unsure, the clinic can clarify it with you.";
+    } else if (/(antibiotic|medication|medicine|supplement|vitamin|drug list)/.test(q)) {
+      answer = "List the medicines you currently take and any recent changes. Where known, include the name, strength, dose, how often you take it, and why. Include current or recent antibiotics, over-the-counter medicines, vitamins, and supplements. Do not start, stop, or change a medicine because of this form.";
+    } else if (/(allerg|reaction|penicillin|latex)/.test(q)) {
+      answer = "Report the substance and what happened during the reaction, if you know. The form records your answer for the dentist to review; it does not assess the allergy or decide treatment.";
+    } else if (/(staff|human|person|contact|message|call the clinic|talk to someone)/.test(q)) {
+      answer = "This local demo cannot send messages to clinic staff. Please call the clinic directly for help or urgent clinical concerns.";
+    } else if (/(privacy|data|real patient|actual patient|safe to enter)/.test(q)) {
+      answer = "This is a local synthetic-data demonstration. Do not enter real names, dates of birth, phone numbers, or real health information.";
+    } else if (/(complete|fill|questionnaire|form|history|what is this)/.test(q)) {
+      answer = "This form collects the history you report so the dentist can review it before your visit. Answer what you know, be as accurate as you can, and use an available “Not sure” option instead of guessing.";
+    }
+    const userLine = document.createElement("p");
+    userLine.className = "mia-chat-line mia-chat-user";
+    userLine.textContent = question;
+    const assistantLine = document.createElement("p");
+    assistantLine.className = "mia-chat-line mia-chat-assistant";
+    assistantLine.textContent = answer;
+    log.appendChild(userLine);
+    log.appendChild(assistantLine);
+    input.value = "";
+    log.scrollTop = log.scrollHeight;
+  });
+})();
+</script>"""
 
 
 def render_landing():
