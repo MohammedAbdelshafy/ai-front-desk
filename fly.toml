@@ -1,0 +1,37 @@
+# Fly.io config — Mia Dental OS (alternative host, for later).
+#
+# Not the primary path; Render is the recommended first deploy.
+# To use: install flyctl, then `fly launch` (it will detect this file),
+# `fly volumes create mia_data --size 1`, and `fly deploy`.
+# Then: fly secrets set PRESCRIBE_SECURE_COOKIES=1
+app = "mia-dental-os"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8767
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 100
+    soft_limit = 80
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+
+[[mounts]]
+  source = "mia_data"
+  destination = "/data"
+
+[env]
+  PORT = "8767"
+  PRESCRIBE_HOST = "0.0.0.0"
+  PRESCRIBE_DB = "/data/prescribe.sqlite3"
+  PRESCRIBE_STATE_DIR = "/data"
+  PRESCRIBE_SECURE_COOKIES = "1"

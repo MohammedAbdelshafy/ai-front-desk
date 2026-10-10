@@ -1,0 +1,30 @@
+# Render Blueprint — Mia Dental OS (one-click deploy).
+#
+# Founder flow: Render dashboard → New → Blueprint → connect this repo →
+# Apply. Render reads this file, builds the Dockerfile, attaches the disk,
+# and gives you a public https:// URL.
+#
+# No secrets in this file. Pricing note: Render's persistent disk requires
+# a paid instance type — the free tier has ephemeral storage (accounts and
+# patient data would be wiped on every deploy/restart). Use Starter or up.
+services:
+  - type: web
+    name: mia-dental-os
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /
+    disk:
+      name: mia-dental-os-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      # Render injects PORT automatically; the server reads $PORT.
+      - key: PRESCRIBE_HOST
+        value: 0.0.0.0
+      - key: PRESCRIBE_DB
+        value: /data/prescribe.sqlite3
+      - key: PRESCRIBE_STATE_DIR
+        value: /data
+      - key: PRESCRIBE_SECURE_COOKIES
+        value: 1

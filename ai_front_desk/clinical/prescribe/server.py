@@ -43,7 +43,10 @@ DB_PATH = Path(
         str(Path.home() / ".mia-prescribe" / "prescribe-demo.sqlite3"),
     )
 )
-PORT = int(os.environ.get("PRESCRIBE_PORT", "8767"))
+# Render and other PaaS inject $PORT; PRESCRIBE_PORT is the local override.
+PORT = int(os.environ.get("PORT") or os.environ.get("PRESCRIBE_PORT", "8767"))
+# Bind host: 127.0.0.1 for local dev; containers set PRESCRIBE_HOST=0.0.0.0.
+HOST = os.environ.get("PRESCRIBE_HOST", "127.0.0.1")
 MAX_BODY = 64 * 1024
 SESSION_COOKIE = "mia_session"
 
@@ -1667,8 +1670,8 @@ WIZ_TOKEN_RE = re.compile(r"wz_[a-f0-9]{12}\Z")
 
 
 def main() -> None:
-    server = HTTPServer(("127.0.0.1", PORT), Handler)
-    print(f"Mia Dental OS demo → http://127.0.0.1:{PORT}/  (synthetic data only)")
+    server = HTTPServer((HOST, PORT), Handler)
+    print(f"Mia Dental OS demo → http://{HOST}:{PORT}/  (synthetic data only)")
     server.serve_forever()
 
 
