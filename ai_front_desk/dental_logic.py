@@ -36,12 +36,11 @@ class ClinicConfig:
 
 
 def new_dental_session(sender_id: str, clinic_id: str) -> dict[str, Any]:
-    """Create JSON-serializable intake state; do not store the message body here."""
+    """Return a JSON-serializable state; avoid storing message bodies."""
     return {
         "sender_id": sender_id,
         "clinic_id": clinic_id,
         "stage": "welcome",
-        "name": "",
         "intent": "",
         "preferred_time": "",
         "callback_method": "",
@@ -69,10 +68,11 @@ def _approved_faq(text: str, config: ClinicConfig) -> str | None:
 def process_dental_message(
     state: dict[str, Any], text: str, config: ClinicConfig
 ) -> tuple[dict[str, Any], str, bool, str]:
-    """Return (state, reply, handoff_required, stage), without external side effects."""
+    """Return (state, reply, handoff_required, stage), with no external side effects."""
     if state.get("clinic_id") != config.clinic_id:
-        # Fail closed rather than allowing cross-tenant state reuse.
         clean = new_dental_session(str(state.get("sender_id", "")), config.clinic_id)
+        clean["stage"] = "handoff"
+        clean["handoff_required"] = True
         return clean, (
             "I couldn't match this conversation to the right clinic. "
             "I'll ask the team to help."
@@ -80,6 +80,17 @@ def process_dental_message(
 
     state = dict(state)
     text = (text or "").strip()
+    stage = state.get("stage", "welcome")
+
+    # Once handed off, the assistant must not resume autonomous handling.
+    if stage in {"handoff", "clinical_handoff"}:
+        state["handoff_required"] = True
+        reply = URGENT_HANDOFF_TEXT if stage == "clinical_handoff" else (
+            "Your request is already directed to the clinic workflow. "
+            "Please contact the clinic directly if you need timely assistance."
+        )
+        return state, reply, True, stage
+
     state["handoff_required"] = False
 
     if _contains_any(text, (
@@ -90,8 +101,7 @@ def process_dental_message(
         state["handoff_required"] = True
         return state, config.handoff_message, True, "handoff"
 
-    # Route symptom-like/clinical messages to people. This intentionally is
-    # conservative keyword routing, not diagnosis or a validated triage model.
+    # Conservative keyword routing only. This is not validated clinical triage.
     if _contains_any(text, (
         "toothache", "tooth pain", "swelling", "bleeding", "abscess",
         "injury", "knocked out", "broken tooth", "can't breathe",
@@ -103,9 +113,8 @@ def process_dental_message(
 
     faq = _approved_faq(text, config)
     if faq:
-        return state, faq, False, state.get("stage", "welcome")
+        return state, faq, False, stage
 
-    stage = state.get("stage", "welcome")
     if not text:
         return state, "Please send your question again, or ask for the clinic team.", False, stage
 
@@ -128,10 +137,9 @@ def process_dental_message(
     if stage == "collect_time":
         state["preferred_time"] = text[:120]
         state["stage"] = "collect_callback"
-        options = "phone or WhatsApp"
         return state, (
-            f"Noted as a request, not a confirmed booking. How should the clinic "
-            f"team contact you: {options}? Reply 'phone' or 'WhatsApp'."
+            "Noted as a request, not a confirmed booking. How should the clinic "
+            "team contact you: phone or WhatsApp? Reply 'phone' or 'WhatsApp'."
         ), False, "collect_callback"
 
     if stage == "collect_callback":
@@ -169,11 +177,11 @@ def process_dental_message(
             ), False, "done"
         return state, "Please reply yes or no so I can handle your request correctly.", False, stage
 
-    if stage in {"handoff", "clinical_handoff", "done"}:
+    if stage == "done":
         return state, (
-            "Your message has been directed to the clinic workflow. "
-            "Please contact the clinic directly if you need timely assistance."
-        ), bool(state.get("handoff_required")), stage
+            "Your earlier request is closed. You can contact the clinic directly "
+            "or start a new request through the clinic's approved channel."
+        ), False, stage
 
     state["stage"] = "welcome"
     return state, f"Hello! I'm the administrative assistant for {config.name}.", False, "welcome"
