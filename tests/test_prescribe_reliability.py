@@ -17,6 +17,7 @@ import subprocess
 import sys
 import threading
 import time
+from pathlib import Path
 import urllib.parse
 import urllib.request
 
@@ -396,7 +397,7 @@ def test_crash_safety_kill9(live_server, tmp_path):
     proc = subprocess.Popen(
         [sys.executable, "-m", "ai_front_desk.clinical.prescribe.server"],
         env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-        cwd=os.path.expanduser("~/workspace/ai-front-desk"),
+        cwd=str(Path(__file__).resolve().parents[1]),
     )
     try:
         base = "http://127.0.0.1:18791"
