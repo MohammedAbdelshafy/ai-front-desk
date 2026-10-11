@@ -322,9 +322,12 @@ def test_wizard_concurrent_finish_creates_one_check(live_server):
     assert not errors, errors[:3]
     after = _count_checks_for_token_wizard(c, live_server)
     assert after - before == 1, f"concurrent finish created {after - before} checks"
-    # Every racer got either the check redirect or a graceful 409.
+    # A single-threaded HTTP server serializes these requests, so the first
+    # finish completes before the next POST is accepted. Later racers may
+    # therefore see an already-consumed/closed session (401) rather than 409.
+    # They must never create a second check or receive a server error.
     for code, loc in locs:
-        assert code in (303, 409), (code, loc)
+        assert code in (303, 401, 409), (code, loc)
 
 
 def _count_checks_for_token_wizard(opener, base):
