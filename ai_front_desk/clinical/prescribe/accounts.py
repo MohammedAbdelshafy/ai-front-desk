@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from . import trial as _trial
+from .store import LockedConnection
 
 # --- constants ---------------------------------------------------------
 
@@ -67,6 +68,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_pacct_email ON prescribe_accounts(email);
 CREATE TABLE IF NOT EXISTS prescribe_sessions (
     token_hash  TEXT PRIMARY KEY,        -- sha256 hex of the bearer token
     account_id  TEXT NOT NULL,
+    csrf_token  TEXT NOT NULL DEFAULT '', -- per-session CSRF secret (random)
     created_at  REAL NOT NULL,
     last_seen   REAL NOT NULL,
     expires_at  REAL NOT NULL,
@@ -130,32 +132,56 @@ class AccountStore:
 
         self.path = Path(db_path).expanduser()
         self.path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-        self._db = sqlite3.connect(str(self.path), timeout=5.0, check_same_thread=False)
-        self._db.row_factory = sqlite3.Row
+        conn = sqlite3.connect(str(self.path), timeout=5.0, check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        self._db = LockedConnection(conn)
+        # Same performance/durability contract as store.py — see
+        # docs/engineering/RELIABILITY.md. Both stores share one SQLite file.
+        self._db.execute("PRAGMA journal_mode = WAL")
+        self._db.execute("PRAGMA synchronous = NORMAL")
         self._db.execute("PRAGMA foreign_keys = ON")
+        self._db.execute("PRAGMA busy_timeout = 5000")
         self._db.executescript(SCHEMA)
+        self._db.commit()
         self._migrate()
         self.ensure_demo_account()
 
     def _migrate(self) -> None:
-        """Idempotent column migrations for prescribe_accounts."""
-        cols = {
+        """Idempotent column migrations."""
+        acct_cols = {
             r["name"]
             for r in self._db.execute("PRAGMA table_info(prescribe_accounts)")
         }
         # Manual Neteller billing: dentist paid, awaiting founder activation.
-        if "payment_pending_at" not in cols:
+        if "payment_pending_at" not in acct_cols:
             self._db.execute(
                 "ALTER TABLE prescribe_accounts ADD COLUMN payment_pending_at REAL"
             )
             self._db.commit()
+        sess_cols = {
+            r["name"]
+            for r in self._db.execute("PRAGMA table_info(prescribe_sessions)")
+        }
+        # Per-session CSRF secret.
+        if "csrf_token" not in sess_cols:
+            self._db.execute(
+                "ALTER TABLE prescribe_sessions ADD COLUMN csrf_token TEXT NOT NULL DEFAULT ''"
+            )
+            self._db.commit()
+            # Backfill: existing sessions get a fresh random token each.
+            for (th,) in self._db.execute("SELECT token_hash FROM prescribe_sessions"):
+                self._db.execute(
+                    "UPDATE prescribe_sessions SET csrf_token = ? WHERE token_hash = ?",
+                    (secrets.token_urlsafe(32), th),
+                )
+            self._db.commit()
         # Legal acceptance: doc version + timestamp recorded at sign-up.
-        if "legal_accepted_version" not in cols:
+        if "legal_accepted_version" not in acct_cols:
             self._db.execute(
                 "ALTER TABLE prescribe_accounts ADD COLUMN legal_accepted_version TEXT"
             )
             self._db.commit()
-        if "legal_accepted_at" not in cols:
+        if "legal_accepted_at" not in acct_cols:
             self._db.execute(
                 "ALTER TABLE prescribe_accounts ADD COLUMN legal_accepted_at REAL"
             )
@@ -261,7 +287,16 @@ class AccountStore:
             "active", "expiring", "subscribed")
 
     def mark_payment_pending(self, account_id: str) -> None:
-        """Dentist clicked 'I've paid via Neteller' — awaiting founder activation."""
+        """Dentist clicked 'I've paid via Neteller' — awaiting founder activation.
+
+        Invalid transition guard: an already-subscribed account can never go
+        back to pending (see docs/engineering/RELIABILITY.md).
+        """
+        acct = self.get_account(account_id)
+        if acct is None:
+            raise KeyError(f"unknown account {account_id}")
+        if acct["subscription_ref"] and not acct["cancelled_at"]:
+            raise ValueError("account is already subscribed — cannot go back to pending")
         self._db.execute(
             "UPDATE prescribe_accounts SET payment_pending_at = ? WHERE account_id = ?",
             (time.time(), account_id),
@@ -312,15 +347,28 @@ class AccountStore:
     # -- sessions --------------------------------------------------------
     def create_session(self, account_id: str,
                        ttl_seconds: int = SESSION_TTL_SECONDS) -> str:
+        # Fresh random bearer token on EVERY signin — a stolen/old token can
+        # never be reused to fixate a session (see RELIABILITY.md).
         token = secrets.token_urlsafe(32)
+        csrf = secrets.token_urlsafe(32)
         now = time.time()
         self._db.execute(
-            "INSERT INTO prescribe_sessions (token_hash, account_id, created_at, "
-            "last_seen, expires_at) VALUES (?, ?, ?, ?, ?)",
-            (_token_hash(token), account_id, now, now, now + ttl_seconds),
+            "INSERT INTO prescribe_sessions (token_hash, account_id, csrf_token, "
+            "created_at, last_seen, expires_at) VALUES (?, ?, ?, ?, ?, ?)",
+            (_token_hash(token), account_id, csrf, now, now, now + ttl_seconds),
         )
         self._db.commit()
         return token
+
+    def csrf_token_for(self, token: str) -> str | None:
+        """Return the CSRF secret bound to a bearer token (for form builders)."""
+        if not token:
+            return None
+        row = self._db.execute(
+            "SELECT csrf_token FROM prescribe_sessions WHERE token_hash = ?",
+            (_token_hash(token),),
+        ).fetchone()
+        return row["csrf_token"] if row and row["csrf_token"] else None
 
     def session_ctx(self, token: str) -> dict[str, Any] | None:
         """Validate a bearer token -> auth context dict, or None.
@@ -353,6 +401,7 @@ class AccountStore:
             self._db.commit()
         trial = self.trial_status(acct["account_id"], now)
         return {
+            "csrf_token": row["csrf_token"] or "",
             "account_id": acct["account_id"],
             "clinic_id": acct["clinic_id"],
             "clinic_name": acct["clinic_name"],

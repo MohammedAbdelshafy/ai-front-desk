@@ -1,5 +1,6 @@
 """Auth tests: signup, signin, sessions, per-account trial, lockout, isolation."""
 import http.cookiejar
+import re
 import json
 import threading
 import time
@@ -62,7 +63,26 @@ def _get(opener, base, path):
         return e.code, e.read().decode(), dict(e.headers)
 
 
-def _post(opener, base, path, fields):
+
+def _csrf_token(opener, base):
+    """Extract the session's CSRF token from a form page (test helper)."""
+    for path in ("/app/start", "/subscribe"):
+        res = _get(opener, base, path)
+        body = res[1] if len(res) > 1 else ""
+        if not isinstance(body, str):
+            continue
+        m = re.search(r"name='csrf_token' value='([^']*)'", body)
+        if m:
+            return m.group(1)
+    return ""
+
+
+def _post(opener, base, path, fields, csrf=True):
+    fields = dict(fields)
+    if csrf and "csrf_token" not in fields:
+        tok = _csrf_token(opener, base)
+        if tok:
+            fields["csrf_token"] = tok
     data = urllib.parse.urlencode(fields).encode()
     req = urllib.request.Request(base + path, data=data, method="POST")
     try:
@@ -182,10 +202,18 @@ def test_signout_invalidates_session(live_server):
     _signup(c, live_server)
     code, body, _ = _get(c, live_server, "/app/patients")
     assert code == 200
-    code, loc, _ = _get(c, live_server, "/signout")
+    # Signout is POST + CSRF now (GET /signout no longer changes state).
+    code, loc, _ = _post(c, live_server, "/api/signout", {})
     assert code == 303 and loc == "/"
     code, loc, _ = _get(c, live_server, "/app/patients")
     assert code == 303 and loc.startswith("/signin")
+    # Legacy GET /signout does not sign out.
+    c2 = _client()
+    _signup(c2, live_server)
+    code, loc, _ = _get(c2, live_server, "/signout")
+    assert code == 303
+    code, body, _ = _get(c2, live_server, "/app/patients")
+    assert code == 200, "GET /signout must not invalidate the session"
 
 
 def test_trial_expiry_locks_and_subscribe_unlocks(live_server):

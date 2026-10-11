@@ -16,8 +16,9 @@ import html
 import json
 import os
 import re
+import secrets
 import time
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer as HTTPServer
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs, quote
 
@@ -324,6 +325,8 @@ a:hover{color:var(--brand)}
 .card.tier{border-style:dashed;border-width:1.5px;background:#fbfdff}
 .eyebrow{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--brand-deep);margin:0 0 6px}
 .btn{display:inline-flex;align-items:center;gap:8px;background:var(--brand);color:#fff;border:0;border-radius:12px;padding:11px 20px;font:600 16px var(--font);cursor:pointer;text-decoration:none;box-shadow:0 4px 12px -4px rgba(13,125,140,.5)}
+.linklike{background:none;border:0;color:var(--brand);font:inherit;cursor:pointer;text-decoration:underline;padding:0}
+.linklike:hover{color:var(--brand-deep)}
 .btn:hover{background:var(--brand-deep);color:#fff}
 .btn.ghost{background:var(--surface);color:var(--brand-deep);border:1.5px solid var(--brand);box-shadow:none}
 .btn.ghost:hover{background:var(--brand-soft)}
@@ -476,7 +479,11 @@ def shell(active: str, clinic_name: str, trial: dict, body: str, ctx: dict | Non
         acct = (
             "<span class='acct-chip'>" + ICONS["user"]
             + f"<span>{esc(ctx['name'])} · {esc(ctx['clinic_name'])}</span>"
-            + "<a href='/signout'>Sign out</a></span>"
+            # POST + CSRF: signout changes state, so it must not be a GET link
+            # (logout-CSRF). Styled inline to keep the chip layout.
+            + f"<form method='POST' action='/api/signout' style='display:inline;margin:0'>"
+            + _csrf_field(ctx)
+            + "<button type='submit' class='linklike'>Sign out</button></form></span>"
         )
     mods = []
     for m in MODULES:
@@ -669,7 +676,8 @@ def welcome_page(ctx: dict) -> str:
         "<p><b>First, see Mia work — 60 seconds:</b></p><ol class='howto'>"
         "<li><b>Load a sample patient</b> — synthetic record with a penicillin allergy and warfarin on board."
         "<form method='POST' action='/api/sample-patient' style='margin-top:8px'>"
-        "<button class='btn ghost' type='submit'>Load sample patient</button></form></li>"
+        + _csrf_field(ctx)
+        + "<button class='btn ghost' type='submit'>Load sample patient</button></form></li>"
         "<li><b>Start a guided check</b> — Mia walks through indication → factors → allergies → meds → conditions → your choice."
         "<p style='margin-top:8px'><a class='btn ghost' href='/app/wizard/start'>Start guided check</a></p></li>"
         "</ol>"
@@ -695,7 +703,8 @@ def subscribe_page(trial: dict, ctx: dict | None = None) -> str:
         body = (
             "<p>The copilot module is unlocked. Cancel anytime — your records stay preserved.</p>"
             "<form method='POST' action='/api/billing/cancel'>"
-            "<button class='btn ghost' type='submit'>Cancel subscription</button></form>"
+            + _csrf_field(ctx)
+            + "<button class='btn ghost' type='submit'>Cancel subscription</button></form>"
         )
     elif state == "pending":
         headline = "Payment received — activating your account"
@@ -719,12 +728,13 @@ def subscribe_page(trial: dict, ctx: dict | None = None) -> str:
             "<li>We confirm your payment and unlock your account</li>"
             "</ol>"
             "<form method='POST' action='/api/billing/paid'>"
-            "<button class='btn' type='submit'>I've completed my Neteller payment</button></form>"
+            + _csrf_field(ctx)
+            + "<button class='btn' type='submit'>I've completed my Neteller payment</button></form>"
             "<p class='src'>Manual billing — a human reviews every payment before activation. "
             "No card details are entered or stored here.</p>"
             "</div>"
+            + demo_video("mia-dental-os-trial.mp4", "How the trial works — 21 seconds")
         )
-        + demo_video("mia-dental-os-trial.mp4", "How the trial works — 21 seconds")
     return (
         "<!doctype html><html><head><title>Subscribe — Mia Dental OS</title>"
         + STYLE + "</head><body>" + banner()
@@ -751,8 +761,8 @@ def patients_page(store, ctx: dict) -> str:
         + "<div class='card'><p class='eyebrow'>Patients</p>"
         f"<table><tr><th>Patient</th><th>Allergies</th><th>Meds</th></tr>{rows}</table></div>"
         + "<div class='card'><h3>Add patient (synthetic demo data)</h3>"
-        f"<form method='POST' action='/api/patient'>"
-        "<label>Label (must start with Demo/Test/Sample)<input name='label' value='Demo Patient ' required></label>"
+        f"<form method='POST' action='/api/patient'>" + _csrf_field(ctx)
+        + "<label>Label (must start with Demo/Test/Sample)<input name='label' value='Demo Patient ' required></label>"
         "<label>Allergies — one per line: substance | reaction<input name='allergies' placeholder='penicillin | rash'></label>"
         "<label><input type='checkbox' name='no_known_allergies' value='1' style='width:auto'> No known allergies (explicit)</label>"
         "<label>Conditions — comma separated<input name='conditions' placeholder='hypertension'></label>"
@@ -798,8 +808,8 @@ def patient_detail_page(store, ctx: dict, patient_id: str) -> str:
         + f"<p><a class='btn' href='{px}/wizard/start?patient={patient_id}'>Start guided check {ICONS['arrow']}</a> "
         "<span class='src'>Walks through indication → factors → allergies → meds → conditions → your choice.</span></p>"
         + f"<div class='card'><p class='eyebrow'>Quick safety check <span class='hint'>(skip wizard)</span></p>"
-        f"<form method='POST' action='/api/check'>"
-        f"<input type='hidden' name='patient_id' value='{patient_id}'>"
+        f"<form method='POST' action='/api/check'>" + _csrf_field(ctx)
+        + f"<input type='hidden' name='patient_id' value='{patient_id}'>"
         f"<label>Drug<input name='drug_name' list='drugs' required placeholder='ibuprofen'></label>"
         f"<datalist id='drugs'>{drug_opts}</datalist>"
         "<label>Strength (mg)<input name='strength_mg' type='number' step='any' placeholder='400'></label>"
@@ -843,8 +853,8 @@ def check_result_page(store, ctx: dict, check_id: str) -> str:
         f"<p>State: <b>{esc(c['review_state'].replace('_', ' '))}</b>"
         + (f" — by {esc(c['reviewed_by'])}" if c["reviewed_by"] else "")
         + (f"<br><span class='src'>{esc(c['review_note'])}</span>" if c["review_note"] else "")
-        + "</p><form method='POST' action='/api/review'>"
-        f"<input type='hidden' name='check_id' value='{check_id}'>"
+        + "</p><form method='POST' action='/api/review'>" + _csrf_field(ctx)
+        + f"<input type='hidden' name='check_id' value='{check_id}'>"
         "<label>Your conclusion (recorded with timestamp + audit)<textarea name='note' rows='2' placeholder='Reviewed — proceeding with alternative…'></textarea></label>"
         "<label>Mark as<select name='state'>"
         "<option value='clinician_reviewed'>Clinician reviewed</option>"
@@ -968,10 +978,12 @@ def start_page(store, ctx: dict) -> str:
         + first
         + "<li><b>Load a sample patient</b> — synthetic record with a penicillin allergy and warfarin on board."
         f"<form method='POST' action='/api/sample-patient' style='margin-top:8px'>"
-        "<button class='btn ghost' type='submit'>Load sample patient</button></form></li>"
+        + _csrf_field(ctx)
+        + "<button class='btn ghost' type='submit'>Load sample patient</button></form></li>"
         "<li><b>Run the sample check</b> — ibuprofen 400 mg three times daily. Watch Mia flag it."
         f"<form method='POST' action='/api/sample-check' style='margin-top:8px'>"
-        "<button class='btn ghost' type='submit'>Run sample check</button></form></li>"
+        + _csrf_field(ctx)
+        + "<button class='btn ghost' type='submit'>Run sample check</button></form></li>"
         "</ol>"
         f"<p><a class='btn' href='{ctx['prefix']}/patients'>Or explore patients →</a></p></div>"
     )
@@ -1088,6 +1100,39 @@ def _field(form: dict, key: str, max_len: int = MAX_FIELD_LEN) -> str:
     return (form.get(key, "") or "")[:max_len].strip()
 
 
+def _csrf_field(ctx: dict | None) -> str:
+    """Hidden CSRF input for state-changing forms (central injection point).
+
+    Every authenticated POST form must include this. The token is per-session,
+    random, and validated server-side on every POST (see _do_POST_inner).
+    """
+    token = (ctx or {}).get("csrf_token", "")
+    return f"<input type='hidden' name='csrf_token' value='{html.escape(token, quote=True)}'>"
+
+
+# POST routes that do NOT require a CSRF token: pre-auth endpoints have no
+# session to bind a token to (they are rate-limited instead). /api/invite is
+# a public lead-capture form with no session either.
+CSRF_EXEMPT_PATHS = frozenset({"/api/signup", "/api/signin", "/api/invite"})
+
+
+def _check_csrf(handler, form: dict) -> str | None:
+    """Validate the CSRF token for a POST.
+
+    Returns None if OK, "no_session" if there is no session (the handler's
+    normal 401 path takes over), or "bad_token" for missing/invalid tokens.
+    """
+    ctx = _auth_ctx(handler)
+    if ctx is None:
+        return "no_session"
+    expected = ctx.get("csrf_token", "")
+    got = form.get("csrf_token", "")
+    # secrets.compare_digest: constant-time, and rejects empty/missing.
+    if bool(expected) and secrets.compare_digest(str(got), str(expected)):
+        return None
+    return "bad_token"
+
+
 def _cookie_token(handler) -> str | None:
     raw = handler.headers.get("Cookie") or ""
     for part in raw.split(";"):
@@ -1184,13 +1229,31 @@ def _audit_auth(action: str, email: str, detail: str = "") -> None:
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "MiaDentalOS/1.0"
+    # No version disclosure: the Server header reveals nothing about the
+    # product or the Python runtime (see docs/engineering/RELIABILITY.md).
+    def version_string(self) -> str:
+        return ""
 
     def log_message(self, *args):  # quiet
         pass
 
     # -- GET ------------------------------------------------------
     def do_GET(self):
+        try:
+            self._do_GET_inner()
+        except Exception:
+            # Never leak a traceback to the client (see _do_POST_inner).
+            import traceback
+            traceback.print_exc()
+            try:
+                _send(self, 500,
+                      "<!doctype html><html><head><title>Error</title></head>"
+                      "<body><h1>Something went wrong.</h1>"
+                      "<p>Try again.</p></body></html>")
+            except Exception:
+                pass
+
+    def _do_GET_inner(self):
         url = urlparse(self.path)
         q = parse_qs(url.query)
         path = url.path
@@ -1212,11 +1275,9 @@ class Handler(BaseHTTPRequestHandler):
                 _send(self, 200, signin_page(next_url=_safe_next(q.get("next", [""])[0])))
                 return
             if path == "/signout":
-                ctx = _auth_ctx(self)
-                if ctx and not ctx.get("is_demo"):
-                    _audit_auth("signout", ctx.get("email", ""))
-                get_accounts().destroy_session(_cookie_token(self))
-                _clear_session_cookie(self, "/")
+                # Legacy GET signout: redirect to the app instead of changing
+                # state (state-changing signout is POST /api/signout + CSRF).
+                _redirect(self, "/app/start")
                 return
             if path == "/invite":
                 _send(self, 200, invite_page())
@@ -1323,6 +1384,11 @@ class Handler(BaseHTTPRequestHandler):
                 _send(self, 403, "cross-account wizard access denied")
                 return
             step = m.group(2)
+            # Server-side step order: a locked step redirects to the first
+            # incomplete one instead of rendering (no skipping via URL).
+            if step in STEPS and not step_is_unlocked(state, step):
+                _redirect(self, f"{ctx['prefix']}/wizard/{m.group(1)}/{first_incomplete_step(state)}")
+                return
             if step == "summary":
                 _send(self, 200, wizard_summary_page(state, ctx))
             elif step == "choose":
@@ -1336,11 +1402,32 @@ class Handler(BaseHTTPRequestHandler):
 
     # -- POST -----------------------------------------------------
     def do_POST(self):
+        try:
+            self._do_POST_inner()
+        except Exception:
+            # Never leak a traceback to the client. Log server-side, return
+            # a generic 500 (see docs/engineering/RELIABILITY.md).
+            import traceback
+            traceback.print_exc()
+            try:
+                _json(self, 500, {"code": "internal_error",
+                                  "message": "Something went wrong. Try again."})
+            except Exception:
+                pass
+
+    def _do_POST_inner(self):
         url = urlparse(self.path)
         path = url.path
-        # Read the request body ONCE (a second rfile read would block forever).
+        # Enforce MAX_BODY BEFORE parsing: oversized bodies are rejected with
+        # 413 instead of being silently truncated (which would corrupt
+        # keep-alive framing and could smuggle fields past validation).
         length = int(self.headers.get("Content-Length", 0) or 0)
-        _raw = self.rfile.read(min(length, MAX_BODY)).decode("utf-8", errors="replace")
+        if length > MAX_BODY:
+            _json(self, 413, {"code": "body_too_large",
+                              "message": "Request body too large."})
+            return
+        # Read the request body ONCE (a second rfile read would block forever).
+        _raw = self.rfile.read(length).decode("utf-8", errors="replace")
         _parsed = parse_qs(_raw)
         # Hard-cap every incoming field (DoS/bloat protection) and bound the
         # number of fields. No legitimate field needs more than this.
@@ -1354,17 +1441,37 @@ class Handler(BaseHTTPRequestHandler):
                 return self._handle_signin(form)
             if path == "/api/invite":
                 # Stored locally; the pilot team follows up personally.
+                # fsync: the lead is durable before we say "you're on the list".
                 invites = BASE / "invites.jsonl"
                 with open(invites, "a") as f:
                     f.write(json.dumps({
                         "name": form.get("name", ""), "clinic": form.get("clinic", ""),
                         "email": form.get("email", ""), "at": time.time(),
                     }) + "\n")
+                    f.flush()
+                    os.fsync(f.fileno())
                 _send(self, 200,
                       "<!doctype html><html><head><title>Thanks</title>" + STYLE +
                       "</head><body><div class='narrow'><h1>You're on the list.</h1>"
                       "<p>We'll reach out personally about the pilot. No spam, no drip sequence.</p>"
                       "<p><a href='/'>← Back</a></p></div></body></html>")
+                return
+            # ---- CSRF gate: every other POST changes state and needs a
+            # valid per-session token (missing/invalid -> 403, audited).
+            # No session -> fall through to the handler's normal 401. ----
+            csrf_err = _check_csrf(self, form)
+            if csrf_err == "bad_token":
+                _audit_denied(self, path, "csrf validation failed")
+                _json(self, 403, {"code": "forbidden",
+                                  "message": "Invalid or missing request token. Reload the page and try again."})
+                return
+            # ---- signout (POST + CSRF; signout changes state) ----
+            if path == "/api/signout":
+                ctx = _auth_ctx(self)
+                if ctx and not ctx.get("is_demo"):
+                    _audit_auth("signout", ctx.get("email", ""))
+                get_accounts().destroy_session(_cookie_token(self))
+                _clear_session_cookie(self, "/")
                 return
             # ---- billing (session required) ----
             if path == "/api/billing/paid":
@@ -1503,11 +1610,18 @@ class Handler(BaseHTTPRequestHandler):
                     return
                 token, step = m.group(1), m.group(2)
                 multi = form_multi
+                # No skipping steps via direct POST: the step must be unlocked.
+                if step in STEPS_REQUIRED and not step_is_unlocked(state, step):
+                    _json(self, 409, {"code": "step_locked",
+                                      "message": "Complete the earlier steps first.",
+                                      "next": first_incomplete_step(state)})
+                    return
                 if step == "indication":
                     WIZARDS.update(token, {
                         "indication": form.get("indication", ""),
                         "indication_notes": form.get("indication_notes", "").strip(),
                     })
+                    WIZARDS.complete_step(token, "indication")
                     _redirect(self, f"{px}/wizard/{token}/factors")
                 elif step == "factors":
                     WIZARDS.update(token, {"factors": {
@@ -1518,6 +1632,7 @@ class Handler(BaseHTTPRequestHandler):
                         "hepatic": form.get("hepatic", ""),
                         "weight_kg": form.get("weight_kg", "").strip(),
                     }})
+                    WIZARDS.complete_step(token, "factors")
                     _redirect(self, f"{px}/wizard/{token}/allergies")
                 elif step == "allergies":
                     allergies = [
@@ -1530,6 +1645,7 @@ class Handler(BaseHTTPRequestHandler):
                         "latex_allergy": form.get("latex_allergy", ""),
                         "anesthesia_history": form.get("anesthesia_history", "").strip(),
                     })
+                    WIZARDS.complete_step(token, "allergies")
                     _redirect(self, f"{px}/wizard/{token}/medications")
                 elif step == "medications":
                     meds = [
@@ -1537,10 +1653,12 @@ class Handler(BaseHTTPRequestHandler):
                         for b in _parse_lines(form.get("meds", ""), 2) if b[0]
                     ]
                     WIZARDS.update(token, {"meds": meds})
+                    WIZARDS.complete_step(token, "medications")
                     _redirect(self, f"{px}/wizard/{token}/conditions")
                 elif step == "conditions":
                     conds = [c for c in multi.get("cond", []) if c in CONDITION_CHECKLIST]
                     WIZARDS.update(token, {"conditions": conds})
+                    WIZARDS.complete_step(token, "conditions")
                     _redirect(self, f"{px}/wizard/{token}/summary")
                 elif step == "finish":
                     drug_name = form.get("drug_name", "").strip()
@@ -1548,37 +1666,73 @@ class Handler(BaseHTTPRequestHandler):
                         _json(self, 400, {"code": "missing_drug",
                                           "message": "drug name is required"})
                         return
-                    intended = {
-                        "drug_name": drug_name,
-                        "strength_mg": _num(form.get("strength_mg")),
-                        "times_per_day": _num(form.get("times_per_day")),
-                        "duration": form.get("duration", "").strip(),
-                        "reason": form.get("reason", "").strip(),
-                        "indication": state["indication"],
-                    }
-                    from .checker import Flag as _Flag
-                    context = build_patient_context(state)
-                    result = check_prescription(context, intended)
-                    # Attach missing-info flags so unknowns are visible, never
-                    # hidden. They are info-severity: they never change a
-                    # red/yellow verdict and never turn CANNOT_VERIFY green.
-                    for mf in missing_info_flags(state):
-                        result.flags.append(_Flag(
-                            mf["severity"], mf["reason"], mf["source"], mf["rule_id"]))
-                    patient_id = state.get("patient_id")
-                    if not patient_id:
-                        patient_id = store.add_patient(
-                            clinic, "Demo Patient Wizard",
-                            allergies=context["allergies"],
-                            conditions=context["conditions"],
-                            current_meds=context["current_meds"],
+                    # Idempotency first: an already-finished wizard returns its
+                    # check — a double-submit is not an error. PENDING means
+                    # another request is creating the check right now.
+                    already = state.get("finished_check_id")
+                    if already == "PENDING":
+                        _json(self, 409, {"code": "finish_in_progress",
+                                          "message": "This check is already being created. Reload."})
+                        return
+                    if already:
+                        _redirect(self, f"{px}/check?id={already}")
+                        return
+                    # Finish preconditions (steps done, indication present).
+                    ok, reason = can_finish(state)
+                    if not ok:
+                        _json(self, 409, {"code": "cannot_finish",
+                                          "message": reason})
+                        return
+                    # Idempotent finish: a double-submit returns the existing
+                    # check instead of creating a duplicate. The claim is
+                    # atomic under the wizard lock, so concurrent double
+                    # finishes can't both create checks.
+                    claimed, existing = WIZARDS.claim_finish(token)
+                    if not claimed:
+                        if existing and existing != "PENDING":
+                            _redirect(self, f"{px}/check?id={existing}")
+                        else:
+                            _json(self, 409, {"code": "finish_in_progress",
+                                              "message": "This check is already being created. Reload."})
+                        return
+                    try:
+                        intended = {
+                            "drug_name": drug_name,
+                            "strength_mg": _num(form.get("strength_mg")),
+                            "times_per_day": _num(form.get("times_per_day")),
+                            "duration": form.get("duration", "").strip(),
+                            "reason": form.get("reason", "").strip(),
+                            "indication": state["indication"],
+                        }
+                        from .checker import Flag as _Flag
+                        context = build_patient_context(state)
+                        result = check_prescription(context, intended)
+                        # Attach missing-info flags so unknowns are visible, never
+                        # hidden. They are info-severity: they never change a
+                        # red/yellow verdict and never turn CANNOT_VERIFY green.
+                        for mf in missing_info_flags(state):
+                            result.flags.append(_Flag(
+                                mf["severity"], mf["reason"], mf["source"], mf["rule_id"]))
+                        patient_id = state.get("patient_id")
+                        if not patient_id:
+                            patient_id = store.add_patient(
+                                clinic, "Demo Patient Wizard",
+                                allergies=context["allergies"],
+                                conditions=context["conditions"],
+                                current_meds=context["current_meds"],
+                            )
+                        cid = store.record_check(
+                            clinic, patient_id,
+                            form.get("dentist", "").strip() or dentist_default,
+                            intended, result.verdict,
+                            [f.__dict__ for f in result.flags],
                         )
-                    cid = store.record_check(
-                        clinic, patient_id,
-                        form.get("dentist", "").strip() or dentist_default,
-                        intended, result.verdict,
-                        [f.__dict__ for f in result.flags],
-                    )
+                        WIZARDS.set_finished(token, cid)
+                    except Exception:
+                        # Check creation failed: release the claim so the
+                        # dentist can retry instead of being stuck.
+                        WIZARDS.release_finish_claim(token)
+                        raise
                     _redirect(self, f"{px}/check?id={cid}")
                 else:
                     _json(self, 404, {"code": "not_found", "message": "not found"})
@@ -1679,6 +1833,10 @@ def _num(value) -> float | None:
 from .wizard import (  # noqa: E402
     WizardSessions,
     STEPS,
+    STEPS_REQUIRED,
+    step_is_unlocked,
+    first_incomplete_step,
+    can_finish,
     missing_info_flags,
     build_patient_context,
     indication_options,
@@ -1790,6 +1948,7 @@ def wizard_step_page(state: dict, step: str, ctx: dict) -> str:
         mia_card(f"Guided check for {state['patient_label'] or 'new patient'} — step {idx + 1} of 7.")
         + wizard_progress(step)
         + f"<div class='card'><form method='POST' action='/api/wizard/{token}/{step}'>"
+        + _csrf_field(ctx)
         + inner
         + f"<button class='btn' type='submit'>Continue {ICONS['arrow']}</button></form></div>"
         + (f"<p><a href='{px}/wizard/{token}/{STEPS[idx-1]}'>← Back</a></p>" if idx > 0 else "")
@@ -1870,7 +2029,8 @@ def wizard_choose_page(state: dict, ctx: dict) -> str:
         + f"<div class='card'>{panel}</div>"
         + f"<div class='card'><p class='eyebrow'>Step 7 of 7 — Your prescription choice</p>"
         f"<form method='POST' action='/api/wizard/{token}/finish'>"
-        f"<label>Drug — your choice<input name='drug_name' list='drugs2' required></label>"
+        + _csrf_field(ctx)
+        + f"<label>Drug — your choice<input name='drug_name' list='drugs2' required></label>"
         f"<datalist id='drugs2'>{drug_opts}</datalist>"
         "<label>Strength (mg)<input name='strength_mg' type='number' step='any'></label>"
         "<label>Times per day<input name='times_per_day' type='number' step='any'></label>"

@@ -66,7 +66,26 @@ def _get(opener, base, path):
         return e.code, e.read().decode()
 
 
-def _post(opener, base, path, fields):
+
+def _csrf_token(opener, base):
+    """Extract the session's CSRF token from a form page (test helper)."""
+    for path in ("/app/start", "/subscribe"):
+        res = _get(opener, base, path)
+        body = res[1] if len(res) > 1 else ""
+        if not isinstance(body, str):
+            continue
+        m = re.search(r"name='csrf_token' value='([^']*)'", body)
+        if m:
+            return m.group(1)
+    return ""
+
+
+def _post(opener, base, path, fields, csrf=True):
+    fields = dict(fields)
+    if csrf and "csrf_token" not in fields:
+        tok = _csrf_token(opener, base)
+        if tok:
+            fields["csrf_token"] = tok
     data = urllib.parse.urlencode(fields).encode()
     req = urllib.request.Request(base + path, data=data, method="POST")
     try:

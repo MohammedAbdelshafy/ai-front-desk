@@ -20,6 +20,10 @@ from .reference_data import INDICATIONS, INDICATION_ORDER
 
 STEPS = ["indication", "factors", "allergies", "medications", "conditions", "summary", "choose"]
 
+# Steps that must be POST-completed (in order) before finish is allowed.
+# summary/choose are GET review pages gated on the five POST steps.
+STEPS_REQUIRED = ["indication", "factors", "allergies", "medications", "conditions"]
+
 UNKNOWN = "don't know"
 NA = "not applicable"
 
@@ -66,8 +70,48 @@ def new_wizard(clinic_id: str, patient: dict | None = None) -> dict:
         "anesthesia_history": "",
         "meds": [dict(m) for m in (patient.get("current_meds") or [])] if patient else [],
         "conditions": list(patient.get("conditions") or []) if patient else [],
+        # Correctness tracking (server-enforced, never trusted from client):
+        "steps_done": [],          # POST-completed steps, in order
+        "finished_check_id": None,  # set once by finish; double-finish is idempotent
     }
     return state
+
+
+def step_is_unlocked(state: dict, step: str) -> bool:
+    """Can this step be viewed/submitted? All earlier POST steps must be done."""
+    if step not in STEPS:
+        return False
+    idx = STEPS.index(step)
+    done = state.get("steps_done") or []
+    for earlier in STEPS[:idx]:
+        if earlier in STEPS_REQUIRED and earlier not in done:
+            return False
+    return True
+
+
+def first_incomplete_step(state: dict) -> str:
+    """First required step not yet completed (for redirects)."""
+    done = state.get("steps_done") or []
+    for s in STEPS_REQUIRED:
+        if s not in done:
+            return s
+    return "summary"
+
+
+def can_finish(state: dict) -> tuple[bool, str]:
+    """Are the finish *preconditions* met? Returns (ok, reason).
+
+    This checks steps + indication only. Idempotency (already finished /
+    finish in progress) is handled by the server before calling this —
+    see the finish branch in server.py.
+    """
+    done = state.get("steps_done") or []
+    missing = [s for s in STEPS_REQUIRED if s not in done]
+    if missing:
+        return False, f"steps not completed: {', '.join(missing)}"
+    if not (state.get("indication") or "").strip():
+        return False, "indication is required"
+    return True, ""
 
 
 class WizardSessions:
@@ -94,6 +138,48 @@ class WizardSessions:
                 return None
             state.update(patch)
             return state
+
+    def complete_step(self, token: str, step: str) -> dict | None:
+        """Mark a POST step done (idempotent, order-preserving)."""
+        with self._lock:
+            state = self._sessions.get(token)
+            if state is None:
+                return None
+            done = state.setdefault("steps_done", [])
+            if step not in done:
+                done.append(step)
+            return state
+
+    def claim_finish(self, token: str) -> tuple[bool, str | None]:
+        """Atomically claim the finish for a wizard.
+
+        Returns (claimed, existing_check_id). Only the first caller gets
+        claimed=True; every later double-submit gets the existing check id.
+        This is what makes double-finish idempotent under concurrency.
+        """
+        with self._lock:
+            state = self._sessions.get(token)
+            if state is None:
+                return False, None
+            existing = state.get("finished_check_id")
+            if existing:
+                return False, existing
+            # Reserve the slot so a concurrent second finish sees it taken.
+            state["finished_check_id"] = "PENDING"
+            return True, None
+
+    def set_finished(self, token: str, check_id: str) -> None:
+        with self._lock:
+            state = self._sessions.get(token)
+            if state is not None:
+                state["finished_check_id"] = check_id
+
+    def release_finish_claim(self, token: str) -> None:
+        """Release a PENDING claim if check creation failed (allows retry)."""
+        with self._lock:
+            state = self._sessions.get(token)
+            if state is not None and state.get("finished_check_id") == "PENDING":
+                state["finished_check_id"] = None
 
 
 def missing_info_flags(state: dict, drug_key: str | None = None,

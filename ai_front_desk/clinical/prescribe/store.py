@@ -6,10 +6,42 @@ rules as the clinical store (see ../store.py). Synthetic demo data only.
 from __future__ import annotations
 
 import json
+import sqlite3
+import threading
 import time
 import uuid
 from pathlib import Path
 from typing import Any
+
+
+class LockedConnection:
+    """Thread-safe wrapper around a sqlite3 connection.
+
+    The server is threaded but each store keeps a single shared connection;
+    sqlite3 connections must not be used concurrently even with
+    check_same_thread=False, so every statement is serialized through one
+    re-entrant lock. (See docs/engineering/RELIABILITY.md — Can't lag.)
+    """
+
+    def __init__(self, conn: sqlite3.Connection):
+        self._conn = conn
+        self._lock = threading.RLock()
+
+    def execute(self, *args, **kwargs):
+        with self._lock:
+            return self._conn.execute(*args, **kwargs)
+
+    def executescript(self, *args, **kwargs):
+        with self._lock:
+            return self._conn.executescript(*args, **kwargs)
+
+    def commit(self):
+        with self._lock:
+            return self._conn.commit()
+
+    def close(self):
+        with self._lock:
+            return self._conn.close()
 
 
 SCHEMA = """
@@ -51,6 +83,7 @@ CREATE TABLE IF NOT EXISTS prescribe_audit (
     detail     TEXT NOT NULL DEFAULT '',
     created_at REAL NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_paudit_clinic_time ON prescribe_audit(clinic_id, created_at);
 """
 
 
@@ -64,14 +97,22 @@ def _new_id(prefix: str) -> str:
 
 class PrescribeStore:
     def __init__(self, db_path: str | Path):
-        import sqlite3
-
         self.path = Path(db_path).expanduser()
         self.path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-        self._db = sqlite3.connect(str(self.path), timeout=5.0, check_same_thread=False)
+        conn = sqlite3.connect(str(self.path), timeout=5.0, check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        self._db = LockedConnection(conn)
         self._db.row_factory = sqlite3.Row
+        # Performance + durability pragmas (see docs/engineering/RELIABILITY.md):
+        # WAL allows readers during writes; NORMAL is safe with WAL (only a full
+        # OS crash could lose the un-checkpointed tail); busy_timeout makes
+        # transient write-write contention wait instead of erroring.
+        self._db.execute("PRAGMA journal_mode = WAL")
+        self._db.execute("PRAGMA synchronous = NORMAL")
         self._db.execute("PRAGMA foreign_keys = ON")
+        self._db.execute("PRAGMA busy_timeout = 5000")
         self._db.executescript(SCHEMA)
+        self._db.commit()
 
     def close(self):
         self._db.close()

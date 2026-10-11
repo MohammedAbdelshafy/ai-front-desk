@@ -7,26 +7,40 @@ human decision. Commands:
     python -m ai_front_desk.clinical.prescribe.admin status <email>
     python -m ai_front_desk.clinical.prescribe.admin activate <email>
     python -m ai_front_desk.clinical.prescribe.admin cancel <email>
+    python -m ai_front_desk.clinical.prescribe.admin backup <dest-dir>
 
 Run these on the machine hosting the app (same PRESCRIBE_DB).
+
+Restore: stop the app, copy the backup file back over the live database
+path, restart. One paragraph, full procedure — see
+docs/engineering/RELIABILITY.md ("Can't lose info").
 """
 from __future__ import annotations
 
 import datetime
 import os
+import sqlite3
 import sys
 import time
 import uuid
+from pathlib import Path
 
 from .accounts import AccountStore
 from .trial import SUBSCRIPTION_PRICE_USD
 
 
+def _db_path() -> Path:
+    # Same default as server.DB_PATH — accounts and clinical data share one file.
+    return Path(
+        os.environ.get(
+            "PRESCRIBE_DB",
+            os.path.expanduser("~/.mia-prescribe/prescribe-demo.sqlite3"),
+        )
+    ).expanduser()
+
+
 def _store() -> AccountStore:
-    db = os.environ.get("PRESCRIBE_DB") or os.path.expanduser(
-        "~/.mia-prescribe/accounts.sqlite3"
-    )
-    return AccountStore(db)
+    return AccountStore(_db_path())
 
 
 def _fmt_ts(ts) -> str:
@@ -90,6 +104,46 @@ def cmd_cancel(store: AccountStore, email: str) -> int:
     return 0
 
 
+def cmd_backup(store: AccountStore, dest: str) -> int:
+    """Hot backup via the SQLite backup API (safe while the app is running).
+
+    Copies the live database — including WAL content — into a single
+    self-contained file. Works while the server is serving traffic.
+    """
+    dest_path = Path(dest).expanduser()
+    if dest_path.is_dir():
+        stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        dest_path = dest_path / f"mia-dental-os-backup-{stamp}.sqlite3"
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+    src = sqlite3.connect(str(_db_path()), timeout=10.0)
+    try:
+        dst = sqlite3.connect(str(dest_path))
+        try:
+            # pages=-1 copies everything; sleep keeps the lock short per step.
+            src.backup(dst, pages=-1, sleep=0.05)
+        finally:
+            dst.close()
+    finally:
+        src.close()
+    # Verify the backup opens and has our tables.
+    chk = sqlite3.connect(str(dest_path))
+    try:
+        tables = {
+            r[0]
+            for r in chk.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            )
+        }
+    finally:
+        chk.close()
+    missing = {"prescribe_accounts", "prescribe_patients"} - tables
+    if missing:
+        print(f"Backup written but missing tables: {sorted(missing)}")
+        return 1
+    print(f"Backup OK: {dest_path}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     if not argv or argv[0] not in (
@@ -97,6 +151,7 @@ def main(argv: list[str] | None = None) -> int:
         "status",
         "activate",
         "cancel",
+        "backup",
     ):
         print(__doc__)
         return 2
@@ -114,6 +169,11 @@ def main(argv: list[str] | None = None) -> int:
             return cmd_activate(store, email)
         if argv[0] == "cancel":
             return cmd_cancel(store, email)
+        if argv[0] == "backup":
+            if len(argv) < 2:
+                print("Usage: admin.py backup <dest-dir-or-file>")
+                return 2
+            return cmd_backup(store, argv[1])
     finally:
         store.close()
     return 2
