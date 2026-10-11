@@ -12,8 +12,8 @@
    (looks like `https://mia-dental-os.onrender.com`).
 
 That's it. The Blueprint builds the Dockerfile, attaches the 1 GB persistent
-disk at `/data`, and sets every env var. No secrets to paste — billing is
-manual Neteller, so there are no API keys.
+disk at `/data`, and sets the required environment variables. No payment API
+keys are needed because billing is manual Neteller transfer plus human verification.
 
 > **Pricing note:** Render's persistent disk needs a paid instance (Starter,
 > ~$7/mo). The free tier has *ephemeral* storage — accounts and patient data
@@ -28,6 +28,16 @@ manual Neteller, so there are no API keys.
 | `PRESCRIBE_DB` | `/data/prescribe.sqlite3` | accounts DB on the persistent disk |
 | `PRESCRIBE_STATE_DIR` | `/data` | trial/clinical state on the persistent disk |
 | `PRESCRIBE_SECURE_COOKIES` | `1` | `Secure` flag on session cookies (HTTPS) |
+
+## Pre-flight: before you send the review link
+
+- [ ] Confirm the Render service was created from the intended branch and the deploy completed successfully.
+- [ ] Confirm the persistent disk is attached and mounted at `/data`.
+- [ ] Confirm `PRESCRIBE_DB=/data/prescribe.sqlite3`, `PRESCRIBE_STATE_DIR=/data`, and `PRESCRIBE_SECURE_COOKIES=1` are active.
+- [ ] Create a disposable test account and complete sample patient → guided check.
+- [ ] Restart or redeploy once, then verify the test account still exists. Do not enter real patient details.
+- [ ] Open each demo video on desktop and mobile; verify playback and text-link fallback.
+- [ ] Confirm the legal routes and security headers below.
 
 ## How to verify the live deployment
 
@@ -67,7 +77,11 @@ manual Neteller, so there are no API keys.
 - **Manual billing.** Neteller transfers + human activation. No chargebacks
   handling, no dunning, no invoices — that comes with a real provider.
 
-## Local Docker test (when docker is available)
+## Container verification status
+
+GitHub Actions now runs `Docker build and container smoke test`: it builds the same `Dockerfile`, starts the container with `/data` mounted, and checks the landing, signup/signin, legal routes, and key security headers. Check the [latest workflow run](https://github.com/MohammedAbdelshafy/ai-front-desk/actions/workflows/tests.yml) for the current result. This verifies the image/runtime in CI, not the live Render service.
+
+## Optional local Docker test
 
 ```bash
 docker build -t mia-dental-os .
