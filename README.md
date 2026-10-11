@@ -47,7 +47,7 @@ python -m ai_front_desk.clinical.prescribe.server
 Open **http://127.0.0.1:8767**. The landing page explains the copilot workflow, the 7-day free trial, and the scope/limitations. The guided first run (trial → sample synthetic patient → sample check) shows the whole loop in about 60 seconds.
 
 - 7-day free trial from account sign-up (server-side clock). After expiry the module locks, data is preserved, and a subscribe screen appears. Default price **$99/mo**. Billing uses **manual Neteller transfer plus founder verification**; there are no automatic charges or payment-provider webhooks. A payment claim remains pending until a human verifies the transfer and activates the account.
-- Reference dataset `reference v1 (2026-10-11)`: standard dental prescribing references; requires dentist review before clinical use. Uncertain rules are omitted, not guessed. Missing/uncertain patient data is never shown as verified-safe.
+- Reference dataset `reference v2 (2026-10-11)`: standard dental prescribing references; requires dentist review before clinical use. Uncertain rules are omitted, not guessed. Missing/uncertain patient data is never shown as verified-safe.
 - **Guided question wizard** (`Start guided check` on any patient card): indication → patient factors → allergies → medications → conditions → summary → dentist's own prescription choice with indication-specific cited reference → safety check. Every question offers "don't know / not applicable"; unknowns become visible missing-info flags, never green.
 - Locked teasers use the exact upsell tier names: **Mia Dental Practice**, **Mia Dental Automation**, **Mia Dental OS Pro**. Nothing behind them is built yet.
 
