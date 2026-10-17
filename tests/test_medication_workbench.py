@@ -192,3 +192,77 @@ def test_opt_in_public_lookup_sends_only_name(workbench_url, monkeypatch):
         assert "Synthetic example ingredient" in body
         assert "only the standalone medicine name is sent" in body
     assert seen == ["Synthetic example ingredient"]
+
+
+def test_opt_in_learning_shelf_is_local_only(workbench_url, monkeypatch):
+    from ai_front_desk.clinical import medication_workbench as workbench
+
+    called = []
+    def fake_search(topic):
+        called.append(topic)
+        return {
+            "query": topic,
+            "status": "found",
+            "result_count": 1,
+            "message": "Educational retrieval only.",
+            "results": [{
+                "id": "test-learning-card",
+                "title": "Synthetic Pharmacology Learning Note",
+                "summary": "A local educational summary.",
+                "learning_points": ["Concept one", "Concept two"],
+                "source_refs": [{
+                    "title": "Open source educational book",
+                    "url": "https://example.org/open-book/chapter",
+                    "license_id": "CC-BY-4.0",
+                    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+                    "attribution": "Synthetic attribution for test."
+                }],
+                "use_scope": "education_only",
+                "cannot_support": ["diagnosis", "medicine_selection"]
+            }]
+        }
+    monkeypatch.setattr(workbench, "search_pharmacology_education", fake_search)
+    payload = {
+        "case_id": "synthetic-case-http-03",
+        "proposed_assessment": "Synthetic clinical scenario",
+        "symptoms": "fictional symptom",
+        "reported_allergies": "fictional allergy context",
+        "current_medications": "fictional medicine context",
+        "relevant_medical_history": "fictional history",
+        "learning_topic": "pharmacokinetics",
+        "search_learning_library": "1",
+        "jurisdiction": "US",
+    }
+    request = Request(
+        workbench_url + "/",
+        data=urlencode(payload).encode("utf-8"),
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    with urlopen(request) as response:
+        body = response.read().decode("utf-8")
+        assert response.status == 200
+        assert "Pharmacology foundations" in body
+        assert "Synthetic Pharmacology Learning Note" in body
+        assert "Open source educational book" in body
+        assert "CC-BY-4.0" in body
+    assert called == ["pharmacokinetics"]
+
+
+def test_learning_shelf_requires_a_topic_when_enabled(workbench_url):
+    payload = {
+        "case_id": "synthetic-case-http-04",
+        "proposed_assessment": "Synthetic clinical scenario",
+        "search_learning_library": "1",
+        "jurisdiction": "US",
+    }
+    request = Request(
+        workbench_url + "/",
+        data=urlencode(payload).encode("utf-8"),
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    with urlopen(request) as response:
+        body = response.read().decode("utf-8")
+        assert response.status == 200
+        assert "Enter a pharmacology learning topic" in body
