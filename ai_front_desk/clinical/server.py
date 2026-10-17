@@ -96,16 +96,16 @@ def esc(s):
     return html.escape(str(s), quote=True)
 
 
-def mia_stage_html(manifest_name="Dental Mia", stage="listening", reason=""):
+def mia_stage_html(manifest_name="Dr. Mia", stage="listening", reason=""):
     default_message = (
         "I'm your intake guide. I can explain this workflow, but I don't diagnose "
         "conditions or recommend medicines."
     )
     message = reason or default_message
     return (
-        "<section class='mia-stage' aria-label='Dental Mia assistant'>"
+        "<section class='mia-stage' aria-label='Dr. Mia assistant'>"
         "<img class='mia-avatar' src='/assets/mia-stand-hi.webp' "
-        "alt='Mia, your AI intake guide' width='64' height='64'>"
+        "alt='Dr. Mia, your AI dental assistant' width='64' height='64'>"
         "<div class='mia-stage-content'>"
         "<div class='mia-stage-head'>"
         f"<strong>{esc(manifest_name)}</strong>"
