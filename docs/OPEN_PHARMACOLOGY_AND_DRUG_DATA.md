@@ -60,8 +60,32 @@ DailyMed exposes current Structured Product Labeling (SPL) information and label
 ### [CDC dental antibiotic-prescribing checklist](https://www.cdc.gov/antibiotic-use/media/pdfs/dental-fact-sheet-508.pdf)
 Useful candidate for the initial dental stewardship workflow and history/risk-factor checklist. Check the exact edition, scope, and embedded third-party content; create product evidence cards only after qualified dental review.
 
-### [ADA antibiotic-stewardship resources](https://www.ada.org/resources/ada-library/oral-health-topics/antibiotic-stewardship)
-Important source for US dental guidance, including current ADA content. Free online access is not itself a license to copy or embed the full text. Until applicable reuse rights are confirmed, link to the source and keep derivative clinical cards pending rights review and clinician approval.
+### [ADA antibiotic-stewardship resources](https://www.ada.org/resources/ada-library/oral-health-topics/antibiotic-stewardship) and [AAE clinical guidelines](https://www.aae.org/specialty/clinical-resources/guidelines-position-statements/)
+Important professional sources for dental decisions and specialty scope. Free online access is not itself a license to copy or embed full text. Keep source links available; index or derive clinical cards only after applicable reuse rights, current version, defined population, and qualified clinical approval are confirmed.
+
+### [CDC Dental Pain and Swelling Materials (page updated September 17, 2026)](https://www.cdc.gov/antibiotic-use/communication-resources/dentists-be-antibiotics-aware-pain-swelling.html)
+A timely candidate for dental antibiotic-stewardship learning and the first bounded clinical-quality workflow. Confirm the exact underlying fact sheet, scope, patient population, and third-party elements, and obtain qualified dentist review before enabling any derived recommendation.
+
+### [Egypt National Essential Medicine List 2025 (English)](https://www.who.int/publications/m/item/egypt--national-essential-medicine-list-2025-%28english%29) and [WHO Model List of Essential Medicines 2025](https://www.who.int/publications/i/item/B09474)
+Useful links for jurisdiction/formulary context and learning about essential-medicine policy. These lists do not provide patient-specific prescribing recommendations. Rights remain pending for commercial full-text ingestion; keep them link-only until permission is confirmed. Never apply the Egypt list automatically to a US workflow, or a US label automatically to an Egypt workflow.
+
+### [Merck Manual Professional Edition](https://www.merckmanuals.com/professional)
+A valuable external clinical reading reference, but Merck's official FAQ says users may share links and must assume the content is copyrighted; reuse for public or commercial purposes requires written permission. Mia's source catalog therefore marks it link-only without written permission.
+
+
+## Daily refresh and source-quality policy
+
+Not every source is updated daily. Daily freshness checks mean checking the *source for a change*, not copying every source into the index each day.
+
+- openFDA Drug Label API: published updates weekly (the API page currently reports a last update of October 7, 2026); store last-seen update metadata and re-query source versions on schedule.
+- openFDA Drugs@FDA: approval information updates daily Monday through Friday; use for approval-record discovery, not as a complete clinical decision engine.
+- DailyMed SPL: use current SPL set IDs/version history to detect label changes and store source links plus retrieved timestamps. Before storing/reusing full text, run record-level rights checks.
+- PubMed Central OA commercial-use collection: poll the official NCBI file lists or approved API on a scheduled cadence; ingest only articles whose individual reuse license qualifies.
+- Guidelines and books: inspect publisher date/version metadata and page/announcement feeds where available; otherwise schedule a lower-frequency manual review. Do not report a source as “updated today” if only our own index timestamp changed.
+
+Every indexed source should carry source_published_or_effective_date (when available), last_checked_at, source_version, content_hash, license_status, jurisdiction, and review_due_at. If the source version changes, mark dependent clinical cards stale until re-reviewed. If the source cannot be reached or its status is uncertain, retain the last verified result with an explicit stale/unverified banner or abstain; never silently treat cached data as current.
+
+The system must also distinguish three independent outcomes: **content changed**, **license/terms changed**, and **clinical recommendation changed**. A new source timestamp alone must not auto-approve or auto-reject treatment content.
 
 ## What is still missing for free
 
