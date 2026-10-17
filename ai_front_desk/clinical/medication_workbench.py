@@ -1,8 +1,10 @@
 """Local clinician-facing demo for Dr. Mia's evidence-review foundation.
 
 Synthetic data only. This is not an EHR or a clinical decision support service.
-The server binds to loopback, does not persist case submissions, and makes no
-external calls. A matching evidence card is not a medication recommendation.
+The server binds to loopback and does not persist case submissions. It makes
+no external calls unless the user explicitly opts into the standalone medicine-name
+lookup; only that name is sent to public NLM/FDA metadata APIs. A matching evidence
+card is not a medication recommendation.
 """
 from __future__ import annotations
 
@@ -16,6 +18,7 @@ import html
 import json
 
 from .medication_support import ClinicianCase, build_evidence_review, load_registry
+from .public_drug_data import lookup_public_drug_metadata
 
 BASE = Path(__file__).resolve().parent
 REGISTRY_PATH = BASE / "medication_evidence_registry.json"
@@ -142,6 +145,64 @@ def _render_quality_checklist(review: dict[str, Any]) -> str:
     return "".join(out)
 
 
+def _render_public_lookup(lookup: dict[str, Any] | None) -> str:
+    if lookup is None:
+        return ""
+    rxnorm = lookup.get("rxnorm", {})
+    labels = lookup.get("openfda_labels", {})
+    out = [
+        "<section class='public-lookup'><div class='eyebrow'>Public source lookup</div>"
+        "<h2>Medication identity &amp; label metadata</h2>"
+        "<p class='muted'>Metadata discovery only. This is not a prescribing recommendation, a drug-interaction check, or a safety conclusion.</p>"
+        "<p><strong>Lookup:</strong> %s · <strong>Status:</strong> %s</p>"
+        % (esc(lookup.get("lookup_term", "")), esc(str(lookup.get("status", "unknown")).replace("_", " ")))
+    ]
+    out.append("<h3>RxNorm medication identity</h3>")
+    rx_items = rxnorm.get("items", [])
+    if rxnorm.get("status") == "unavailable":
+        out.append("<p>RxNorm is temporarily unavailable. No identity result was returned.</p>")
+    elif not rx_items:
+        out.append("<p>No RxNorm identity match was returned for this term.</p>")
+    else:
+        out.append("<ul>")
+        for item in rx_items:
+            out.append("<li><strong>%s</strong> · RxCUI %s · %s</li>" % (
+                esc(item.get("name", "")), esc(item.get("rxcui", "")), esc(item.get("term_type", ""))
+            ))
+        out.append("</ul>")
+    out.append("<h3>openFDA label-record metadata</h3>")
+    label_items = labels.get("items", [])
+    if labels.get("status") == "unavailable":
+        out.append("<p>openFDA is temporarily unavailable. No label metadata was returned.</p>")
+    elif not label_items:
+        out.append("<p>No openFDA label metadata match was returned. Try the generic ingredient or brand name separately.</p>")
+    else:
+        for item in label_items:
+            out.append(
+                "<article class='evidence-card'><h3>%s</h3>"
+                "<p><strong>Generic name:</strong> %s</p><p><strong>Manufacturer:</strong> %s</p>"
+                "<p><strong>Product type:</strong> %s · <strong>Route:</strong> %s · <strong>Dosage form:</strong> %s</p>"
+                "<p><strong>Label effective time:</strong> %s</p>"
+                "<p><a href='%s' target='_blank' rel='noopener noreferrer'>Open corresponding DailyMed label/search</a></p>"
+                "<p class='muted'>Metadata record only. Confirm the current product-specific label; submitted labeling can differ from currently distributed or approved labeling.</p></article>"
+                % (
+                    esc(item.get("brand_name") or item.get("generic_name") or "Drug label record"),
+                    esc(item.get("generic_name", "")), esc(item.get("manufacturer", "")),
+                    esc(item.get("product_type", "")), esc(item.get("route", "")),
+                    esc(item.get("dosage_form", "")), esc(item.get("effective_time", "")),
+                    esc(item.get("dailymed_url", "")),
+                )
+            )
+    out.append(
+        "<p class='muted'>This lookup sent only the standalone medicine name to RxNorm/openFDA. "
+        "The clinical case, symptoms, allergies, current medicines, medical history, and patient identifiers were not sent.</p>"
+        "<p class='muted'>NLM attribution: This product uses publicly available data from the U.S. National Library of Medicine (NLM), "
+        "National Institutes of Health, Department of Health and Human Services; NLM is not responsible for the product and does not endorse or recommend this or any other product.</p>"
+        "</section>"
+    )
+    return "".join(out)
+
+
 def _render_evidence(review: dict[str, Any]) -> str:
     items = review.get("matched_evidence", [])
     if not items:
@@ -183,6 +244,7 @@ def render_page(
     form: Mapping[str, Any] | None = None,
     review: dict[str, Any] | None = None,
     error: str = "",
+    public_lookup: dict[str, Any] | None = None,
 ) -> str:
     form = form or {}
     value = lambda name, default="": esc(_one(form, name, default))
@@ -203,8 +265,8 @@ def render_page(
             "<article><h3>Reported allergies</h3><p>%s</p></article>"
             "<article><h3>Current medicines</h3><p>%s</p></article>"
             "<article><h3>Relevant history</h3><p>%s</p></article></div>"
-            "%s%s%s<p class='disclaimer'>This demo does not diagnose, prescribe, calculate doses, "
-            "or perform comprehensive interaction checks. No information is saved or sent to an external service.</p></section>"
+            "%s%s%s%s<p class='disclaimer'>This demo does not diagnose, prescribe, calculate doses, "
+            "or perform comprehensive interaction checks. Submitted cases are not saved. External APIs are queried only when you explicitly check the public lookup box, and only the standalone medicine name is sent.</p></section>"
             % (
                 esc(evidence_state.replace("_", " ").title()),
                 esc(review.get("message", "")),
@@ -214,6 +276,7 @@ def render_page(
                 _render_quality_checklist(review),
                 _render_flags(review),
                 _render_evidence(review),
+                _render_public_lookup(public_lookup),
             )
         )
     error_html = "<div class='error'>%s</div>" % esc(error) if error else ""
@@ -233,6 +296,7 @@ textarea{min-height:74px;resize:vertical}.hint,.muted{font-size:12px;color:var(-
 .factor-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.check{display:flex;align-items:flex-start;gap:7px;margin:0;padding:9px;background:var(--wash);border:1px solid #e0ebec;border-radius:9px;font-weight:500;font-size:12px}.check input{margin-top:4px}
 button{margin-top:18px;background:var(--teal);color:#fff;border:0;padding:12px 17px;border-radius:10px;font-weight:750;font-size:14px;cursor:pointer}button:hover{background:#056c76}
 .note{background:#eff8f7;border:1px solid #d0e9e5;padding:12px 14px;border-radius:12px;font-size:13px}.note strong{display:block;margin-bottom:4px}.error{margin:12px 0;padding:12px;background:#ffe8e8;border:1px solid #f4bcbc;border-radius:10px;color:#8c2020}
+.public-query-panel{margin-top:22px;border:1px dashed #9cc7cc;padding:14px;border-radius:12px;background:#f8fcfc}.public-query-panel .check{margin-top:9px}.public-lookup{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}.public-lookup h2{font-size:20px;margin:5px 0 12px}.public-lookup h3{margin-top:18px}.public-lookup li{font-size:13px;margin:8px 0;overflow-wrap:anywhere}.public-lookup a{color:#086e7b;font-weight:700}
 .results{margin-top:18px}.result-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.pill{font-size:11px;font-weight:750;border-radius:30px;background:#e5f4ef;color:#13644e;padding:7px 10px}.context-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.context-grid article{padding:12px;border:1px solid var(--line);background:#fbfdfd;border-radius:12px;overflow-wrap:anywhere}.context-grid p{margin:0;white-space:pre-wrap;font-size:13px}
 .flags{margin:20px 0}.flag{border-left:3px solid #bd7d00;background:var(--amber);padding:10px 12px;margin:8px 0;border-radius:6px}.flag p{margin:4px 0 0;font-size:13px}
 .quality-checklist{margin:20px 0}.quality-grid{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.quality-item{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fbfdfd;min-width:0}.quality-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.quality-item strong{font-size:12px}.quality-item p{font-size:12px;color:var(--muted);margin:6px 0 0}.quality-state{font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;padding:4px 6px;border-radius:20px;background:#e1f4eb;color:#146049;white-space:nowrap}.quality-state.attention{background:#fff0c9;color:#815100}
@@ -260,6 +324,13 @@ footer{margin:25px 0 10px;color:var(--muted);font-size:12px}
 <label for="current_medications">Current medicines / supplements (synthetic)</label><textarea id="current_medications" name="current_medications" maxlength="1200" placeholder="Demo-only context">%s</textarea><p class="hint">Record “none reported” or “unknown” when applicable; do not mark this factor reviewed while the field is blank.</p>
 <label for="relevant_medical_history">Relevant medical history (synthetic)</label><textarea id="relevant_medical_history" name="relevant_medical_history" maxlength="1200" placeholder="Demo-only context">%s</textarea>
 <label for="patient_risk_tags">Reviewer-configured caution tags (demo only)</label><input type="text" id="patient_risk_tags" name="patient_risk_tags" maxlength="800" value="%s" placeholder="comma-separated reviewer tags">
+<div class="public-query-panel">
+<div class="eyebrow">Optional free public data lookup</div>
+<label for="drug_lookup_name">One medicine name or active ingredient</label>
+<input type="text" id="drug_lookup_name" name="drug_lookup_name" maxlength="120" value="%s" placeholder="e.g. a generic ingredient or brand name">
+<label class="check"><input type="checkbox" name="lookup_public_sources" value="1"%s> Look up medication identity and label metadata</label>
+<p class="hint">Only use this for one standalone medicine name. When checked, only that name is sent to NLM RxNorm and openFDA. Never place a patient name, symptoms, allergies, medical history, or case details here. This is not an interaction checker.</p>
+</div>
 <label>Patient factors confirmed/reviewed in this synthetic case</label><div class="factor-grid">%s</div>
 <label for="jurisdiction">Reference jurisdiction</label><select id="jurisdiction" name="jurisdiction"><option value="US" selected>United States (US)</option></select>
 <div class="note" style="margin-top:16px"><strong>What this tool does not do</strong>
@@ -283,6 +354,8 @@ It does not diagnose, prescribe, calculate doses, or perform comprehensive drug-
         value("current_medications"),
         value("relevant_medical_history"),
         value("patient_risk_tags"),
+        value("drug_lookup_name"),
+        _checked(_one(form, "lookup_public_sources").lower() in {"1", "true", "on", "yes"}),
         factors,
         result_html,
     )
@@ -351,7 +424,16 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
             if any(len(values[0]) > 1500 for values in form.values() if values):
                 raise ValueError("One or more fields are too long.")
             review, case = run_review(form)
-            self._send_html(200, render_page(form, review))
+            public_lookup = None
+            lookup_requested = _one(form, "lookup_public_sources").lower() in {"1", "true", "on", "yes"}
+            drug_lookup_name = _one(form, "drug_lookup_name")
+            if lookup_requested:
+                if not drug_lookup_name:
+                    raise ValueError("Enter one medicine name or active ingredient before enabling the public lookup.")
+                # Only a single medicine name is sent. Clinical case details are
+                # deliberately not passed to either external source.
+                public_lookup = lookup_public_drug_metadata(drug_lookup_name)
+            self._send_html(200, render_page(form, review, public_lookup=public_lookup))
         except (UnicodeDecodeError, ValueError, json.JSONDecodeError) as exc:
             self._send_html(400, render_page(error=str(exc)))
         except (OSError, KeyError) as exc:
