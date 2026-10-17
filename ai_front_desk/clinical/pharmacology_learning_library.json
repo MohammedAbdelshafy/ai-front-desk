@@ -126,6 +126,147 @@
       ],
       "ingestion_status": "link_only_no_commercial_ingestion",
       "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "public-health-pharmacy-practice-casebook-2e",
+      "title": "Public Health in Pharmacy Practice: A Casebook, 2nd edition",
+      "authors": [
+        "Jordan R. Covvey",
+        "Vibhuti Arya",
+        "Natalie A. DiPietro Mager",
+        "Neyda V. Gilman",
+        "MaRanda Herring",
+        "Stephanie Lukas",
+        "Leslie Ochs",
+        "Lindsay Waddington"
+      ],
+      "publisher": "Open textbook project",
+      "published_year": 2021,
+      "url": "https://pharmacypracticebook.com/",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "Official open textbook project and license statement",
+      "source_verification_url": "https://pharmacypracticebook.com/",
+      "roles": [
+        "pharmacy_case_based_learning",
+        "medication_safety_education",
+        "infectious_disease_education",
+        "patient_communication",
+        "public_health_pharmacy"
+      ],
+      "limits": [
+        "Educational casebook, not a current drug monograph or dental prescribing guideline.",
+        "Check chapter-level attribution and exclude or separately clear any third-party materials before reuse.",
+        "Do not promote a teaching case into a patient-specific treatment recommendation without independent guideline review and qualified clinician approval."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "essential-clinical-pharmacology-competencies-delphi-2024",
+      "title": "A Modified Delphi Study to Establish Essential Clinical Pharmacology Competencies",
+      "authors": [
+        "Bernadette Johnson-Williams",
+        "Kellie Reynolds",
+        "Joga Gobburu",
+        "Albert Rundio"
+      ],
+      "publisher": "Therapeutic Innovation & Regulatory Science",
+      "published_year": 2024,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11043191/",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "PubMed Central article license statement",
+      "source_verification_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11043191/",
+      "roles": [
+        "clinical_pharmacology_learning_objectives",
+        "competency_based_education",
+        "curriculum_design"
+      ],
+      "limits": [
+        "Research about educational competencies, not a drug guideline or evidence for choosing a medicine.",
+        "Check article-level license text, figure/table notices, and any embedded third-party content before reuse.",
+        "Use to inform teaching objectives and assessment, not patient-specific treatment decisions."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "innovative-pharmacology-curriculum-medical-students-2021",
+      "title": "An innovative pharmacology curriculum for medical students: promoting higher order cognition, learner-centered coaching, and constructive feedback through a social pedagogy framework",
+      "authors": [
+        "Douglas McHugh",
+        "Andrew J. Yanik",
+        "Michael R. Mancini"
+      ],
+      "publisher": "BMC Medical Education",
+      "published_year": 2021,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7863331/",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "PubMed Central article license statement",
+      "source_verification_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7863331/",
+      "roles": [
+        "case_based_pharmacology_teaching",
+        "higher_order_reasoning",
+        "learner_feedback",
+        "clinical_education_design"
+      ],
+      "limits": [
+        "Educational-methods study, not a prescribing guideline or medicine safety database.",
+        "Check article-level license text, figure/table notices, and any embedded third-party content before reuse.",
+        "Use for designing learning workflows and feedback; do not infer patient-specific treatment recommendations."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "generic-versus-brand-names-clinical-pharmacology-education-europe-2026",
+      "title": "The use of generic versus brand names in (clinical) pharmacology education across Europe: a cross-sectional survey",
+      "authors": [
+        "Veronika Slezáková",
+        "Jitka Rychlíčková",
+        "Yoann Cazaubon",
+        "Erik M. Donker",
+        "Ellen van Leeuwen",
+        "Robert Likic",
+        "Dana Mazánková",
+        "Joost D. Piët",
+        "Fabrizio De Ponti",
+        "Walter Raasch",
+        "Floor van Rosse",
+        "Emilio J. Sanz",
+        "Markus Schwaninger",
+        "Michiel A. van Agtmael",
+        "Jelle Tichelaar"
+      ],
+      "publisher": "European Journal of Clinical Pharmacology",
+      "published_year": 2026,
+      "url": "https://link.springer.com/article/10.1007/s00228-026-04005-x",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "Publisher article license statement",
+      "source_verification_url": "https://link.springer.com/article/10.1007/s00228-026-04005-x",
+      "roles": [
+        "generic_and_brand_name_education",
+        "medication_name_normalization",
+        "pharmacology_curriculum_design"
+      ],
+      "limits": [
+        "Research about naming and pharmacology education, not a clinical recommendation or medication equivalence checker.",
+        "Check article-level license text, figure/table notices, and any embedded third-party content before reuse.",
+        "Use to improve generic/brand teaching and retrieval; do not treat name similarity as proof of therapeutic interchangeability."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
     }
   ]
 }
