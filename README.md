@@ -57,6 +57,8 @@ Start with a narrow, clinician-reviewed set of common dental medication scenario
 - `ai_front_desk/clinical/public_drug_data.py`: opt-in name-only metadata lookup through NLM RxNorm and openFDA. It does not fetch or transmit the clinical case, and it is not an interaction checker.
 - `ai_front_desk/clinical/pharmacology_education.py`: local keyword retrieval over original, source-linked educational notes; no external calls and no patient-specific prescribing advice.
 - `ai_front_desk/clinical/pharmacology_education_cards.json`: educational summaries attributed to open-license pharmacology books and linked public sources; these are not approved prescribing recommendations.
+- `ai_front_desk/clinical/knowledge_library.py`: offline full-text indexing/search for operator-supplied rights-cleared UTF-8 text. Keeps edition/section/license/attribution and content hash; textbook chunks are education-only and excluded from approved clinical evidence retrieval.
+- `docs/MIA_KNOWLEDGE_LIBRARY_BLUEPRINT.md`: searchable library architecture, candidate sources, licensing rules, importer workflow, and clinical-evidence governance.
 - `docs/DENTAL_AI_MVP_BUILD_SPEC.md`, `docs/DENTAL_AI_GITHUB_RESEARCH.md`, `docs/DENTAL_AI_PRODUCTION_REFERENCE.md`: scope, research, and production architecture notes.
 - `docs/MIA_CLINICAL_PLATFORM_BUILD_PLAN.md`: multi-app Mia runtime and multi-specialty clinical platform plan.
 - `docs/DR_MIA_PRODUCT_POSITIONING.md`: core strategy, supporting features, upsells, and claims boundaries.
@@ -98,7 +100,19 @@ The form includes an optional public drug-data lookup. It remains off unless you
 
 This lookup normalizes medication names and finds label metadata; it does not recommend medicines, calculate doses, assess interactions, or establish safety. Use the linked source labels and appropriate clinical guidelines, and require clinician review.
 
-See [Free and Open-Licensed Pharmacology Knowledge](docs/OPEN_PHARMACOLOGY_AND_DRUG_DATA.md) for textbook licenses, API limitations, and required attribution.
+See [Free and Open-Licensed Pharmacology Knowledge](docs/OPEN_PHARMACOLOGY_AND_DRUG_DATA.md) for textbook licenses, API limitations, and required attribution, plus the [Mia Searchable Clinical Knowledge Library blueprint](docs/MIA_KNOWLEDGE_LIBRARY_BLUEPRINT.md) for the full-text index and safe retrieval design.
+
+### Index a rights-cleared textbook extract locally
+
+The importer does not automatically download or scrape books. After obtaining a UTF-8 text extract using a permitted workflow and checking the exact license/selected content, run:
+
+```bash
+dr-mia-index-library --source-id openrn-nursing-pharmacology-2e --file /path/to/rights-cleared-extract.txt
+```
+
+The local index defaults to `~/.mia-dental-os/knowledge-library.jsonl`, outside the repository. The source catalog blocks noncommercial and unresolved-license texts. For a source with chapter/third-party content caveats, review and exclude any material not covered by the license before using `--confirm-rights-review`. This flag is an operator attestation, not a substitute for permissions.
+
+**Current status:** the indexing engine is implemented and tested, but the full-text index is empty by default and no complete textbook is bundled. Import only rights-cleared content. Study retrieval does not make clinical recommendations; the clinical evidence registry still has zero approved medication evidence cards.
 
 ## Test
 
