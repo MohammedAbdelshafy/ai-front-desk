@@ -50,7 +50,7 @@ Start with a narrow, clinician-reviewed set of common dental medication scenario
 - `ai_front_desk/clinical/mia_shell.py`: Dr. Mia character manifest and task-stage model.
 - `ai_front_desk/clinical/server.py`: local demo server with patient intake, dentist dashboard, record review, corrections, audit history, and FHIR export endpoints.
 - `ai_front_desk/clinical/medication_support.py`: versioned source/evidence models, source eligibility checks, exact-phrase retrieval, source provenance, baseline medication-history prompts, and a non-scoring clinical-completeness checklist. It is not a drug-interaction or dosage engine.
-- `ai_front_desk/clinical/medication_workbench.py`: local clinician-facing synthetic-case UI at port 8767; no case persistence and no external calls.
+- `ai_front_desk/clinical/medication_workbench.py`: local clinician-facing synthetic-case UI at port 8767; no case persistence, no external calls by default, and opt-in name-only queries to NLM RxNorm/openFDA for metadata.
 - `ai_front_desk/clinical/medication_evidence_registry.json`: candidate clinical reference links only; no approved evidence cards are enabled.
 - `ai_front_desk/clinical/pharmacology_learning_library.json`: open-license pharmacology books and reuse/attribution constraints.
 - `ai_front_desk/clinical/drug_data_sources.json`: drug-data sources, terms, API scope, and known limitations.
@@ -64,8 +64,7 @@ Start with a narrow, clinician-reviewed set of common dental medication scenario
 - `docs/MEDICATION_SUPPORT_FOUNDATION.md`: workbench architecture and development test instructions.
 - `docs/CLINICAL_SOURCE_REGISTER.md`: candidate sources and evidence approval checklist.
 - `docs/CLINICAL_DATA_PROVIDER_OPTIONS.md`: source/terminology/interaction-provider comparison and integration decision criteria.
-- `docs/OPEN_PHARMACOLOGY_AND_DRUG_DATA.md`: free/open textbook licenses, public drug-data options, attribution, and reuse guardrails.
-- `docs/OPEN_PHARMACOLOGY_AND_DRUG_DATA.md`: open book selection, public drug-data options, reuse limits, and attribution rules.
+- `docs/OPEN_PHARMACOLOGY_AND_DRUG_DATA.md`: open book licenses, public drug-data options, attribution, and reuse guardrails.
 - `docs/adr/001-clinical-data-store.md`: development storage decision and production prerequisites.
 
 ## Run the Mia Clinical intake demo
