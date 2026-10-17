@@ -2,7 +2,7 @@
 
 ## Purpose and state
 
-This is a **candidate-source register**, not a clinical knowledge base. The initial jurisdiction is the United States. Candidate links below are not approved for clinical retrieval, and no medication recommendations or source-derived treatment content have been loaded into the evidence registry.
+This is a **candidate-source register**, not a clinical knowledge base. The current local workbench UI remains US-only; the expanded source directory includes Egypt-specific regulator and formulary candidates for future jurisdiction-specific work. See [Clinical Information Centers](CLINICAL_INFORMATION_CENTERS.md) and the machine-readable directory at `ai_front_desk/clinical/clinical_information_centers.json`. Egyptian sources are not yet live runtime integrations, and no medication cards have been approved. Candidate links below are not approved for clinical retrieval, and no medication recommendations or source-derived treatment content have been loaded into the evidence registry.
 
 Every new source must be assessed for clinical scope, currentness, jurisdiction, reuse rights, product terms, and review requirements by an appropriate owner. Each specific evidence card needs review and approval by a qualified dental clinician before it can be retrieved by the prototype. Do not confuse public page access with permission to bulk-copy content or redistribute protected full text.
 
