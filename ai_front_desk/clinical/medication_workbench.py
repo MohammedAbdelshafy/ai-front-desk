@@ -115,6 +115,33 @@ def _render_flags(review: dict[str, Any]) -> str:
     return "".join(out)
 
 
+def _render_quality_checklist(review: dict[str, Any]) -> str:
+    checks = review.get("quality_checklist", [])
+    if not checks:
+        return ""
+    out = [
+        "<section class='quality-checklist'><h3>Clinical quality checklist</h3>"
+        "<p class='muted'>Completeness prompts only. This is not a clinical quality score or a safety determination.</p>"
+        "<ul class='quality-grid'>"
+    ]
+    attention = {"missing", "not_entered", "review_required", "no_verified_evidence", "required"}
+    for item in checks:
+        state = str(item.get("state", "review_required"))
+        css = "attention" if state in attention else "recorded"
+        out.append(
+            "<li class='quality-item'><div class='quality-item-top'><strong>%s</strong>"
+            "<span class='quality-state %s'>%s</span></div><p>%s</p></li>"
+            % (
+                esc(item.get("label", "")),
+                css,
+                esc(state.replace("_", " ")),
+                esc(item.get("detail", "")),
+            )
+        )
+    out.append("</ul></section>")
+    return "".join(out)
+
+
 def _render_evidence(review: dict[str, Any]) -> str:
     items = review.get("matched_evidence", [])
     if not items:
@@ -176,7 +203,7 @@ def render_page(
             "<article><h3>Reported allergies</h3><p>%s</p></article>"
             "<article><h3>Current medicines</h3><p>%s</p></article>"
             "<article><h3>Relevant history</h3><p>%s</p></article></div>"
-            "%s%s<p class='disclaimer'>This demo does not diagnose, prescribe, calculate doses, "
+            "%s%s%s<p class='disclaimer'>This demo does not diagnose, prescribe, calculate doses, "
             "or perform comprehensive interaction checks. No information is saved or sent to an external service.</p></section>"
             % (
                 esc(evidence_state.replace("_", " ").title()),
@@ -184,6 +211,7 @@ def render_page(
                 esc(review.get("clinical_context_summary", {}).get("reported_allergies", "Not entered")),
                 esc(review.get("clinical_context_summary", {}).get("current_medications", "Not entered")),
                 esc(review.get("clinical_context_summary", {}).get("relevant_medical_history", "Not entered")),
+                _render_quality_checklist(review),
                 _render_flags(review),
                 _render_evidence(review),
             )
@@ -207,11 +235,12 @@ button{margin-top:18px;background:var(--teal);color:#fff;border:0;padding:12px 1
 .note{background:#eff8f7;border:1px solid #d0e9e5;padding:12px 14px;border-radius:12px;font-size:13px}.note strong{display:block;margin-bottom:4px}.error{margin:12px 0;padding:12px;background:#ffe8e8;border:1px solid #f4bcbc;border-radius:10px;color:#8c2020}
 .results{margin-top:18px}.result-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.pill{font-size:11px;font-weight:750;border-radius:30px;background:#e5f4ef;color:#13644e;padding:7px 10px}.context-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.context-grid article{padding:12px;border:1px solid var(--line);background:#fbfdfd;border-radius:12px;overflow-wrap:anywhere}.context-grid p{margin:0;white-space:pre-wrap;font-size:13px}
 .flags{margin:20px 0}.flag{border-left:3px solid #bd7d00;background:var(--amber);padding:10px 12px;margin:8px 0;border-radius:6px}.flag p{margin:4px 0 0;font-size:13px}
+.quality-checklist{margin:20px 0}.quality-grid{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.quality-item{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fbfdfd;min-width:0}.quality-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.quality-item strong{font-size:12px}.quality-item p{font-size:12px;color:var(--muted);margin:6px 0 0}.quality-state{font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;padding:4px 6px;border-radius:20px;background:#e1f4eb;color:#146049;white-space:nowrap}.quality-state.attention{background:#fff0c9;color:#815100}
 .empty-evidence{background:#f2f7f8;border:1px dashed #aac4c9;border-radius:12px;padding:15px;margin-top:14px}.empty-evidence h3{color:#7a5200}.empty-evidence p{font-size:13px;margin-bottom:0}
 .notice{background:#e8f5f2;border:1px solid #c5e7dd;padding:12px;border-radius:10px;margin-top:12px;font-size:13px}.evidence-card{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;overflow-wrap:anywhere}.evidence-card p{font-size:13px;margin:8px 0}.evidence-card a{color:#086e7b;font-weight:700}
 .disclaimer{border-top:1px solid var(--line);padding-top:12px;color:var(--muted);font-size:12px;margin-top:18px}
 footer{margin:25px 0 10px;color:var(--muted);font-size:12px}
-@media(max-width:780px){.layout{grid-template-columns:1fr}.context-grid{grid-template-columns:1fr}.factor-grid{grid-template-columns:1fr}header{align-items:flex-start}.avatar{width:58px;height:58px;flex-basis:58px}.wrap{padding:14px}}
+@media(max-width:780px){.layout{grid-template-columns:1fr}.context-grid{grid-template-columns:1fr}.factor-grid{grid-template-columns:1fr}.quality-grid{grid-template-columns:1fr}header{align-items:flex-start}.avatar{width:58px;height:58px;flex-basis:58px}.wrap{padding:14px}}
 </style></head><body>
 <div class="banner">LOCAL DEMO ONLY · USE SYNTHETIC CASES · DO NOT ENTER REAL PATIENT IDENTIFIERS OR HEALTH INFORMATION</div>
 <main class="wrap">
