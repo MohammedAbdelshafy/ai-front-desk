@@ -239,8 +239,14 @@ def _quality_checklist(case: ClinicianCase, matched_evidence_count: int) -> list
 def _baseline_review_flags(case: ClinicianCase) -> list[dict[str, str]]:
     """Critical medication-context review prompts apply even when no card matches."""
     required_factors = {
-        "allergies": "Confirm reported allergies and reactions; record 'none reported' or 'unknown' when appropriate before interpreting medication evidence.",
-        "current_medications": "Confirm current medicines and supplements, or explicitly record 'none reported' or 'unknown', before interpreting medication evidence.",
+        "allergies": (
+            bool(case.reported_allergies.strip()),
+            "Confirm reported allergies and reactions; record 'none reported' or 'unknown' when appropriate before interpreting medication evidence.",
+        ),
+        "current_medications": (
+            bool(case.current_medications.strip()),
+            "Confirm current medicines and supplements, or explicitly record 'none reported' or 'unknown', before interpreting medication evidence.",
+        ),
     }
     return [
         {
@@ -249,8 +255,8 @@ def _baseline_review_flags(case: ClinicianCase) -> list[dict[str, str]]:
             "factor": factor,
             "message": message,
         }
-        for factor, message in required_factors.items()
-        if factor not in case.reviewed_factors
+        for factor, (has_context, message) in required_factors.items()
+        if factor not in case.reviewed_factors or not has_context
     ]
 
 
