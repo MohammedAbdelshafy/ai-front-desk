@@ -6,7 +6,7 @@ Dr. Mia is a character-led clinical support product direction for dental practic
 
 **The core product is clinical quality and prescribing support.** The AI front desk, retention automation, and Lead Engine are optional expansions, not the product's identity.
 
-> **Current status:** this repository contains reference communication workflows, testable administrative logic, and a local clinical-intake demo using synthetic data. The prescribing copilot described below is a product direction, not an implemented capability. Live phone answering, production messaging, appointment scheduling, and production clinical decision support are not shipped.
+> **Current status:** this repository contains reference communication workflows, testable administrative logic, a local clinical-intake demo, and an initial local medication evidence workbench using synthetic data. The workbench can retrieve only approved, current, jurisdiction-matched evidence cards; the registry currently contains candidate source links only and **zero approved medication evidence cards**, so no medication recommendations are available. It does not diagnose, prescribe, calculate doses, or perform comprehensive interaction checks. Live phone answering, production messaging, appointment scheduling, and production clinical decision support are not shipped.
 
 ## Core product: Clinical Quality & Prescribing Copilot
 
@@ -49,9 +49,14 @@ Start with a narrow, clinician-reviewed set of common dental medication scenario
 - `ai_front_desk/clinical/dashboard.py`: dentist-facing history brief with patient-reported answers, system-check flags, and a deterministic structured rollup. It is not AI-generated clinical interpretation.
 - `ai_front_desk/clinical/mia_shell.py`: Dental Mia character manifest and task-stage model.
 - `ai_front_desk/clinical/server.py`: local demo server with patient intake, dentist dashboard, record review, corrections, audit history, and FHIR export endpoints.
+- `ai_front_desk/clinical/medication_support.py`: versioned source/evidence models, source eligibility checks, exact-phrase retrieval, source provenance, and clinician review prompts. It is not a drug-interaction or dosage engine.
+- `ai_front_desk/clinical/medication_workbench.py`: local clinician-facing synthetic-case UI at port 8767; no case persistence and no external calls.
+- `ai_front_desk/clinical/medication_evidence_registry.json`: candidate reference links only; no approved evidence cards are enabled.
 - `docs/DENTAL_AI_MVP_BUILD_SPEC.md`, `docs/DENTAL_AI_GITHUB_RESEARCH.md`, `docs/DENTAL_AI_PRODUCTION_REFERENCE.md`: scope, research, and production architecture notes.
 - `docs/MIA_CLINICAL_PLATFORM_BUILD_PLAN.md`: multi-app Mia runtime and multi-specialty clinical platform plan.
-- `docs/DR_MIA_PRODUCT_POSITIONING.md`: updated core strategy, feature descriptions, upsells, and claims boundaries.
+- `docs/DR_MIA_PRODUCT_POSITIONING.md`: core strategy, supporting features, upsells, and claims boundaries.
+- `docs/MEDICATION_SUPPORT_FOUNDATION.md`: workbench architecture and development test instructions.
+- `docs/CLINICAL_SOURCE_REGISTER.md`: candidate sources and evidence approval checklist.
 - `docs/adr/001-clinical-data-store.md`: development storage decision and production prerequisites.
 
 ## Run the Mia Clinical intake demo
@@ -68,6 +73,20 @@ Open **http://127.0.0.1:8766**. Pick a fictional demo clinic, submit a fictional
 The demo database is stored at `~/.mia-clinical-demo/clinical-demo.sqlite3` by default. Set `CLINICAL_DB` to override the local path. This is a development prototype, not an EHR.
 
 **Do not enter real patient data.** The questionnaire is marked draft and must be reviewed and approved by a qualified dentist before clinical use. The prototype has no production authentication, does not send messages or book appointments, and does not provide medication recommendations or autonomous clinical decisions. The Mia help conversation uses fixed local responses and is explicitly not a connected live AI model.
+
+## Run the Dr. Mia Evidence Workbench demo
+
+The workbench is local-only, uses the candidate-source registry, stores no submitted case, and makes no external calls. Use synthetic cases only. Since no approved medication evidence cards are enabled, it intentionally returns **No verified evidence found**.
+
+After installing the project:
+
+```bash
+dr-mia-workbench
+# or
+python -m ai_front_desk.clinical.medication_workbench
+```
+
+Open **http://127.0.0.1:8767**. The demo only retrieves cards marked approved with current review metadata, cleared content rights, and a matching US jurisdiction. It does not prescribe, calculate doses, or perform comprehensive drug-interaction checks.
 
 ## Test
 
