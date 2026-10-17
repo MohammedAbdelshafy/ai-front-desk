@@ -30,7 +30,7 @@ This replaces the earlier front-desk-first commercial recommendation recorded in
 - Strict source eligibility checks (approval state, rights status, jurisdiction, reviewer metadata, and review due date).
 - Exact-phrase evidence-card retrieval with source provenance.
 - Baseline allergy/current-medication review prompts and a deterministic completeness checklist.
-- A local workbench at `http://127.0.0.1:8767` that accepts synthetic cases, makes no external calls, and stores no submissions.
+- A local workbench at `http://127.0.0.1:8767` that accepts synthetic cases and stores no submissions. By default it makes no external calls; its optional public lookup sends only a standalone medicine name to NLM RxNorm/openFDA for metadata and never sends case context.
 - Automated tests covering the no-evidence path, source expiry/approval/rights/jurisdiction checks, form escaping, and local HTTP behavior.
 
 **There are zero approved medication evidence cards.** The source links are candidates, not clinical approval. The workbench correctly returns “No verified evidence found” until evidence has been reviewed and approved.
