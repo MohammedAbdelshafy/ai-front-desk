@@ -275,7 +275,7 @@ def build_evidence_review(
     flagged_factors = {flag.get("factor") for flag in flags}
 
     if not case.proposed_assessment.strip():
-        flags.append({
+        flags.insert(0, {
             "code": "missing_clinician_assessment",
             "severity": "review_required",
             "message": "Enter the clinician's working assessment before retrieving assessment-specific evidence.",
