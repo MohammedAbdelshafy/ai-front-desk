@@ -48,7 +48,7 @@ Keep the software source-agnostic and split three jobs:
 
 Before any vendor integration, establish permitted clinical use, license terms, caching/display limits, version/update commitments, uptime, data-processing terms, and total per-clinic operating cost. Do not send real patient data to a provider until the clinic's privacy/security and contract requirements have been reviewed.
 
-See [Clinical Source Register](CLINICAL_SOURCE_REGISTER.md) and [Clinical Data Provider Options](CLINICAL_DATA_PROVIDER_OPTIONS.md).
+See [Clinical Information Centers](CLINICAL_INFORMATION_CENTERS.md), the machine-readable catalog at `ai_front_desk/clinical/clinical_information_centers.json`, the [Clinical Source Register](CLINICAL_SOURCE_REGISTER.md), and [Clinical Data Provider Options](CLINICAL_DATA_PROVIDER_OPTIONS.md). The directory now lists ADA, CDC, AAPD, AAE, NLM/FDA, EDA Egypt, WHO, and a licensed DDI provider candidate. Only RxNorm/openFDA name-only metadata lookup is currently implemented; the other entries are source links or integration candidates, not live recommendation sources.
 
 ## Build sequence
 
