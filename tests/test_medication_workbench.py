@@ -45,6 +45,7 @@ def test_workbench_empty_registry_returns_no_verified_evidence():
     })
     assert review["status"] == "no_verified_evidence"
     assert review["matched_evidence"] == []
+    assert {flag.get("factor") for flag in review["flags"] if flag["code"] == "patient_factor_needs_review"} >= {"allergies", "current_medications"}
     page = render_page({"case_id": "synthetic-case-003", "proposed_assessment": "Synthetic assessment for demo"}, review)
     assert "No verified evidence found" in page
     assert "Do not infer that a medicine is appropriate or safe" in page
@@ -132,3 +133,17 @@ def test_workbench_http_unknown_routes_return_404(workbench_url):
     with pytest.raises(HTTPError) as exc:
         urlopen(workbench_url + "/unknown")
     assert exc.value.code == 404
+
+
+def test_checked_box_does_not_override_blank_critical_context():
+    case = case_from_form({
+        "case_id": "synthetic-case-005",
+        "proposed_assessment": "Synthetic assessment",
+        "reviewed_allergies": "1",
+        "reviewed_current_medications": "1",
+        "reported_allergies": "",
+        "current_medications": "",
+        "jurisdiction": "US",
+    })
+    assert "allergies" not in case.reviewed_factors
+    assert "current_medications" not in case.reviewed_factors
