@@ -39,7 +39,7 @@ The workbench now has a local, offline full-text search path:
 - Re-indexing a source replaces that source's previous local chunks rather than showing the old and new edition as duplicate matches.
 - Retrieved textbook passages are tagged `education_only` and `not_clinically_approved`. The clinical-evidence search excludes them by construction.
 
-This first implementation accepts UTF-8 plain text rather than scraping or downloading books automatically. Convert only the rights-cleared source selection to text using a permitted workflow. The current source catalog is small and intentionally conservative.
+This first implementation accepts UTF-8 plain text rather than scraping or downloading books automatically. Convert only the rights-cleared source selection to text using a permitted workflow. The source catalog is intentionally conservative. It now includes foundational textbooks, an open pharmacy casebook, education-methods research, the PMC commercial-use discovery collection, CDC dental antibiotic stewardship, ADA/AAE guideline links, official label sources, WHO essential-medicine lists, and Egypt's 2025 National Essential Medicine List. Copyrighted or unresolved material (including Merck Manual, SDCEP, and most ADA/AAE documents) remains link-only until permission is confirmed. NCBI's LitArch Open Access subset is its authorized route for automated book download; individual file licenses still govern reuse.
 
 ## Example import workflow
 
