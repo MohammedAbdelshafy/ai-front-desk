@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Open-license pharmacology education sources to support foundational learning. This is not an approved clinical prescribing knowledge base.",
+  "ingestion_policy": "Use only entries marked commercial_reuse_permitted for any extracted or adapted content in a commercial product, preserve attribution and license notices, track source versions, and have clinical summaries independently reviewed. Do not use any book as a current drug monograph or patient-specific medication authority.",
+  "sources": [
+    {
+      "id": "openrn-nursing-pharmacology-2e",
+      "title": "Nursing Pharmacology, 2nd edition",
+      "authors": [
+        "Open Resources for Nursing (Open RN)",
+        "Kimberly Ernstmeyer",
+        "Elizabeth Christman"
+      ],
+      "publisher": "Chippewa Valley Technical College",
+      "published_year": 2023,
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK595000/",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "NLM NCBI Bookshelf copyright notice",
+      "source_verification_url": "https://www.ncbi.nlm.nih.gov/books/NBK595000/",
+      "roles": [
+        "foundational_pharmacology",
+        "pharmacokinetics",
+        "pharmacodynamics",
+        "drug_classes",
+        "antimicrobials",
+        "medication_safety_education"
+      ],
+      "limits": [
+        "The authors explicitly state this is not intended to be a drug reference book.",
+        "Designed for prelicensure nursing education, not dental prescribing decisions.",
+        "Any derived clinical card must be reviewed independently by a qualified clinician."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "uic-essentials-of-pharmacology",
+      "title": "Essentials of Pharmacology",
+      "authors": [
+        "Joshua Halpern",
+        "University of Illinois Chicago contributors"
+      ],
+      "publisher": "Medicine LibreTexts / University of Illinois Chicago",
+      "published_year": 2025,
+      "url": "https://med.libretexts.org/Courses/University_of_Illinois_Chicago/Essentials_of_Pharmacology",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "Medicine LibreTexts page license metadata",
+      "source_verification_url": "https://med.libretexts.org/Courses/University_of_Illinois_Chicago/Essentials_of_Pharmacology",
+      "roles": [
+        "foundational_pharmacology",
+        "pharmacokinetics",
+        "pharmacodynamics",
+        "pharmacogenomics",
+        "drug_development",
+        "adverse_effects"
+      ],
+      "limits": [
+        "Educational pharmacology text, not a current product label or patient-specific prescribing reference.",
+        "Check chapter-level license metadata for any third-party content before reuse."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "vt-microbiology-pharmacology-immunology-preclinical",
+      "title": "Microbiology, Pharmacology, and Immunology for Pre-Clinical Students",
+      "authors": [
+        "Jennifer L. Cleveland",
+        "Andrew P. Binks",
+        "Renée J. LeClair"
+      ],
+      "publisher": "Virginia Tech Publishing",
+      "published_year": 2025,
+      "url": "https://open.umn.edu/opentextbooks/textbooks/1778",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "Open Textbook Library usage-rights metadata",
+      "source_verification_url": "https://open.umn.edu/opentextbooks/textbooks/1778",
+      "roles": [
+        "preclinical_learning",
+        "infectious_disease_foundations",
+        "microbiology",
+        "immunology",
+        "treatment_mechanisms"
+      ],
+      "limits": [
+        "Preclinical medical education reference, not a medication monograph or dental prescribing guideline.",
+        "Verify chapter-level attribution and third-party content before reuse."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "openstax-pharmacology-for-nurses",
+      "title": "Pharmacology for Nurses",
+      "authors": [
+        "Tina Barbour-Taylor",
+        "Leah Mueller (Sabato)",
+        "Donna Paris",
+        "Dorie Weaver"
+      ],
+      "publisher": "OpenStax / Rice University",
+      "published_year": 2024,
+      "url": "https://openstax.org/books/pharmacology/pages/preface",
+      "license_id": "CC-BY-NC-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "OpenStax official preface and licensing statement",
+      "source_verification_url": "https://openstax.org/books/pharmacology/pages/preface",
+      "roles": [
+        "optional_external_reading_link"
+      ],
+      "limits": [
+        "Noncommercial license; do not ingest, reproduce, adapt, or train a commercial Dr. Mia product on this content without permission from OpenStax.",
+        "Free to read does not grant commercial reuse."
+      ],
+      "ingestion_status": "link_only_no_commercial_ingestion",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    }
+  ]
+}
