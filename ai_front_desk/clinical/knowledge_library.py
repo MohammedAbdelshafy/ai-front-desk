@@ -494,6 +494,9 @@ def main() -> int:
     parser.add_argument("--check-updates", action="store_true", help="Check source URL HTTP headers for possible updates")
     parser.add_argument("--status-path", default=str(Path.home() / ".mia-dental-os" / "source-update-status.json"), help="Local update-check state path")
     parser.add_argument("--save-update-status", action="store_true", help="Save Last-Modified/ETag signals locally for comparison on the next run")
+    parser.add_argument("--search", help="Search the local index without importing a new source")
+    parser.add_argument("--mode", choices=("education", "clinical_evidence"), default="education", help="Clinical evidence mode returns only explicitly approved evidence chunks")
+    parser.add_argument("--limit", type=int, default=5, help="Maximum number of local passages to return (1-10)")
     parser.add_argument(
         "--confirm-rights-review", action="store_true",
         help="Confirm that chapter-level/third-party content in the selected text was checked and excluded if not reusable",
@@ -518,8 +521,17 @@ def main() -> int:
         )
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0
+    if args.search:
+        result = search_knowledge_library(
+            args.search,
+            corpus_path=args.corpus_path,
+            limit=args.limit,
+            mode=args.mode,
+        )
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0
     if not args.source_id or not args.file:
-        parser.error("--source-id and --file are required unless --list-sources or --check-updates is used")
+        parser.error("--source-id and --file are required unless --list-sources, --check-updates, or --search is used")
     try:
         result = index_text_file(
             args.source_id, args.file,
