@@ -6,14 +6,16 @@ This is the initial backend foundation for the dentist-facing clinical quality a
 
 ## Added components
 
-- `ai_front_desk/clinical/medication_workbench.py`: local synthetic-case web UI at `http://127.0.0.1:8767`. It binds only to loopback, does not persist cases, and makes no external requests.
+- `ai_front_desk/clinical/medication_workbench.py`: local synthetic-case web UI at `http://127.0.0.1:8767`. It binds only to loopback, does not persist cases, and makes no external requests. The review screen surfaces a completeness checklist and requires a supervising-dentist review state; it does not record a prescription or clinical approval.
 - `ai_front_desk/clinical/medication_support.py`
   - Versioned source and evidence-card data models.
   - A curator-controlled approval state and mandatory source review due date.
   - Rights, reviewer, version, URL, review-date, and jurisdiction checks.
   - Exact-phrase retrieval against the clinician-entered assessment and symptoms.
   - Source provenance on every returned evidence card.
-  - Reviewer-configured patient-factor prompts and risk-tag prompts.
+  - Baseline prompts for allergy/reaction and current-medication review, shown even when no source card matches.
+  - A deterministic clinical-completeness checklist for assessment, symptoms, allergies, current medicines, history, evidence state, and required supervising-dentist review. It is not a clinical quality score.
+  - Reviewer-configured patient-factor prompts and caution-tag prompts.
   - Explicit response fields stating that prescribing, dose calculation, and comprehensive interaction checking are not performed.
   - Empty, stale, unapproved, rights-uncleared, and wrong-jurisdiction content fails closed.
 - `ai_front_desk/clinical/medication_evidence_registry.json`
