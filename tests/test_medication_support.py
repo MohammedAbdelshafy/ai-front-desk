@@ -111,6 +111,11 @@ def test_no_matching_evidence_never_invents_a_card():
     assert result["matched_evidence"] == []
     assert result["status"] == "no_verified_evidence"
     assert "Do not infer" in result["message"]
+    checklist = {item["id"]: item["state"] for item in result["quality_checklist"]}
+    assert checklist["evidence"] == "no_verified_evidence"
+    assert checklist["supervising_review"] == "required"
+    assert checklist["allergies"] == "review_required"
+    assert checklist["current_medications"] == "review_required"
 
 
 def test_missing_assessment_returns_for_input():
