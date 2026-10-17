@@ -432,6 +432,148 @@
       ],
       "ingestion_status": "link_only_without_written_permission",
       "clinical_evidence_status": "not_a_prescribing_authority_in_this_product"
+    },
+    {
+      "id": "dental-education-review-open-access-2024",
+      "title": "Application of Emerging Teaching Models in Dental Education: A Systematic Review and Meta-Analysis",
+      "authors": [
+        "Xuefei Liu",
+        "Ling Li and colleagues"
+      ],
+      "publisher": "BMC Medical Education",
+      "published_year": 2024,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11551604/",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "PMC article copyright/license statement",
+      "source_verification_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11551604/",
+      "roles": [
+        "dental_education",
+        "systematic_review_methods",
+        "case_based_learning",
+        "learning_assessment"
+      ],
+      "limits": [
+        "Educational-methods review, not a dental treatment or drug-prescribing guideline.",
+        "Check article-level license statement and any embedded third-party figure/table notices before reuse.",
+        "Useful for teaching architecture, not patient-specific medication decisions."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "dental-education-guide-novice-tutors",
+      "title": "Dental Education: A Guide for Novice Tutors",
+      "authors": [
+        "Authors as listed in source article"
+      ],
+      "publisher": "European Journal of Dental Education / PubMed Central",
+      "published_year": 2023,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10491430/",
+      "license_id": "Article-level license to be verified",
+      "license_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10491430/",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "PMC full-text record; record-level license requires confirmation",
+      "source_verification_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10491430/",
+      "roles": [
+        "dental_education",
+        "case_based_learning",
+        "team_based_learning"
+      ],
+      "limits": [
+        "Educational review, not a clinical treatment guide.",
+        "Do not ingest commercial text until the full article license and third-party content notices are verified.",
+        "Citation and link remain available for independent reading."
+      ],
+      "ingestion_status": "link_only_pending_article_license_review",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "local-anaesthesia-dentistry-review",
+      "title": "Local Anaesthesia in Dentistry: A Review",
+      "authors": [
+        "Aviv Ouanounou and colleagues"
+      ],
+      "publisher": "Journal of the Canadian Dental Association / FDI-related publication",
+      "published_year": 2021,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9275172/",
+      "license_id": "CC-BY-NC-ND-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "PMC article license statement",
+      "source_verification_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9275172/",
+      "roles": [
+        "local_anaesthesia_education",
+        "dental_pharmacology_reference_link",
+        "contraindication_education_topic"
+      ],
+      "limits": [
+        "The article is CC BY-NC-ND: noncommercial and no-derivatives; do not ingest or adapt it into the commercial library without permission.",
+        "Link-only source despite public full-text access.",
+        "Review is foundational and must not replace a current product label or patient-specific clinician assessment."
+      ],
+      "ingestion_status": "link_only_noncommercial_no_derivatives",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "dental-pain-analgesics-guidance-2026-india",
+      "title": "Indian Society of Periodontology Good Clinical Practice Recommendations for Dental Pain Management and Use of Analgesics",
+      "authors": [
+        "Indian Society of Periodontology working group"
+      ],
+      "publisher": "Journal of Indian Society of Periodontology",
+      "published_year": 2026,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13286543/",
+      "license_id": "CC-BY-NC-ND-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "PMC article license statement",
+      "source_verification_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13286543/",
+      "roles": [
+        "dental_pain_analgesia_guideline_link",
+        "guideline_discovery",
+        "international_guidance_comparison"
+      ],
+      "limits": [
+        "CC BY-NC-ND terms do not permit commercial reuse/adaptation without permission; link only.",
+        "Indian professional guidance must not be automatically applied to US or Egypt practice.",
+        "Exact scope and recommendations require dental clinician review before any comparative teaching summary."
+      ],
+      "ingestion_status": "link_only_noncommercial_no_derivatives",
+      "clinical_evidence_status": "not_a_prescribing_authority_in_this_product"
+    },
+    {
+      "id": "open-textbook-library-catalog",
+      "title": "Open Textbook Library Catalog API and Metadata",
+      "authors": [
+        "Open Education Network contributors"
+      ],
+      "publisher": "Open Textbook Library",
+      "published_year": 2026,
+      "url": "https://open.umn.edu/opentextbooks/discovery",
+      "license_id": "CC0 for the catalog records; each textbook has its own license",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": false,
+      "source_verified_from": "Official Open Textbook Library discovery page",
+      "source_verification_url": "https://open.umn.edu/opentextbooks/discovery",
+      "roles": [
+        "open_textbook_discovery",
+        "license_metadata_discovery",
+        "catalog_refresh"
+      ],
+      "limits": [
+        "CC0 applies to Open Textbook Library catalog records, not automatically to the linked textbook content.",
+        "The library is a referatory, not the content archive; retrieve the book from its publisher and inspect the book/chapter license.",
+        "Metadata discovery is not clinical endorsement or textbook-content ingestion."
+      ],
+      "ingestion_status": "metadata_only_catalog_discovery",
+      "clinical_evidence_status": "not_a_prescribing_authority"
     }
   ]
 }
