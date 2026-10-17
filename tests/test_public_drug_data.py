@@ -110,3 +110,22 @@ def test_lookup_does_not_echo_or_persist_case_details():
     assert "patient" in result["source_notice"].lower()
     assert "allergies" not in result
     assert "medical_history" not in result
+
+import json
+from pathlib import Path
+
+
+def test_open_knowledge_catalogs_declare_reuse_rights_and_limits():
+    base = Path(__file__).resolve().parents[1] / "ai_front_desk" / "clinical"
+    learning = json.loads((base / "pharmacology_learning_library.json").read_text(encoding="utf-8"))
+    drug_data = json.loads((base / "drug_data_sources.json").read_text(encoding="utf-8"))
+
+    books = {item["id"]: item for item in learning["sources"]}
+    assert books["openrn-nursing-pharmacology-2e"]["license_id"] == "CC-BY-4.0"
+    assert books["openrn-nursing-pharmacology-2e"]["commercial_reuse_permitted"] is True
+    assert books["openstax-pharmacology-for-nurses"]["commercial_reuse_permitted"] is False
+
+    providers = {item["id"]: item for item in drug_data["sources"]}
+    assert providers["rxnorm-api"]["access_cost"] == "free_of_charge"
+    assert "normalization" in " ".join(providers["rxnorm-api"]["roles"])
+    assert providers["rxnav-discontinued-ddi"]["ingestion_status"] == "retired_do_not_integrate"
