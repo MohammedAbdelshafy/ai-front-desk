@@ -49,6 +49,9 @@ def test_workbench_empty_registry_returns_no_verified_evidence():
     page = render_page({"case_id": "synthetic-case-003", "proposed_assessment": "Synthetic assessment for demo"}, review)
     assert "No verified evidence found" in page
     assert "Do not infer that a medicine is appropriate or safe" in page
+    assert "Clinical quality checklist" in page
+    assert "Supervising dentist review" in page
+    assert "not a clinical quality score" in page.lower()
 
 
 def test_workbench_rejects_non_synthetic_case_reference():
