@@ -57,6 +57,7 @@ Start with a narrow, clinician-reviewed set of common dental medication scenario
 - `docs/DR_MIA_PRODUCT_POSITIONING.md`: core strategy, supporting features, upsells, and claims boundaries.
 - `docs/MEDICATION_SUPPORT_FOUNDATION.md`: workbench architecture and development test instructions.
 - `docs/CLINICAL_SOURCE_REGISTER.md`: candidate sources and evidence approval checklist.
+- `docs/CLINICAL_DATA_PROVIDER_OPTIONS.md`: source/terminology/interaction-provider comparison and integration decision criteria.
 - `docs/adr/001-clinical-data-store.md`: development storage decision and production prerequisites.
 
 ## Run the Mia Clinical intake demo
