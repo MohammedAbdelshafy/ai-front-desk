@@ -148,6 +148,7 @@ def check_source_updates(
     *,
     manifest_path: str | Path = DEFAULT_MANIFEST_PATH,
     previous_status_path: str | Path | None = None,
+    save_status: bool = False,
 ) -> dict[str, Any]:
     """Check source URLs for HTTP version signals only; never auto-approves content."""
     import urllib.error
@@ -213,13 +214,36 @@ def check_source_updates(
                 "license_status": source.get("ingestion_status"),
                 "note": "No currentness claim can be made from this check.",
             })
-    return {
+    report = {
         "checked_at": date.today().isoformat(),
         "check_type": "source_header_update_discovery_only",
         "source_count": len(records),
         "records": records,
         "message": "Header checks detect possible updates only. They do not download, index, license, or approve content.",
     }
+    if save_status and status_path:
+        status_path.parent.mkdir(parents=True, exist_ok=True)
+        compact = {}
+        for record in records:
+            if record.get("status") in {"reachable_metadata_found", "reachable_version_signal_missing", "version_signal_changed"}:
+                compact[str(record.get("source_id"))] = {
+                    "last_modified": record.get("last_modified"),
+                    "etag": record.get("etag"),
+                    "checked_at": record.get("checked_at"),
+                }
+            elif record.get("source_id") in previous:
+                compact[str(record.get("source_id"))] = previous[str(record.get("source_id"))]
+        temp_fd, temp_path = tempfile.mkstemp(prefix="mia-source-status-", suffix=".json", dir=str(status_path.parent))
+        try:
+            with os.fdopen(temp_fd, "w", encoding="utf-8") as handle:
+                json.dump(compact, handle, ensure_ascii=False, sort_keys=True, indent=2)
+                handle.write("\n")
+            os.replace(temp_path, status_path)
+        finally:
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+        report["status_saved_to"] = str(status_path)
+    return report
 
 
 def _read_index(path: str | Path) -> list[dict[str, Any]]:
@@ -468,7 +492,8 @@ def main() -> int:
     parser.add_argument("--manifest-path", default=str(DEFAULT_MANIFEST_PATH), help="Source allow-list JSON path")
     parser.add_argument("--list-sources", action="store_true", help="List catalog sources and their ingest eligibility")
     parser.add_argument("--check-updates", action="store_true", help="Check source URL HTTP headers for possible updates")
-    parser.add_argument("--status-path", default=str(Path.home() / ".mia-dental-os" / "source-update-status.json"), help="Prior update-check state path (reserved for caller-managed history)")
+    parser.add_argument("--status-path", default=str(Path.home() / ".mia-dental-os" / "source-update-status.json"), help="Local update-check state path")
+    parser.add_argument("--save-update-status", action="store_true", help="Save Last-Modified/ETag signals locally for comparison on the next run")
     parser.add_argument(
         "--confirm-rights-review", action="store_true",
         help="Confirm that chapter-level/third-party content in the selected text was checked and excluded if not reusable",
@@ -486,7 +511,11 @@ def main() -> int:
         } for item in sources], indent=2, ensure_ascii=False))
         return 0
     if args.check_updates:
-        result = check_source_updates(manifest_path=args.manifest_path, previous_status_path=args.status_path)
+        result = check_source_updates(
+            manifest_path=args.manifest_path,
+            previous_status_path=args.status_path,
+            save_status=args.save_update_status,
+        )
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0
     if not args.source_id or not args.file:
