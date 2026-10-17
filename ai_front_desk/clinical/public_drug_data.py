@@ -22,6 +22,16 @@ TIMEOUT_SECONDS = 4
 MAX_RESULTS = 5
 MAX_QUERY_LENGTH = 120
 MEDICINE_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 +().,'/-]{0,119}$")
+# Block common clinical narrative terms so obvious case descriptions are not
+# sent as a "medicine name". This cannot reliably detect every person's name;
+# the UI must still tell users to enter only one known medicine/ingredient.
+BLOCKED_QUERY_TERMS = {
+    "patient", "patients", "allergy", "allergies", "allergic", "symptom", "symptoms",
+    "history", "medical", "diagnosed", "diagnosis", "prescribed", "taking",
+    "takes", "has", "have", "had", "is", "are", "was", "were", "he", "she",
+    "they", "their", "dob", "birth", "age", "pain", "feels", "reports",
+    "complains", "case", "chart",
+}
 
 
 class PublicDrugDataError(RuntimeError):
@@ -37,8 +47,15 @@ def validate_medicine_name(value: str) -> str:
     if not isinstance(value, str):
         raise ValueError("Enter one medicine name or active ingredient.")
     term = value.strip()
-    if not term or len(term) > MAX_QUERY_LENGTH or not MEDICINE_NAME_RE.fullmatch(term):
-        raise ValueError("Enter one medicine name or active ingredient (1-120 safe characters).")
+    tokens = set(re.findall(r"[a-z]+", term.casefold()))
+    if (
+        not term
+        or len(term) > MAX_QUERY_LENGTH
+        or not MEDICINE_NAME_RE.fullmatch(term)
+        or tokens.intersection(BLOCKED_QUERY_TERMS)
+        or len(term.split()) > 5
+    ):
+        raise ValueError("Enter one medicine name or active ingredient only; do not enter patient or clinical case details.")
     return term
 
 
@@ -266,7 +283,8 @@ def lookup_public_drug_metadata(
         "interaction_check_performed": False,
         "source_notice": (
             "Metadata discovery only. This lookup does not recommend, prescribe, dose, "
-            "diagnose, or check drug interactions. Confirm the current product label and "
+            "diagnose, or check drug interactions. Patient-specific case context is not sent. "
+            "Confirm the current product label and "
             "evaluate the actual clinical question using appropriate clinical guidance."
         ),
         "rxnorm": rxnorm,
