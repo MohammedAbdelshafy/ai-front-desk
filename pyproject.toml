@@ -20,4 +20,4 @@ include = ["ai_front_desk*"]
 
 [tool.setuptools.package-data]
 ai_front_desk = ["n8n_workflow.json", ".env.example"]
-"ai_front_desk.clinical" = ["dental_intake_v1.json", "medication_evidence_registry.json", "pharmacology_learning_library.json", "drug_data_sources.json", "static/*.webp"]
+"ai_front_desk.clinical" = ["dental_intake_v1.json", "medication_evidence_registry.json", "pharmacology_learning_library.json", "drug_data_sources.json", "pharmacology_education_cards.json", "static/*.webp"]
