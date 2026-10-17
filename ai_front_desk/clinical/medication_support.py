@@ -186,6 +186,24 @@ def load_registry(path: str | Path) -> tuple[list[EvidenceSource], list[Evidence
     return sources, cards
 
 
+def _baseline_review_flags(case: ClinicianCase) -> list[dict[str, str]]:
+    """Critical medication-context review prompts apply even when no card matches."""
+    required_factors = {
+        "allergies": "Confirm reported allergies and reactions; record 'none reported' or 'unknown' when appropriate before interpreting medication evidence.",
+        "current_medications": "Confirm current medicines and supplements, or explicitly record 'none reported' or 'unknown', before interpreting medication evidence.",
+    }
+    return [
+        {
+            "code": "patient_factor_needs_review",
+            "severity": "review_required",
+            "factor": factor,
+            "message": message,
+        }
+        for factor, message in required_factors.items()
+        if factor not in case.reviewed_factors
+    ]
+
+
 def build_evidence_review(
     case: ClinicianCase,
     sources: Iterable[EvidenceSource],
@@ -197,7 +215,8 @@ def build_evidence_review(
     today = today or date.today()
     source_map = {source.source_id: source for source in sources}
     source_reasons = {key: _source_exclusion_reason(source, today) for key, source in source_map.items()}
-    flags: list[dict[str, str]] = []
+    flags: list[dict[str, str]] = _baseline_review_flags(case)
+    flagged_factors = {flag.get("factor") for flag in flags}
 
     if not case.proposed_assessment.strip():
         flags.append({
@@ -228,7 +247,7 @@ def build_evidence_review(
     evidence_items: list[dict[str, Any]] = []
     for card, source, hits in matched:
         for factor in card.required_patient_factors:
-            if factor not in case.reviewed_factors:
+            if factor not in case.reviewed_factors and factor not in flagged_factors:
                 flags.append({
                     "code": "patient_factor_needs_review",
                     "severity": "review_required",
@@ -236,6 +255,7 @@ def build_evidence_review(
                     "factor": factor,
                     "message": "Confirm patient factor '%s' before assessing whether this evidence applies." % factor,
                 })
+                flagged_factors.add(factor)
         risk_tags = {_norm(value) for value in case.patient_risk_tags}
         for tag in card.caution_tags:
             if _norm(tag) in risk_tags:
