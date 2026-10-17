@@ -144,6 +144,84 @@ def _chunk_section(section: str, text: str) -> Iterable[str]:
         yield carry
 
 
+def check_source_updates(
+    *,
+    manifest_path: str | Path = DEFAULT_MANIFEST_PATH,
+    previous_status_path: str | Path | None = None,
+) -> dict[str, Any]:
+    """Check source URLs for HTTP version signals only; never auto-approves content."""
+    import urllib.error
+    import urllib.request
+
+    sources = load_source_catalog(manifest_path)
+    previous: dict[str, Any] = {}
+    status_path = Path(previous_status_path).expanduser() if previous_status_path else None
+    if status_path and status_path.exists():
+        try:
+            loaded = json.loads(status_path.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                previous = loaded
+        except (OSError, json.JSONDecodeError):
+            previous = {}
+
+    records = []
+    for source in sources:
+        source_id = str(source.get("id", ""))
+        url = str(source.get("url", ""))
+        if not url.startswith(("https://", "http://")):
+            records.append({"source_id": source_id, "status": "invalid_source_url", "url": url})
+            continue
+        request = urllib.request.Request(
+            url,
+            headers={"User-Agent": "MiaKnowledgeLibrarySourceCheck/1.0"},
+            method="HEAD",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=12) as response:
+                modified = response.headers.get("Last-Modified")
+                etag = response.headers.get("ETag")
+                status_code = getattr(response, "status", 200)
+            old = previous.get(source_id, {})
+            changed = bool(
+                isinstance(old, dict)
+                and ((modified and old.get("last_modified") and modified != old.get("last_modified"))
+                     or (etag and old.get("etag") and etag != old.get("etag")))
+            )
+            records.append({
+                "source_id": source_id,
+                "title": source.get("title"),
+                "url": url,
+                "status": "version_signal_changed" if changed else (
+                    "reachable_metadata_found" if modified or etag else "reachable_version_signal_missing"
+                ),
+                "http_status": status_code,
+                "last_modified": modified,
+                "etag": etag,
+                "previous_last_modified": old.get("last_modified") if isinstance(old, dict) else None,
+                "previous_etag": old.get("etag") if isinstance(old, dict) else None,
+                "checked_at": date.today().isoformat(),
+                "license_status": source.get("ingestion_status"),
+                "note": "Header changes trigger human re-review; they do not prove a clinical update.",
+            })
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError) as exc:
+            records.append({
+                "source_id": source_id,
+                "title": source.get("title"),
+                "url": url,
+                "status": "check_unavailable",
+                "error_type": type(exc).__name__,
+                "license_status": source.get("ingestion_status"),
+                "note": "No currentness claim can be made from this check.",
+            })
+    return {
+        "checked_at": date.today().isoformat(),
+        "check_type": "source_header_update_discovery_only",
+        "source_count": len(records),
+        "records": records,
+        "message": "Header checks detect possible updates only. They do not download, index, license, or approve content.",
+    }
+
+
 def _read_index(path: str | Path) -> list[dict[str, Any]]:
     index_path = Path(path)
     if not index_path.exists():
@@ -389,6 +467,8 @@ def main() -> int:
     parser.add_argument("--corpus-path", default=str(DEFAULT_INDEX_PATH), help="Local JSONL index path (default is outside the repo)")
     parser.add_argument("--manifest-path", default=str(DEFAULT_MANIFEST_PATH), help="Source allow-list JSON path")
     parser.add_argument("--list-sources", action="store_true", help="List catalog sources and their ingest eligibility")
+    parser.add_argument("--check-updates", action="store_true", help="Check source URL HTTP headers for possible updates")
+    parser.add_argument("--status-path", default=str(Path.home() / ".mia-dental-os" / "source-update-status.json"), help="Prior update-check state path (reserved for caller-managed history)")
     parser.add_argument(
         "--confirm-rights-review", action="store_true",
         help="Confirm that chapter-level/third-party content in the selected text was checked and excluded if not reusable",
@@ -405,8 +485,12 @@ def main() -> int:
             "url": item.get("url"),
         } for item in sources], indent=2, ensure_ascii=False))
         return 0
+    if args.check_updates:
+        result = check_source_updates(manifest_path=args.manifest_path, previous_status_path=args.status_path)
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0
     if not args.source_id or not args.file:
-        parser.error("--source-id and --file are required unless --list-sources is used")
+        parser.error("--source-id and --file are required unless --list-sources or --check-updates is used")
     try:
         result = index_text_file(
             args.source_id, args.file,
