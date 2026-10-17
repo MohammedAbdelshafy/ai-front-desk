@@ -150,3 +150,45 @@ def test_checked_box_does_not_override_blank_critical_context():
     })
     assert "allergies" not in case.reviewed_factors
     assert "current_medications" not in case.reviewed_factors
+
+
+def test_opt_in_public_lookup_sends_only_name(workbench_url, monkeypatch):
+    from ai_front_desk.clinical import medication_workbench as workbench
+
+    seen = []
+    def fake_lookup(term):
+        seen.append(term)
+        return {
+            "status": "found",
+            "lookup_term": term,
+            "patient_context_sent": False,
+            "rxnorm": {"status": "found", "items": [
+                {"rxcui": "99999", "name": "Synthetic example ingredient", "term_type": "IN"}
+            ]},
+            "openfda_labels": {"status": "not_found", "items": []},
+        }
+    monkeypatch.setattr(workbench, "lookup_public_drug_metadata", fake_lookup)
+    payload = {
+        "case_id": "synthetic-case-http-02",
+        "proposed_assessment": "Synthetic clinical scenario",
+        "symptoms": "fictional symptom",
+        "reported_allergies": "fictional allergy context",
+        "current_medications": "fictional medicine context",
+        "relevant_medical_history": "fictional history",
+        "drug_lookup_name": "Synthetic example ingredient",
+        "lookup_public_sources": "1",
+        "jurisdiction": "US",
+    }
+    request = Request(
+        workbench_url + "/",
+        data=urlencode(payload).encode("utf-8"),
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    with urlopen(request) as response:
+        body = response.read().decode("utf-8")
+        assert response.status == 200
+        assert "Public source lookup" in body
+        assert "Synthetic example ingredient" in body
+        assert "only the standalone medicine name is sent" in body
+    assert seen == ["Synthetic example ingredient"]
