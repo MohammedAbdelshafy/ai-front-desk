@@ -47,14 +47,15 @@ Start with a narrow, clinician-reviewed set of common dental medication scenario
 - `ai_front_desk/clinical/intake.py`: validation, missing-answer and contradiction checks, FHIR QuestionnaireResponse export.
 - `ai_front_desk/clinical/store.py`: local SQLite development store with clinic scoping and an audit log.
 - `ai_front_desk/clinical/dashboard.py`: dentist-facing history brief with patient-reported answers, system-check flags, and a deterministic structured rollup. It is not AI-generated clinical interpretation.
-- `ai_front_desk/clinical/mia_shell.py`: Dental Mia character manifest and task-stage model.
+- `ai_front_desk/clinical/mia_shell.py`: Dr. Mia character manifest and task-stage model.
 - `ai_front_desk/clinical/server.py`: local demo server with patient intake, dentist dashboard, record review, corrections, audit history, and FHIR export endpoints.
-- `ai_front_desk/clinical/medication_support.py`: versioned source/evidence models, source eligibility checks, exact-phrase retrieval, source provenance, and clinician review prompts. It is not a drug-interaction or dosage engine.
+- `ai_front_desk/clinical/medication_support.py`: versioned source/evidence models, source eligibility checks, exact-phrase retrieval, source provenance, baseline medication-history prompts, and a non-scoring clinical-completeness checklist. It is not a drug-interaction or dosage engine.
 - `ai_front_desk/clinical/medication_workbench.py`: local clinician-facing synthetic-case UI at port 8767; no case persistence and no external calls.
 - `ai_front_desk/clinical/medication_evidence_registry.json`: candidate reference links only; no approved evidence cards are enabled.
 - `docs/DENTAL_AI_MVP_BUILD_SPEC.md`, `docs/DENTAL_AI_GITHUB_RESEARCH.md`, `docs/DENTAL_AI_PRODUCTION_REFERENCE.md`: scope, research, and production architecture notes.
 - `docs/MIA_CLINICAL_PLATFORM_BUILD_PLAN.md`: multi-app Mia runtime and multi-specialty clinical platform plan.
 - `docs/DR_MIA_PRODUCT_POSITIONING.md`: core strategy, supporting features, upsells, and claims boundaries.
+- `docs/DR_MIA_CLINICAL_COPILOT_MVP_SPEC.md`: clinical-first MVP scope, evaluation gates, and pilot boundaries.
 - `docs/MEDICATION_SUPPORT_FOUNDATION.md`: workbench architecture and development test instructions.
 - `docs/CLINICAL_SOURCE_REGISTER.md`: candidate sources and evidence approval checklist.
 - `docs/CLINICAL_DATA_PROVIDER_OPTIONS.md`: source/terminology/interaction-provider comparison and integration decision criteria.
