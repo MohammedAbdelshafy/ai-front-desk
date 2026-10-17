@@ -78,6 +78,21 @@
       "edition": "",
       "version": "Final guidance",
       "published_on": "2026-01-29"
+    },
+    {
+      "source_id": "rxnorm-terminology-api",
+      "title": "RxNorm API documentation",
+      "publisher": "US National Library of Medicine",
+      "jurisdiction": "US",
+      "url": "https://lhncbc.nlm.nih.gov/RxNav/APIs/RxNormAPIs.html",
+      "content_rights": "unknown",
+      "approval_status": "candidate",
+      "reviewer": "",
+      "reviewed_on": "",
+      "review_due_on": "",
+      "edition": "",
+      "version": "",
+      "published_on": ""
     }
   ],
   "evidence_cards": []
