@@ -1,0 +1,304 @@
+{
+  "schema_version": "1.1",
+  "purpose": "Source directory for medicine identity, product labels, national regulatory context, safety-list discovery, and potential licensed interaction screening. None of these sources alone constitutes a patient-specific prescribing recommendation.",
+  "policy": [
+    "Separate source discovery, medicine identity, regulatory status, labels, interaction screening, and clinical guideline decisions.",
+    "No source record is automatically a clinically approved evidence card.",
+    "Do not infer 'no interaction' from a missing response, ambiguous medication identity, unsupported product, or failed provider call.",
+    "Do not ingest or redistribute full text without verifying record-specific rights and provider terms."
+  ],
+  "sources": [
+    {
+      "id": "rxnorm-api",
+      "title": "RxNorm API",
+      "publisher": "US National Library of Medicine (NLM)",
+      "url": "https://lhncbc.nlm.nih.gov/RxNav/APIs/RxNormAPIs.html",
+      "terms_url": "https://lhncbc.nlm.nih.gov/RxNav/TermsofService.html",
+      "access_cost": "free_of_charge",
+      "content_rights": "non_proprietary_RxNorm_content; RxClass includes SNOMED CT subject to separate terms",
+      "commercial_use_status": "eligible_for_name_normalization_subject_to_NLM_terms",
+      "integration_status": "existing_opt_in_name_only_adapter",
+      "attribution": "This product uses publicly available data from the U.S. National Library of Medicine (NLM), National Institutes of Health, Department of Health and Human Services; NLM is not responsible for the product and does not endorse or recommend this or any other product.",
+      "roles": [
+        "medication_name_normalization",
+        "ingredient_product_identity",
+        "RxCUI_mapping"
+      ],
+      "limits": [
+        "NLM API terms include rate limits and caching recommendations; follow current terms.",
+        "RxNav's Drug-Drug Interaction API was discontinued January 2, 2024.",
+        "Does not provide a complete drug-interaction screening service or patient-specific prescribing recommendation."
+      ],
+      "ingestion_status": "eligible_for_opt_in_metadata_lookup"
+    },
+    {
+      "id": "openfda-drug-label-api",
+      "title": "openFDA Drug Product Labeling API",
+      "publisher": "US Food and Drug Administration",
+      "url": "https://open.fda.gov/apis/drug/label/",
+      "terms_url": "https://open.fda.gov/terms/",
+      "access_cost": "public_API_subject_to_terms_and_rate_limits",
+      "content_rights": "CC0_or_public_domain_unless_specific_record_warns_of_third_party_rights",
+      "commercial_use_status": "eligible_for_metadata_discovery; omit records with third_party_rights_warning",
+      "integration_status": "existing_opt_in_name_only_adapter",
+      "attribution": "Data provided by the U.S. Food and Drug Administration (https://open.fda.gov)",
+      "roles": [
+        "label_record_discovery",
+        "manufacturer_submitted_label_metadata",
+        "source_version_discovery"
+      ],
+      "limits": [
+        "FDA states that openFDA data has limitations and should not be used alone to make medical-care decisions.",
+        "Some records include private-party material whose rights are limited; separately review or exclude those records.",
+        "Submitted labeling can differ from the currently distributed or approved product labeling.",
+        "Do not copy full label text into the curated knowledge base by default; display metadata and a link to the source record."
+      ],
+      "ingestion_status": "eligible_for_opt_in_metadata_lookup"
+    },
+    {
+      "id": "dailymed-spl-api",
+      "title": "DailyMed SPL Web Services",
+      "publisher": "US National Library of Medicine",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/app-support-web-services.cfm",
+      "access_cost": "public_API_no_paid_key_documented",
+      "content_rights": "record_level_rights_review_required",
+      "commercial_use_status": "link_and_discover_only_until_record_rights_checked",
+      "integration_status": "cataloged_not_integrated_as_runtime_adapter",
+      "roles": [
+        "current_SPL_discovery",
+        "label_version_history",
+        "authoritative_label_link"
+      ],
+      "limits": [
+        "Use SPL set IDs and version history to identify the exact product-label version.",
+        "Do not assume public access authorizes bulk redistribution of all label content; check record-specific rights notices.",
+        "A label reference does not replace patient-specific clinical assessment or local jurisdiction checks."
+      ],
+      "ingestion_status": "eligible_for_link_and_version_discovery_only"
+    },
+    {
+      "id": "fda-drugs-at-fda",
+      "title": "Drugs@FDA Database and openFDA Drugs@FDA API",
+      "publisher": "US Food and Drug Administration",
+      "url": "https://www.fda.gov/drugs/drug-approvals-and-databases/about-drugsfda",
+      "api_url": "https://open.fda.gov/apis/drug/drugsfda/",
+      "access_cost": "public_website_and_api_subject_to_terms",
+      "content_rights": "source_and_record_specific_review_required_for_reuse",
+      "commercial_use_status": "regulatory_metadata_discovery_only_until_record_reviewed",
+      "integration_status": "cataloged_not_integrated",
+      "roles": [
+        "US_approval_status",
+        "approval_letters",
+        "reviews",
+        "label_approval_history"
+      ],
+      "update_policy": "FDA reports daily updates Monday through Friday for openFDA Drugs@FDA data",
+      "limits": [
+        "US regulatory context only; does not establish Egyptian registration, availability, or prescribing rules.",
+        "Approval metadata is not a dental clinical guideline, dose calculation, or interaction checker."
+      ],
+      "ingestion_status": "official_link_and_metadata_candidate"
+    },
+    {
+      "id": "drugbank-clinical-api",
+      "title": "DrugBank Clinical API — Medication Search and Drug-Drug Interactions",
+      "publisher": "DrugBank",
+      "url": "https://docs.drugbank.com/api-docs",
+      "account_url": "https://dev.drugbank.com/",
+      "access_cost": "commercial_quote_or_license_required",
+      "content_rights": "commercial_license_required",
+      "commercial_use_status": "not_authorized_until_contract_and_product_use_confirmed",
+      "integration_status": "shortlisted_not_integrated_no_api_key",
+      "roles": [
+        "licensed_drug_interaction_screening",
+        "medication_search",
+        "adverse_effect_lookup"
+      ],
+      "limits": [
+        "Not currently connected, configured, tested, or validated in Mia.",
+        "Confirm country coverage, allowed display/storage, source provenance, refresh process, uptime, clinical liability, data-processing terms, and cost before integration.",
+        "A missing, ambiguous, or unavailable response must not be interpreted as a negative interaction result."
+      ],
+      "ingestion_status": "vendor_due_diligence_required"
+    },
+    {
+      "id": "cdc-dental-antibiotic-stewardship",
+      "title": "CDC dental antibiotic prescribing and stewardship resources",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "url": "https://www.cdc.gov/antibiotic-use/communication-resources/dentists-be-antibiotics-aware-pain-swelling.html",
+      "access_cost": "free_public_access",
+      "content_rights": "US_government_content_candidate_subject_to_embedded_third_party_review",
+      "commercial_use_status": "candidate_for_review_of_government_authored_content; verify exact artifact and embedded rights",
+      "integration_status": "source_candidate_only",
+      "roles": [
+        "dental_antibiotic_stewardship",
+        "clinical_workflow_checklist",
+        "history_and_risk_factor_checklist"
+      ],
+      "limits": [
+        "CDC page updated September 17, 2026; recheck the current page and exact downloadable artifact.",
+        "Scope depends on the specific population and clinical question in the underlying resource.",
+        "Must be reviewed by a qualified dentist before a product evidence card is approved."
+      ],
+      "ingestion_status": "candidate_for_clinician_review"
+    },
+    {
+      "id": "ada-dental-guidelines",
+      "title": "ADA dental clinical practice guidelines, acute pain, and antibiotic stewardship",
+      "publisher": "American Dental Association",
+      "url": "https://www.ada.org/resources/research/science/evidence-based-dental-research",
+      "access_cost": "free_to_read_where_published",
+      "content_rights": "copyright_and_specific_reuse_rights_need_confirmation",
+      "commercial_use_status": "reference_and_link_only_until_permission_or_applicable_license_confirmed",
+      "integration_status": "source_candidate_only",
+      "roles": [
+        "professional_dental_guidance",
+        "acute_dental_pain",
+        "antibiotic_stewardship"
+      ],
+      "limits": [
+        "Use the exact guideline page, publication, intended population, and version.",
+        "Free online access is not permission to copy or embed full text.",
+        "Each derived card requires scope, supersession, rights, and qualified clinician review."
+      ],
+      "ingestion_status": "reference_link_only_pending_rights_review"
+    },
+    {
+      "id": "aapd-pediatric-guidelines",
+      "title": "AAPD Reference Manual — Pediatric pain management and antibiotic therapy",
+      "publisher": "American Academy of Pediatric Dentistry",
+      "url": "https://www.aapd.org/research/oral-health-policies--recommendations",
+      "pain_guideline_url": "https://www.aapd.org/research/oral-health-policies--recommendations/pain-management-in-infants-children-adolescents-and-individuals-with-special-health-care-needs/",
+      "antibiotic_guideline_url": "https://www.aapd.org/research/oral-health-policies--recommendations/use-of-antibiotic-therapy-for-pediatric-dental-patients/",
+      "access_cost": "free_to_read_where_published",
+      "content_rights": "copyright_and_specific_reuse_rights_need_confirmation",
+      "commercial_use_status": "reference_and_link_only_until_permission_or_applicable_license_confirmed",
+      "integration_status": "source_candidate_only",
+      "roles": [
+        "pediatric_dental_pain",
+        "pediatric_antibiotic_stewardship",
+        "age_specific_guidance"
+      ],
+      "limits": [
+        "Verify the current Reference Manual edition and the exact recommendation artifact.",
+        "Pediatric sources must not be treated as interchangeable with adult guidance.",
+        "No pediatric dose card may be approved without qualified review of age, weight, formulation, route, and source-specific limits."
+      ],
+      "ingestion_status": "reference_link_only_pending_rights_review"
+    },
+    {
+      "id": "aae-clinical-guidelines",
+      "title": "AAE Clinical Guidelines and Position Statements",
+      "publisher": "American Association of Endodontists",
+      "url": "https://www.aae.org/specialty/clinical-resources/guidelines-position-statements/",
+      "access_cost": "free_to_read_where_published",
+      "content_rights": "copyright_and_specific_reuse_rights_need_confirmation",
+      "commercial_use_status": "reference_and_link_only_until_permission_or_applicable_license_confirmed",
+      "integration_status": "source_candidate_only",
+      "roles": [
+        "endodontic_clinical_guidance",
+        "specialty_scope"
+      ],
+      "limits": [
+        "Link the exact guideline and edition used.",
+        "Do not derive a medication recommendation from a general resource index."
+      ],
+      "ingestion_status": "reference_link_only_pending_rights_review"
+    },
+    {
+      "id": "eda-egyptian-drug-register",
+      "title": "Egyptian Drug Register",
+      "publisher": "Egyptian Drug Authority",
+      "url": "https://www.edaegypt.gov.eg/ar/%D8%A7%D9%84%D9%85%D8%B1%D8%AC%D8%B9-%D8%A7%D9%84%D8%AA%D9%86%D8%B8%D9%8A%D9%85%D9%8A-%D9%84%D9%87%D9%8A%D8%A6%D8%A9-%D8%A7%D9%84%D8%AF%D9%88%D8%A7%D8%A1-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%8A%D8%A9/%D8%B3%D8%AC%D9%84-%D8%A7%D9%84%D8%AF%D9%88%D8%A7%D8%A1-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%8A/",
+      "access_cost": "public_reference",
+      "content_rights": "reuse_rights_not_established_by_public_access",
+      "commercial_use_status": "official_link_and_manual_review_only_until_terms_confirmed",
+      "integration_status": "cataloged_not_integrated_no_verified_public_api",
+      "roles": [
+        "Egyptian_product_regulatory_context",
+        "national_drug_register"
+      ],
+      "limits": [
+        "The official public page lists drug-register chapters by class/year; no supported public API contract has been verified.",
+        "Do not scrape at scale or infer current registration/availability without confirming the exact product and current record.",
+        "US FDA approval data must not be used as a substitute for Egyptian regulatory status."
+      ],
+      "ingestion_status": "official_link_only_pending_access_and_rights_review"
+    },
+    {
+      "id": "eda-periodic-medicine-lists",
+      "title": "Egyptian Drug Authority Periodic Pharmaceutical Lists",
+      "publisher": "Egyptian Drug Authority",
+      "url": "https://www.edaegypt.gov.eg/ar/%D8%A5%D8%B5%D8%AF%D8%A7%D8%B1%D8%A7%D8%AA-%D9%88%D8%AA%D9%82%D8%A7%D8%B1%D9%8A%D8%B1-%D8%A7%D9%84%D9%87%D9%8A%D8%A6%D8%A9-%D9%81%D9%8A-%D8%A3%D8%B1%D9%82%D8%A7%D9%85/%D8%A5%D8%B5%D8%AF%D8%A7%D8%B1%D8%A7%D8%AA/%D9%82%D9%88%D8%A7%D8%A6%D9%85-%D8%AF%D9%88%D8%B1%D9%8A%D8%A9/",
+      "access_cost": "public_reference",
+      "content_rights": "reuse_rights_not_established_by_public_access",
+      "commercial_use_status": "official_link_and_manual_review_only_until_terms_confirmed",
+      "integration_status": "cataloged_not_integrated",
+      "roles": [
+        "Egyptian_essential_medicine_list",
+        "high_risk_medicine_flags",
+        "do_not_crush_list",
+        "OTC_classification",
+        "safety_notice_discovery"
+      ],
+      "limits": [
+        "Record the exact edition and publication date for each list used.",
+        "These lists provide regulatory/safety context, not patient-specific treatment choices or interaction screening."
+      ],
+      "ingestion_status": "official_link_only_pending_access_and_rights_review"
+    },
+    {
+      "id": "eda-pharmaceutical-information-center",
+      "title": "Egyptian Pharmaceutical Information Center — reliable drug information inquiry",
+      "publisher": "Egyptian Drug Authority",
+      "url": "https://edaegypt.gov.eg/en/about-us/home-page-services/home-page-services/inquire-about-reliable-drug-information/",
+      "access_cost": "service_described_as_free",
+      "content_rights": "not_a_bulk_ingestion_source",
+      "commercial_use_status": "human_expert_escalation_only",
+      "integration_status": "manual_escalation_route_not_api",
+      "roles": [
+        "complex_medicine_information_escalation",
+        "pharmacist_or_regulatory_source_clarification"
+      ],
+      "limits": [
+        "This is a human information service, not an API or a source for bulk corpus ingestion.",
+        "Do not submit identifiable patient information without an approved legal and privacy process."
+      ],
+      "ingestion_status": "human_escalation_only"
+    },
+    {
+      "id": "who-egypt-national-eml-2025",
+      "title": "Egypt: National Essential Medicine List 2025 (English)",
+      "publisher": "World Health Organization",
+      "url": "https://www.who.int/publications/m/item/egypt--national-essential-medicine-list-2025-%28english%29",
+      "access_cost": "public_publication_link",
+      "content_rights": "link_only_pending_reuse_review",
+      "commercial_use_status": "formulary_policy_context_only",
+      "integration_status": "cataloged_not_ingested",
+      "roles": [
+        "Egyptian_formulary_context",
+        "medicine_policy_context"
+      ],
+      "limits": [
+        "An essential-medicine list is not a patient-specific prescribing guideline, interaction database, or proof of current product stock.",
+        "Do not apply it to a US workflow."
+      ],
+      "ingestion_status": "link_only_pending_reuse_review"
+    },
+    {
+      "id": "rxnav-discontinued-ddi",
+      "title": "RxNav Drug-Drug Interaction API",
+      "publisher": "US National Library of Medicine",
+      "url": "https://lhncbc.nlm.nih.gov/RxNav/information/FAQs.html",
+      "access_cost": "discontinued",
+      "content_rights": "not_applicable_to_discontinued_service",
+      "commercial_use_status": "do_not_use",
+      "integration_status": "retired",
+      "roles": [],
+      "limits": [
+        "NLM states the RxNav drug-drug interaction features were discontinued on January 2, 2024."
+      ],
+      "ingestion_status": "retired_do_not_integrate"
+    }
+  ]
+}

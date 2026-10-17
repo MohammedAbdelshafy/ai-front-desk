@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ai-front-desk"
 version = "0.1.0"
-description = "WhatsApp AI front-desk reference build: pure-Python qualification state machine, Meta webhook dev harness, and the n8n production workflow."
+description = "AI front-desk reference workflow and Dr. Mia clinical intake/evidence-workbench foundations."
 authors = [{name = "Mohammed Abdelshafy"}]
 readme = "README.md"
 requires-python = ">=3.9"
@@ -13,10 +13,12 @@ license = { text = "MIT" }
 
 [project.scripts]
 ai-front-desk-webhook = "ai_front_desk.webhook:main"
+dr-mia-workbench = "ai_front_desk.clinical.medication_workbench:main"
+dr-mia-index-library = "ai_front_desk.clinical.knowledge_library:main"
 
 [tool.setuptools.packages.find]
 include = ["ai_front_desk*"]
 
 [tool.setuptools.package-data]
 ai_front_desk = ["n8n_workflow.json", ".env.example"]
-"ai_front_desk.clinical" = ["dental_intake_v1.json", "static/*.webp"]
+"ai_front_desk.clinical" = ["dental_intake_v1.json", "medication_evidence_registry.json", "pharmacology_learning_library.json", "drug_data_sources.json", "pharmacology_education_cards.json", "static/*.webp"]

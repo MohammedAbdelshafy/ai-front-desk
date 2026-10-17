@@ -2,6 +2,8 @@
 **Date:** 2026-10-10  
 **Status:** Research-derived architecture and execution plan. This document is a plan, not a claim that the described production capabilities are shipped.
 
+> **Strategy update — October 17, 2026:** The product's core offer is now Dr. Mia Clinical Quality & Prescribing Copilot; smart intake supports that workflow, and front-desk/retention/lead-generation functions are optional upsells. Earlier commercial sequencing in this plan is superseded by [Dr. Mia Clinical Copilot MVP Spec](DR_MIA_CLINICAL_COPILOT_MVP_SPEC.md). The architecture, source-governance, privacy, clinical-review, and validation constraints remain applicable. The current workbench is a local synthetic-data prototype with zero approved medication evidence cards.
+
 ## Executive decision
 
 Build **one reusable Mia experience and agent runtime**, then attach **versioned, evidence-backed specialty packs** to it. Start commercial validation with the dental pre-visit workflow because that is the clearest wedge already identified. Architect for every clinic niche and market, but do not try to clinically validate every specialty before the first paid pilot.
@@ -129,9 +131,9 @@ For every specialty, assemble a documented academic reference panel of up to thr
 
 For each proposed institution/material, record what it contributes: e.g. evidence-based medicine, problem/case-based learning, clinical reasoning, specialty training or patient safety. Never equate university prestige with a current treatment recommendation. Never scrape or embed closed courseware, textbooks, lecture recordings, or proprietary protocols without rights. The clinically authoritative layer remains applicable guidelines and approved drug information.
 
-## Evidence-linked medication decision support: later phase only
+## Evidence-linked medication decision support: core product direction, not cleared for live prescribing
 
-Do not put this into the first paid pilot. First obtain clinical governance and regulatory review of the proposed intended use in each target market.
+**Strategy update — October 17, 2026:** This is the core product direction, not a later optional module. However, the current prototype is only an evidence-retrieval foundation and has zero approved medication evidence cards. Do not sell or deploy it as a live prescribing capability. The first proof should be a narrow, supervised validation/shadow-mode workflow with qualified dentists, approved sources, and synthetic cases. Obtain clinical governance and regulatory review of the proposed intended use in each target market before any real-patient workflow.
 
 A future clinician-facing panel can:
 - Restate clinician-entered assessment and relevant patient facts, clearly distinguishing facts from AI summaries.
