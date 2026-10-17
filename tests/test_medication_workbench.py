@@ -262,7 +262,11 @@ def test_learning_shelf_requires_a_topic_when_enabled(workbench_url):
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         method="POST",
     )
-    with urlopen(request) as response:
-        body = response.read().decode("utf-8")
-        assert response.status == 200
+    from urllib.error import HTTPError
+    try:
+        urlopen(request)
+        raise AssertionError("expected missing learning topic to be rejected")
+    except HTTPError as exc:
+        body = exc.read().decode("utf-8")
+        assert exc.code == 400
         assert "Enter a pharmacology learning topic" in body
