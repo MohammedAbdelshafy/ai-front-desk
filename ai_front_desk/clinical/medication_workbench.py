@@ -19,6 +19,7 @@ import json
 
 from .medication_support import ClinicianCase, build_evidence_review, load_registry
 from .public_drug_data import lookup_public_drug_metadata
+from .pharmacology_education import search_pharmacology_education
 
 BASE = Path(__file__).resolve().parent
 REGISTRY_PATH = BASE / "medication_evidence_registry.json"
@@ -203,6 +204,51 @@ def _render_public_lookup(lookup: dict[str, Any] | None) -> str:
     return "".join(out)
 
 
+def _render_education_search(result: dict[str, Any] | None) -> str:
+    if result is None:
+        return ""
+    out = [
+        "<section class='education-search'><div class='eyebrow'>Open-license learning shelf</div>"
+        "<h2>Pharmacology foundations</h2>"
+        "<p class='muted'>Local, source-linked education notes. These do not recommend or prescribe medicines.</p>"
+        "<p><strong>Topic:</strong> %s · <strong>Result:</strong> %s</p>"
+        % (esc(result.get("query", "")), esc(str(result.get("status", "unknown")).replace("_", " ")))
+    ]
+    items = result.get("results", [])
+    if not items:
+        out.append("<p>No matching learning note was found. This is not a clinical answer.</p>")
+    for item in items:
+        out.append(
+            "<article class='education-card'><h3>%s</h3><p>%s</p><ul>%s</ul>"
+            "<p class='muted'><strong>Scope:</strong> %s</p><p class='muted'><strong>Cannot support:</strong> %s</p>"
+            "<div class='education-sources'><strong>Source references and licenses</strong>"
+            % (
+                esc(item.get("title", "")),
+                esc(item.get("summary", "")),
+                "".join("<li>%s</li>" % esc(point) for point in item.get("learning_points", [])),
+                esc(item.get("use_scope", "education_only")),
+                esc(", ".join(item.get("cannot_support", []))),
+            )
+        )
+        for source in item.get("source_refs", []):
+            out.append(
+                "<p><a href='%s' target='_blank' rel='noopener noreferrer'>%s</a><br>"
+                "<span class='muted'>%s · <a href='%s' target='_blank' rel='noopener noreferrer'>License/source terms</a></span><br>"
+                "<span class='muted'>%s</span></p>"
+                % (
+                    esc(source.get("url", "")), esc(source.get("title", "")),
+                    esc(source.get("license_id", "")), esc(source.get("license_url", "")),
+                    esc(source.get("attribution", "")),
+                )
+            )
+        out.append("</div></article>")
+    out.append(
+        "<p class='muted'>These are concise learning summaries grounded in the cited materials. "
+        "The shelf is not a current medication monograph library, dental prescribing guideline, interaction checker, or patient-specific clinical decision.</p></section>"
+    )
+    return "".join(out)
+
+
 def _render_evidence(review: dict[str, Any]) -> str:
     items = review.get("matched_evidence", [])
     if not items:
@@ -245,6 +291,7 @@ def render_page(
     review: dict[str, Any] | None = None,
     error: str = "",
     public_lookup: dict[str, Any] | None = None,
+    education_result: dict[str, Any] | None = None,
 ) -> str:
     form = form or {}
     value = lambda name, default="": esc(_one(form, name, default))
@@ -265,8 +312,8 @@ def render_page(
             "<article><h3>Reported allergies</h3><p>%s</p></article>"
             "<article><h3>Current medicines</h3><p>%s</p></article>"
             "<article><h3>Relevant history</h3><p>%s</p></article></div>"
-            "%s%s%s%s<p class='disclaimer'>This demo does not diagnose, prescribe, calculate doses, "
-            "or perform comprehensive interaction checks. Submitted cases are not saved. External APIs are queried only when you explicitly check the public lookup box, and only the standalone medicine name is sent.</p></section>"
+            "%s%s%s%s%s<p class='disclaimer'>This demo does not diagnose, prescribe, calculate doses, "
+            "or perform comprehensive interaction checks. Submitted cases are not saved. External APIs are queried only when you explicitly check the public lookup box, and only the standalone medicine name is sent. The learning shelf is local-only.</p></section>"
             % (
                 esc(evidence_state.replace("_", " ").title()),
                 esc(review.get("message", "")),
@@ -277,6 +324,7 @@ def render_page(
                 _render_flags(review),
                 _render_evidence(review),
                 _render_public_lookup(public_lookup),
+                _render_education_search(education_result),
             )
         )
     error_html = "<div class='error'>%s</div>" % esc(error) if error else ""
@@ -297,6 +345,7 @@ textarea{min-height:74px;resize:vertical}.hint,.muted{font-size:12px;color:var(-
 button{margin-top:18px;background:var(--teal);color:#fff;border:0;padding:12px 17px;border-radius:10px;font-weight:750;font-size:14px;cursor:pointer}button:hover{background:#056c76}
 .note{background:#eff8f7;border:1px solid #d0e9e5;padding:12px 14px;border-radius:12px;font-size:13px}.note strong{display:block;margin-bottom:4px}.error{margin:12px 0;padding:12px;background:#ffe8e8;border:1px solid #f4bcbc;border-radius:10px;color:#8c2020}
 .public-query-panel{margin-top:22px;border:1px dashed #9cc7cc;padding:14px;border-radius:12px;background:#f8fcfc}.public-query-panel .check{margin-top:9px}.public-lookup{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}.public-lookup h2{font-size:20px;margin:5px 0 12px}.public-lookup h3{margin-top:18px}.public-lookup li{font-size:13px;margin:8px 0;overflow-wrap:anywhere}.public-lookup a{color:#086e7b;font-weight:700}
+.education-query-panel{margin-top:16px;border:1px solid #c6d6f4;padding:14px;border-radius:12px;background:#f4f7ff}.education-query-panel .check{margin-top:9px}.education-search{margin-top:18px;border:1px solid #d5e1f6;border-radius:14px;padding:16px;background:#fcfdff}.education-search h2{font-size:20px;margin:5px 0 12px}.education-card{border:1px solid #d5e1f6;border-radius:12px;background:#fff;padding:14px;margin:12px 0}.education-card h3{margin-top:0}.education-card li{font-size:13px;margin:5px 0}.education-sources{border-top:1px solid #e4eaf7;padding-top:10px;margin-top:10px}.education-sources p{font-size:12px;overflow-wrap:anywhere}.education-sources a{color:#3557b7;font-weight:700}
 .results{margin-top:18px}.result-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.pill{font-size:11px;font-weight:750;border-radius:30px;background:#e5f4ef;color:#13644e;padding:7px 10px}.context-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.context-grid article{padding:12px;border:1px solid var(--line);background:#fbfdfd;border-radius:12px;overflow-wrap:anywhere}.context-grid p{margin:0;white-space:pre-wrap;font-size:13px}
 .flags{margin:20px 0}.flag{border-left:3px solid #bd7d00;background:var(--amber);padding:10px 12px;margin:8px 0;border-radius:6px}.flag p{margin:4px 0 0;font-size:13px}
 .quality-checklist{margin:20px 0}.quality-grid{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.quality-item{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fbfdfd;min-width:0}.quality-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.quality-item strong{font-size:12px}.quality-item p{font-size:12px;color:var(--muted);margin:6px 0 0}.quality-state{font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;padding:4px 6px;border-radius:20px;background:#e1f4eb;color:#146049;white-space:nowrap}.quality-state.attention{background:#fff0c9;color:#815100}
@@ -331,6 +380,13 @@ footer{margin:25px 0 10px;color:var(--muted);font-size:12px}
 <label class="check"><input type="checkbox" name="lookup_public_sources" value="1"%s> Look up medication identity and label metadata</label>
 <p class="hint">Only use this for one standalone medicine name. When checked, only that name is sent to NLM RxNorm and openFDA. Never place a patient name, symptoms, allergies, medical history, or case details here. This is not an interaction checker.</p>
 </div>
+<div class="education-query-panel">
+<div class="eyebrow">Local pharmacology learning shelf</div>
+<label for="learning_topic">Learning topic</label>
+<input type="text" id="learning_topic" name="learning_topic" maxlength="180" value="%s" placeholder="e.g. pharmacokinetics, adverse effects, antimicrobials">
+<label class="check"><input type="checkbox" name="search_learning_library" value="1"%s> Search source-linked open-learning notes</label>
+<p class="hint">This lookup is local-only and makes no external calls. It returns educational summaries with book/source links, not patient-specific prescribing advice.</p>
+</div>
 <label>Patient factors confirmed/reviewed in this synthetic case</label><div class="factor-grid">%s</div>
 <label for="jurisdiction">Reference jurisdiction</label><select id="jurisdiction" name="jurisdiction"><option value="US" selected>United States (US)</option></select>
 <div class="note" style="margin-top:16px"><strong>What this tool does not do</strong>
@@ -356,6 +412,8 @@ It does not diagnose, prescribe, calculate doses, or perform comprehensive drug-
         value("patient_risk_tags"),
         value("drug_lookup_name"),
         _checked(_one(form, "lookup_public_sources").lower() in {"1", "true", "on", "yes"}),
+        value("learning_topic"),
+        _checked(_one(form, "search_learning_library").lower() in {"1", "true", "on", "yes"}),
         factors,
         result_html,
     )
@@ -433,7 +491,14 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
                 # Only a single medicine name is sent. Clinical case details are
                 # deliberately not passed to either external source.
                 public_lookup = lookup_public_drug_metadata(drug_lookup_name)
-            self._send_html(200, render_page(form, review, public_lookup=public_lookup))
+            education_result = None
+            education_requested = _one(form, "search_learning_library").lower() in {"1", "true", "on", "yes"}
+            learning_topic = _one(form, "learning_topic")
+            if education_requested:
+                if not learning_topic:
+                    raise ValueError("Enter a pharmacology learning topic before searching the learning shelf.")
+                education_result = search_pharmacology_education(learning_topic)
+            self._send_html(200, render_page(form, review, public_lookup=public_lookup, education_result=education_result))
         except (UnicodeDecodeError, ValueError, json.JSONDecodeError) as exc:
             self._send_html(400, render_page(error=str(exc)))
         except (OSError, KeyError) as exc:
