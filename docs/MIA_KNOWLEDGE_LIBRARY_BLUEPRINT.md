@@ -15,10 +15,10 @@ The first corpus is for US dental education. Keep patient examples synthetic unt
 
 | Tier | Starting sources | What Mia may do | Current ingestion policy |
 | --- | --- | --- | --- |
-| Open educational textbooks | [Nursing Pharmacology, 2e](https://www.ncbi.nlm.nih.gov/books/NBK595000/); [UIC Essentials of Pharmacology](https://med.libretexts.org/Courses/University_of_Illinois_Chicago/Essentials_of_Pharmacology) | Explain basic concepts and retrieve passages with edition/section citations | Open RN is CC BY 4.0 and its book text says it is not a drug-reference book. UIC has CC BY 4.0 source metadata; verify the exact selected chapters and third-party elements before ingestion. |
+| Open educational textbooks | [Nursing Pharmacology, 2e](https://www.ncbi.nlm.nih.gov/books/NBK595000/); [UIC Essentials of Pharmacology](https://med.libretexts.org/Courses/University_of_Illinois_Chicago/Essentials_of_Pharmacology); [Public Health in Pharmacy Practice: A Casebook, 2e](https://pharmacypracticebook.com/) | Explain foundational pharmacology and public-health/pharmacy cases; retrieve source passages with edition/section citations | Open RN is CC BY 4.0 and not a drug-reference book. UIC has CC BY 4.0 source metadata but needs a chapter/third-party rights check. The casebook is cataloged as CC BY 4.0 with selected content and third-party rights review required. |
 | Candidate open textbook | [Microbiology, Pharmacology, and Immunology for Pre-Clinical Students](https://openvt.lib.vt.edu/2025/04/25/micropharmimmuno/) | Potentially support infectious-disease and drug-mechanism education | Virginia Tech's announcement identifies CC BY 4.0 but also describes the use as "not primarily commercial." Commercial ingestion is blocked in the catalog until the publisher clarifies the conflicting wording. |
 | Noncommercial textbook | [OpenStax Pharmacology for Nurses](https://openstax.org/books/pharmacology/pages/preface) | Link-only independent reading | CC BY-NC-SA 4.0 is not approved for use in a commercial product without permission. Never ingest it through the standard importer. |
-| Research articles | [PMC Open Access Subset](https://pmc.ncbi.nlm.nih.gov/tools/openftlist/) | Retrieve reusable research passages and paper metadata | Rights are article-specific. Prefer CC BY or CC0; review share-alike implications before CC BY-SA. Exclude NC and ND material from the commercial derived-text index unless permissions explicitly allow the intended use. Use NCBI-approved retrieval services; do not scrape the website. |
+| Research articles | [PMC Open Access Subset](https://pmc.ncbi.nlm.nih.gov/tools/openftlist/); [clinical pharmacology competencies Delphi study](https://pmc.ncbi.nlm.nih.gov/articles/PMC11043191/); [pharmacology curriculum case-based learning study](https://pmc.ncbi.nlm.nih.gov/articles/PMC7863331/); [generic versus brand names in pharmacology education (2026)](https://link.springer.com/article/10.1007/s00228-026-04005-x) | Search reusable research passages; inform learning objectives, case-based teaching, generic/brand-name education, and assessment design | Rights are article-specific. The named papers are cataloged as CC BY 4.0, subject to article-level license and third-party content checks. They inform education design, not treatment selection. Prefer CC BY or CC0; review share-alike implications before CC BY-SA. Exclude NC and ND material from commercial ingestion unless permissions explicitly allow the intended use. Use NCBI-approved retrieval services; do not scrape the website. |
 | Dental guidelines | [CDC dental pain and swelling materials](https://www.cdc.gov/antibiotic-use/communication-resources/dentists-be-antibiotics-aware-pain-swelling.html); [ADA clinical practice guideline collection](https://www.ada.org/resources/research/science/evidence-based-dental-research) | Identify relevant source sections, then create reviewed clinical cards | Check exact version, patient population, scope, and embedded third-party rights. ADA materials remain link-only until applicable reuse rights are confirmed. CDC material still needs scope review and qualified clinical approval before it supports product recommendations. |
 | UK dental guidance | [SDCEP Drug Prescribing for Dentistry](https://www.sdcep.org.uk/published-guidance/drug-prescribing/) | Link to the up-to-date reference for a user who works under the relevant jurisdiction | SDCEP states commercial use requires written permission. Do not ingest for commercial use without permission. |
 | General guidelines | [NICE content reuse terms](https://www.nice.org.uk/reusing-our-content/nice-uk-open-content-licence) | Source discovery and linking | NICE's standard content licence explicitly does not cover AI use; international use has additional restrictions. Link-only until written permission or an appropriate agreement is obtained. |
@@ -77,12 +77,13 @@ A full drug-interaction checker, dose calculator, or independent medication sele
 
 ## Roadmap
 
-### Phase 1 — Foundation (in progress)
+### Phase 1 — Foundation (indexing engine implemented; corpus not yet populated)
 - Source catalog with explicit license states and conservative defaults.
-- Local full-text ingestion for explicitly reusable foundational texts.
-- Offline searchable index with section citations, edition, attribution, and content hash.
+- Local full-text ingestion command for operator-supplied UTF-8 extracts that have passed reuse-rights checks.
+- Offline BM25-style search with section citations, edition/version, attribution, license URL, source hash, and index date.
 - Separate education search from clinical evidence retrieval.
-- Unit tests that reject noncommercial sources and prove textbook chunks cannot satisfy the clinical-evidence gate.
+- Unit tests reject noncommercial/unresolved sources and prove textbook chunks cannot satisfy the clinical-evidence gate.
+- No full-text books or articles are bundled or indexed by default.
 
 ### Phase 2 — Expand the library
 - Confirm and ingest selected chapters from additional commercial-reuse open textbooks.
