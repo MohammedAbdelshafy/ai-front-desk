@@ -24,6 +24,7 @@ from .knowledge_library import search_knowledge_library
 
 BASE = Path(__file__).resolve().parent
 REGISTRY_PATH = BASE / "medication_evidence_registry.json"
+INFORMATION_CENTERS_PATH = BASE / "clinical_information_centers.json"
 MAX_BODY = 16 * 1024
 ALLOWED_JURISDICTIONS = {"US"}
 FACTOR_LABELS = {
@@ -327,6 +328,57 @@ def _render_evidence(review: dict[str, Any]) -> str:
     return "".join(out)
 
 
+def _render_information_centers(jurisdiction: str = "US") -> str:
+    """Render official reference links without treating them as approved evidence."""
+    try:
+        with INFORMATION_CENTERS_PATH.open("r", encoding="utf-8") as handle:
+            catalog = json.load(handle)
+    except (OSError, json.JSONDecodeError):
+        return (
+            "<section class='source-directory'><div class='eyebrow'>Clinical information centers</div>"
+            "<p>The source directory could not be loaded. No recommendation has been generated from it.</p></section>"
+        )
+    sources = catalog.get("sources", []) if isinstance(catalog, dict) else []
+    matched = []
+    for source in sources:
+        if not isinstance(source, dict):
+            continue
+        jurisdictions = source.get("jurisdictions", [])
+        if jurisdiction not in jurisdictions and "global_evidence_discovery" not in jurisdictions:
+            continue
+        url = str(source.get("url", ""))
+        if not url.startswith(("https://", "http://")):
+            continue
+        matched.append(source)
+    out = [
+        "<section class='source-directory'><div class='eyebrow'>Official reference links</div>"
+        "<h2>%s information centers</h2>"
+        "<p class='muted'>Open primary sources for clinician review. These links are not approved evidence cards and do not generate or validate a medication recommendation.</p>"
+        % esc("US" if jurisdiction == "US" else jurisdiction)
+    ]
+    if not matched:
+        out.append("<p>No source links are cataloged for this jurisdiction. Do not borrow another country's guidance.</p>")
+    for source in matched:
+        roles = source.get("roles", [])
+        role_text = ", ".join(str(item).replace("_", " ") for item in roles[:3])
+        status = str(source.get("clinical_status", source.get("integration_status", "reference only")))
+        out.append(
+            "<article class='source-link'><a href='%s' target='_blank' rel='noopener noreferrer'>%s</a>"
+            "<p>%s</p><p>Role: %s</p><p class='source-status'>Status: %s</p></article>"
+            % (
+                esc(source.get("url", "")),
+                esc(source.get("name", source.get("title", "Reference source"))),
+                esc(source.get("publisher", "")),
+                esc(role_text or "General reference"),
+                esc(status.replace("_", " ")),
+            )
+        )
+    out.append(
+        "<p class='muted'>Source pages may change and may carry reuse restrictions. Mia does not scrape these pages or turn them into recommendations automatically. Only current, jurisdiction-matched, rights-cleared, clinician-approved evidence cards can support clinical retrieval. The DDI provider is not currently integrated.</p></section>"
+    )
+    return "".join(out)
+
+
 def render_page(
     form: Mapping[str, Any] | None = None,
     review: dict[str, Any] | None = None,
@@ -392,6 +444,7 @@ button{margin-top:18px;background:var(--teal);color:#fff;border:0;padding:12px 1
 .results{margin-top:18px}.result-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.pill{font-size:11px;font-weight:750;border-radius:30px;background:#e5f4ef;color:#13644e;padding:7px 10px}.context-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.context-grid article{padding:12px;border:1px solid var(--line);background:#fbfdfd;border-radius:12px;overflow-wrap:anywhere}.context-grid p{margin:0;white-space:pre-wrap;font-size:13px}
 .flags{margin:20px 0}.flag{border-left:3px solid #bd7d00;background:var(--amber);padding:10px 12px;margin:8px 0;border-radius:6px}.flag p{margin:4px 0 0;font-size:13px}
 .quality-checklist{margin:20px 0}.quality-grid{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.quality-item{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fbfdfd;min-width:0}.quality-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.quality-item strong{font-size:12px}.quality-item p{font-size:12px;color:var(--muted);margin:6px 0 0}.quality-state{font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;padding:4px 6px;border-radius:20px;background:#e1f4eb;color:#146049;white-space:nowrap}.quality-state.attention{background:#fff0c9;color:#815100}
+.source-directory{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 6px 18px rgba(13,53,61,.04)}.source-directory h2{font-size:18px;margin:5px 0 8px}.source-directory .source-link{padding:10px 0;border-top:1px solid #e2ecee}.source-directory .source-link a{font-size:13px;color:#086e7b;font-weight:750;overflow-wrap:anywhere}.source-directory .source-link p{font-size:11px;color:var(--muted);margin:4px 0 0}.source-directory .source-status{font-weight:750;text-transform:capitalize}
 .empty-evidence{background:#f2f7f8;border:1px dashed #aac4c9;border-radius:12px;padding:15px;margin-top:14px}.empty-evidence h3{color:#7a5200}.empty-evidence p{font-size:13px;margin-bottom:0}
 .notice{background:#e8f5f2;border:1px solid #c5e7dd;padding:12px;border-radius:10px;margin-top:12px;font-size:13px}.evidence-card{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;overflow-wrap:anywhere}.evidence-card p{font-size:13px;margin:8px 0}.evidence-card a{color:#086e7b;font-weight:700}
 .disclaimer{border-top:1px solid var(--line);padding-top:12px;color:var(--muted);font-size:12px;margin-top:18px}
@@ -440,7 +493,7 @@ It does not diagnose, prescribe, calculate doses, or perform comprehensive drug-
 <p>Dr. Mia should be friendly and direct, but never confident without a source.</p>
 <ul><li>Every evidence card must identify its source and section.</li><li>Expired, unapproved, unlicensed, or wrong-jurisdiction entries are excluded.</li><li>Missing patient factors create review prompts, not automatic clinical conclusions.</li><li>No evidence match means no recommendation.</li><li>All final clinical decisions remain with the treating dentist.</li></ul>
 <div class="note"><strong>Current prototype status</strong>The source registry contains no approved medication entries, so a search should return “No verified evidence found.” That is an intentional safety behavior, not a failure.</div>
-</section></aside></div>
+</section>%s</aside></div>
 %s
 <footer>Dr. Mia · Local prototype · No case persistence · No external API calls · Not for real patient use</footer>
 </main></body></html>
@@ -458,6 +511,7 @@ It does not diagnose, prescribe, calculate doses, or perform comprehensive drug-
         value("learning_topic"),
         _checked(_one(form, "search_learning_library").lower() in {"1", "true", "on", "yes"}),
         factors,
+        _render_information_centers(_one(form, "jurisdiction", "US")),
         result_html,
     )
 
