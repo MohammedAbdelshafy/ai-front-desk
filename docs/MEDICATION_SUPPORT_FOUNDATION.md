@@ -6,6 +6,7 @@ This is the initial backend foundation for the dentist-facing clinical quality a
 
 ## Added components
 
+- `ai_front_desk/clinical/medication_workbench.py`: local synthetic-case web UI at `http://127.0.0.1:8767`. It binds only to loopback, does not persist cases, and makes no external requests.
 - `ai_front_desk/clinical/medication_support.py`
   - Versioned source and evidence-card data models.
   - A curator-controlled approval state and mandatory source review due date.
@@ -16,7 +17,9 @@ This is the initial backend foundation for the dentist-facing clinical quality a
   - Explicit response fields stating that prescribing, dose calculation, and comprehensive interaction checking are not performed.
   - Empty, stale, unapproved, rights-uncleared, and wrong-jurisdiction content fails closed.
 - `ai_front_desk/clinical/medication_evidence_registry.json`
-  - Empty versioned registry. No unreviewed or invented medication information is shipped as clinical guidance.
+  - Versioned registry currently lists five candidate source links for qualified review, all marked `candidate` with unknown use rights. It contains zero evidence cards, and all candidates are excluded from clinical retrieval.
+- `docs/CLINICAL_SOURCE_REGISTER.md`
+  - Describes what each candidate source may support and the human approval checklist.
 - `tests/test_medication_support.py`
   - Synthetic-only tests for source eligibility, traceable references, missing inputs, patient-factor prompts, jurisdiction matching, stale reviews, and fail-closed behavior.
 
@@ -33,7 +36,9 @@ An evidence-card match means only that a reviewed entry matched the clinician-en
 
 ## Boundaries and next build steps
 
-This module does not yet provide a user interface, a general-purpose drug database, an external reference integration, an automated drug-interaction checker, dose calculation, prescription writing, EHR/PMS integration, or production patient storage. It accepts a non-identifying case reference and is intended for synthetic development cases until the service is appropriately governed and validated.
+The local UI is a form-and-results workbench, not a production clinical service. There is no general-purpose drug database, external reference integration, automated drug-interaction checker, dose calculation, prescription writing, EHR/PMS integration, real-patient storage, authentication, or clinical validation. It accepts a non-identifying case reference and is intended for synthetic development cases only.
+
+Run it with `dr-mia-workbench` or `python -m ai_front_desk.clinical.medication_workbench`; open `http://127.0.0.1:8767`. It intentionally returns “No verified evidence found” while the registry has no approved cards.
 
 Recommended next steps:
 1. Build a small local clinician workbench UI for entering an assessment, viewing sources and review prompts, and recording a supervising dentist's review.
