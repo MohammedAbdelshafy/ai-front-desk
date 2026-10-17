@@ -8,7 +8,7 @@ from ai_front_desk.clinical import public_drug_data as drugdata
 def test_medicine_query_is_validated_as_a_single_name():
     assert drugdata.validate_medicine_name("Amoxicillin") == "Amoxicillin"
     assert drugdata.validate_medicine_name("Tylenol 500 mg") == "Tylenol 500 mg"
-    for invalid in ("", "  ", "Jane Doe is allergic", "medicine" OR *:*", "<script>alert(1)</script>", "A" * 121):
+    for invalid in ("", "  ", "Jane Doe is allergic", 'medicine" OR *:*', "<script>alert(1)</script>", "A" * 121):
         with pytest.raises(ValueError):
             drugdata.validate_medicine_name(invalid)
 
