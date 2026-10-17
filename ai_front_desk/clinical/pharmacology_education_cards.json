@@ -1,0 +1,226 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Short original educational notes grounded in openly licensed pharmacology books. They support foundational learning only and are not clinical recommendations.",
+  "attribution_policy": "Book-derived ideas are paraphrased rather than reproduced. Preserve each card's source references and attribution when adapting or redistributing notes.",
+  "cards": [
+    {
+      "id": "pharmacokinetics-adme",
+      "title": "Pharmacokinetics: ADME",
+      "topic": "pharmacokinetics",
+      "keywords": [
+        "pharmacokinetics",
+        "adme",
+        "absorption",
+        "distribution",
+        "metabolism",
+        "excretion",
+        "exposure",
+        "elimination"
+      ],
+      "summary": "Pharmacokinetics describes how a substance moves through the body: absorption, distribution, metabolism, and excretion (ADME). Route of administration and individual patient factors can affect exposure. A general ADME explanation does not establish an appropriate medicine or dose for a particular patient.",
+      "learning_points": [
+        "ADME names four linked processes: absorption, distribution, metabolism, and excretion.",
+        "The same medicine can behave differently across routes and patient contexts.",
+        "Do not infer an individual dose from a foundational pharmacokinetics summary."
+      ],
+      "source_refs": [
+        {
+          "title": "Nursing Pharmacology, 2nd edition, Chapter 1: Pharmacokinetics & Pharmacodynamics",
+          "url": "https://www.ncbi.nlm.nih.gov/books/NBK595006/",
+          "license_id": "CC-BY-4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0/",
+          "attribution": "Ernstmeyer, K., & Christman, E. (Eds.). (2023). Open RN Nursing Pharmacology (2nd ed.), Chapter 1. Chippewa Valley Technical College. CC BY 4.0."
+        }
+      ],
+      "use_scope": "education_only",
+      "cannot_support": [
+        "patient_specific_dosing",
+        "medicine_selection",
+        "diagnosis",
+        "interaction_check"
+      ],
+      "review_status": "education_summary_ready"
+    },
+    {
+      "id": "pharmacodynamics-and-response",
+      "title": "Pharmacodynamics, efficacy, and dose-response",
+      "topic": "pharmacodynamics",
+      "keywords": [
+        "pharmacodynamics",
+        "mechanism",
+        "receptor",
+        "efficacy",
+        "potency",
+        "dose response",
+        "therapeutic window",
+        "therapeutic index"
+      ],
+      "summary": "Pharmacodynamics concerns how a substance produces effects in the body, including interactions with biological targets. Potency, efficacy, dose-response, and therapeutic window describe different aspects of response; none can be used alone to select a treatment for an individual patient.",
+      "learning_points": [
+        "Mechanism of action describes how a medicine produces a biological effect.",
+        "Potency and efficacy are related but distinct concepts.",
+        "The therapeutic window is a clinical concept that requires drug-specific evidence and patient context."
+      ],
+      "source_refs": [
+        {
+          "title": "Nursing Pharmacology, 2nd edition, Chapter 1: Pharmacokinetics & Pharmacodynamics",
+          "url": "https://www.ncbi.nlm.nih.gov/books/NBK595006/",
+          "license_id": "CC-BY-4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0/",
+          "attribution": "Ernstmeyer, K., & Christman, E. (Eds.). (2023). Open RN Nursing Pharmacology (2nd ed.), Chapter 1. Chippewa Valley Technical College. CC BY 4.0."
+        },
+        {
+          "title": "Essentials of Pharmacology, Chapter 3: Pharmacodynamics",
+          "url": "https://med.libretexts.org/Courses/University_of_Illinois_Chicago/Essentials_of_Pharmacology/03:_Pharmacodynamics",
+          "license_id": "CC-BY-4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0/",
+          "attribution": "Halpern, J. (2025). Essentials of Pharmacology, Chapter 3. University of Illinois Chicago / Medicine LibreTexts. CC BY 4.0."
+        }
+      ],
+      "use_scope": "education_only",
+      "cannot_support": [
+        "patient_specific_dosing",
+        "medicine_selection",
+        "diagnosis",
+        "interaction_check"
+      ],
+      "review_status": "education_summary_ready"
+    },
+    {
+      "id": "medication-history-completeness",
+      "title": "Medication-history completeness",
+      "topic": "medication history",
+      "keywords": [
+        "medication history",
+        "medication reconciliation",
+        "current medicine",
+        "prescription",
+        "over the counter",
+        "otc",
+        "supplement",
+        "herbal",
+        "allergy",
+        "reaction"
+      ],
+      "summary": "A medication history should distinguish prescribed medicines, nonprescription products, vitamins, herbal products, and other supplements. Where known, capture the exact product, strength/form, route, frequency, and reason for use; record unknown or not-reported facts explicitly rather than guessing. The clinician verifies the details before using them in a clinical decision.",
+      "learning_points": [
+        "Don't collapse unknown, not asked, and none reported into the same value.",
+        "Record allergy reactions as reported and route them for clinician verification.",
+        "A list of medicines is context for review, not a complete interaction check."
+      ],
+      "source_refs": [
+        {
+          "title": "Nursing Pharmacology, 2nd edition, Chapter 1: Types of Medications",
+          "url": "https://www.ncbi.nlm.nih.gov/books/NBK595006/",
+          "license_id": "CC-BY-4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0/",
+          "attribution": "Ernstmeyer, K., & Christman, E. (Eds.). (2023). Open RN Nursing Pharmacology (2nd ed.), Chapter 1. Chippewa Valley Technical College. CC BY 4.0."
+        },
+        {
+          "title": "CDC Checklist for Antibiotic Prescribing in Dentistry",
+          "url": "https://www.cdc.gov/antibiotic-use/media/pdfs/dental-fact-sheet-508.pdf",
+          "license_id": "US-government-source-rights-review-required",
+          "license_url": "https://www.cdc.gov/other/about/terms.html",
+          "attribution": "Source: U.S. Centers for Disease Control and Prevention. Check embedded third-party material and current document version before reuse."
+        }
+      ],
+      "use_scope": "workflow_education_only",
+      "cannot_support": [
+        "medicine_selection",
+        "diagnosis",
+        "interaction_check"
+      ],
+      "review_status": "education_summary_ready"
+    },
+    {
+      "id": "adverse-medication-outcomes",
+      "title": "Adverse effects and unintended medication outcomes",
+      "topic": "adverse effects",
+      "keywords": [
+        "adverse effect",
+        "side effect",
+        "adverse drug event",
+        "unintended outcome",
+        "warning",
+        "contraindication",
+        "label",
+        "pharmacovigilance"
+      ],
+      "summary": "A medicine can produce intended effects as well as unintended effects. Product labeling and appropriate clinical references separate warnings, contraindications, precautions, adverse reactions, and other information. A general educational note cannot establish whether a specific medicine is appropriate or safe for a person.",
+      "learning_points": [
+        "Read the applicable product-specific label rather than relying on memory or a generic name alone.",
+        "Keep source version and date attached to label-derived information.",
+        "Do not equate a metadata match or absence of a surfaced warning with a safety conclusion."
+      ],
+      "source_refs": [
+        {
+          "title": "Essentials of Pharmacology, Chapter 6: Unintended Medication Outcomes",
+          "url": "https://med.libretexts.org/Courses/University_of_Illinois_Chicago/Essentials_of_Pharmacology/06:_Unintended_Medication_Outcomes",
+          "license_id": "CC-BY-4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0/",
+          "attribution": "Halpern, J. (2025). Essentials of Pharmacology, Chapter 6. University of Illinois Chicago / Medicine LibreTexts. CC BY 4.0."
+        },
+        {
+          "title": "openFDA Drug Product Labeling API",
+          "url": "https://open.fda.gov/apis/drug/label/",
+          "license_id": "CC0-unless-record-specific-third-party-rights-apply",
+          "license_url": "https://open.fda.gov/terms/",
+          "attribution": "Data provided by the U.S. Food and Drug Administration (https://open.fda.gov)."
+        }
+      ],
+      "use_scope": "education_only",
+      "cannot_support": [
+        "patient_specific_safety_conclusion",
+        "medicine_selection",
+        "diagnosis",
+        "interaction_check"
+      ],
+      "review_status": "education_summary_ready"
+    },
+    {
+      "id": "antimicrobial-classes-learning",
+      "title": "Antimicrobial therapy: learning concepts",
+      "topic": "antimicrobials",
+      "keywords": [
+        "antimicrobial",
+        "antibiotic",
+        "antimicrobials",
+        "antibiotics",
+        "antimicrobial stewardship",
+        "spectrum",
+        "resistance",
+        "infection"
+      ],
+      "summary": "Antimicrobial classes differ in their targets, spectrum, and safety considerations. Applying this background to a dental case requires the clinician's diagnosis and examination, the patient's circumstances, an applicable current guideline, and source-specific review. This card contains no medicine or dose recommendation.",
+      "learning_points": [
+        "Class-level knowledge is not enough to select an antimicrobial for a patient.",
+        "Dental clinical guidelines define their own patient population and circumstances.",
+        "Do not infer an antibiotic indication or regimen from symptoms alone in this learning shelf."
+      ],
+      "source_refs": [
+        {
+          "title": "Nursing Pharmacology, 2nd edition, Chapter 3: Antimicrobials",
+          "url": "https://www.ncbi.nlm.nih.gov/books/NBK594998/",
+          "license_id": "CC-BY-4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0/",
+          "attribution": "Ernstmeyer, K., & Christman, E. (Eds.). (2023). Open RN Nursing Pharmacology (2nd ed.), Chapter 3. Chippewa Valley Technical College. CC BY 4.0."
+        },
+        {
+          "title": "ADA Antibiotic Stewardship",
+          "url": "https://www.ada.org/resources/ada-library/oral-health-topics/antibiotic-stewardship",
+          "license_id": "copyrighted-reference-link-until-reuse-rights-confirmed",
+          "license_url": "https://www.ada.org/terms-of-use",
+          "attribution": "Link to the American Dental Association source; no full-text reuse is implied."
+        }
+      ],
+      "use_scope": "education_only",
+      "cannot_support": [
+        "patient_specific_medicine_selection",
+        "patient_specific_dosing",
+        "diagnosis",
+        "interaction_check"
+      ],
+      "review_status": "education_summary_ready"
+    }
+  ]
+}
