@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0",
+  "registry_status": "unpopulated",
+  "description": "Curated reference registry template for the Dr. Mia evidence workbench.",
+  "notice": "No clinical source cards are enabled. Do not use this file to make clinical decisions. Add sources and summaries only after rights review and qualified clinical approval.",
+  "sources": [],
+  "evidence_cards": []
+}
