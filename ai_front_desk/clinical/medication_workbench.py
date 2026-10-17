@@ -495,7 +495,7 @@ It does not diagnose, prescribe, calculate doses, or perform comprehensive drug-
 <div class="note"><strong>Current prototype status</strong>The source registry contains no approved medication entries, so a search should return “No verified evidence found.” That is an intentional safety behavior, not a failure.</div>
 </section>%s</aside></div>
 %s
-<footer>Dr. Mia · Local prototype · No case persistence · No external API calls · Not for real patient use</footer>
+<footer>Dr. Mia · Local prototype · No case persistence · External calls only when explicitly requested · Not for real patient use</footer>
 </main></body></html>
 """ % (
         error_html,
