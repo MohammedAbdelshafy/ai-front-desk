@@ -78,12 +78,12 @@
       "publisher": "Virginia Tech Publishing",
       "published_year": 2025,
       "url": "https://open.umn.edu/opentextbooks/textbooks/1778",
-      "license_id": "CC-BY (version not specified in listing)",
-      "license_url": "https://open.umn.edu/opentextbooks/textbooks/1778",
-      "commercial_reuse_permitted": true,
+      "license_id": "CC-BY-4.0 reported by Virginia Tech; commercial-use wording unresolved",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": false,
       "attribution_required": true,
-      "source_verified_from": "Open Textbook Library usage-rights metadata",
-      "source_verification_url": "https://open.umn.edu/opentextbooks/textbooks/1778",
+      "source_verified_from": "Virginia Tech Publishing announcement; contradictory commercial-use wording requires clarification",
+      "source_verification_url": "https://openvt.lib.vt.edu/2025/04/25/micropharmimmuno/",
       "roles": [
         "preclinical_learning",
         "infectious_disease_foundations",
@@ -92,11 +92,11 @@
         "treatment_mechanisms"
       ],
       "limits": [
-        "Open Textbook Library lists the conditions of use as CC BY, but its listing does not establish the exact version. Confirm the original publisher's exact license before copying or adapting content.",
+        "Virginia Tech's official announcement identifies CC BY 4.0 but also describes usage as 'not primarily commercial'; resolve the conflicting commercial-use wording with the publisher before commercial ingestion.",
         "Verify chapter-level attribution and third-party content before reuse.",
         "Preclinical medical education reference, not a medication monograph or dental prescribing guideline."
       ],
-      "ingestion_status": "candidate_confirm_exact_license_version_before_ingestion",
+      "ingestion_status": "confirm_commercial_reuse_terms_before_ingestion",
       "clinical_evidence_status": "not_a_prescribing_authority"
     },
     {
