@@ -20,6 +20,7 @@ import json
 from .medication_support import ClinicianCase, build_evidence_review, load_registry
 from .public_drug_data import lookup_public_drug_metadata
 from .pharmacology_education import search_pharmacology_education
+from .knowledge_library import search_knowledge_library
 
 BASE = Path(__file__).resolve().parent
 REGISTRY_PATH = BASE / "medication_evidence_registry.json"
@@ -249,6 +250,46 @@ def _render_education_search(result: dict[str, Any] | None) -> str:
     return "".join(out)
 
 
+def _render_knowledge_library(result: dict[str, Any] | None) -> str:
+    if result is None:
+        return ""
+    out = [
+        "<section class='education-search fulltext-search'><div class='eyebrow'>Local full-text book library</div>"
+        "<h2>Searchable source passages</h2>"
+        "<p class='muted'>Offline search across rights-cleared text imported to this machine. Every result retains source, license, edition, and section provenance.</p>"
+        "<p><strong>Topic:</strong> %s · <strong>Status:</strong> %s</p>"
+        % (esc(result.get("query", "")), esc(str(result.get("status", "unknown")).replace("_", " ")))
+    ]
+    items = result.get("results", [])
+    if not items:
+        out.append("<p>%s</p>" % esc(result.get("message", "No indexed source passage was found.")))
+    for item in items:
+        out.append(
+            "<article class='education-card'><h3>%s</h3>"
+            "<p><strong>Section:</strong> %s · <strong>Edition/version:</strong> %s</p>"
+            "<p class='corpus-excerpt'>%s</p>"
+            "<p class='muted'><strong>License:</strong> %s · <strong>Indexed:</strong> %s</p>"
+            "<p><a href='%s' target='_blank' rel='noopener noreferrer'>Open original source</a></p>"
+            "<p class='muted'>Attribution: %s</p>"
+            "<p class='muted'>Education only. This passage is not an approved clinical recommendation.</p></article>"
+            % (
+                esc(item.get("source_title", "")),
+                esc(item.get("section", "Section not captured")),
+                esc(item.get("edition_or_version", "Version not captured")),
+                esc(item.get("text", "")),
+                esc(item.get("license_id", "")),
+                esc(item.get("indexed_on", "")),
+                esc(item.get("source_url", "")),
+                esc(item.get("attribution", "")),
+            )
+        )
+    out.append(
+        "<p class='muted'>Book passages are retrieved locally and are not sent to an external service. "
+        "A textbook passage cannot qualify as approved clinical evidence, a drug-interaction result, or a patient-specific prescribing recommendation.</p></section>"
+    )
+    return "".join(out)
+
+
 def _render_evidence(review: dict[str, Any]) -> str:
     items = review.get("matched_evidence", [])
     if not items:
@@ -292,6 +333,7 @@ def render_page(
     error: str = "",
     public_lookup: dict[str, Any] | None = None,
     education_result: dict[str, Any] | None = None,
+    knowledge_result: dict[str, Any] | None = None,
 ) -> str:
     form = form or {}
     value = lambda name, default="": esc(_one(form, name, default))
@@ -312,8 +354,8 @@ def render_page(
             "<article><h3>Reported allergies</h3><p>%s</p></article>"
             "<article><h3>Current medicines</h3><p>%s</p></article>"
             "<article><h3>Relevant history</h3><p>%s</p></article></div>"
-            "%s%s%s%s%s<p class='disclaimer'>This demo does not diagnose, prescribe, calculate doses, "
-            "or perform comprehensive interaction checks. Submitted cases are not saved. External APIs are queried only when you explicitly check the public lookup box, and only the standalone medicine name is sent. The learning shelf is local-only.</p></section>"
+            "%s%s%s%s%s%s<p class='disclaimer'>This demo does not diagnose, prescribe, calculate doses, "
+            "or perform comprehensive interaction checks. Submitted cases are not saved. External APIs are queried only when you explicitly check the public lookup box, and only the standalone medicine name is sent. The learning notes and full-text book library are local-only.</p></section>"
             % (
                 esc(evidence_state.replace("_", " ").title()),
                 esc(review.get("message", "")),
@@ -325,6 +367,7 @@ def render_page(
                 _render_evidence(review),
                 _render_public_lookup(public_lookup),
                 _render_education_search(education_result),
+                _render_knowledge_library(knowledge_result),
             )
         )
     error_html = "<div class='error'>%s</div>" % esc(error) if error else ""
@@ -381,11 +424,11 @@ footer{margin:25px 0 10px;color:var(--muted);font-size:12px}
 <p class="hint">Only use this for one standalone medicine name. When checked, only that name is sent to NLM RxNorm and openFDA. Never place a patient name, symptoms, allergies, medical history, or case details here. This is not an interaction checker.</p>
 </div>
 <div class="education-query-panel">
-<div class="eyebrow">Local pharmacology learning shelf</div>
+<div class="eyebrow">Local searchable book library + learning shelf</div>
 <label for="learning_topic">Learning topic</label>
 <input type="text" id="learning_topic" name="learning_topic" maxlength="180" value="%s" placeholder="e.g. pharmacokinetics, adverse effects, antimicrobials">
-<label class="check"><input type="checkbox" name="search_learning_library" value="1"%s> Search source-linked open-learning notes</label>
-<p class="hint">This lookup is local-only and makes no external calls. It returns educational summaries with book/source links, not patient-specific prescribing advice.</p>
+<label class="check"><input type="checkbox" name="search_learning_library" value="1"%s> Search source-linked notes and locally indexed book text</label>
+<p class="hint">This lookup is local-only and makes no external calls. It searches the short study notes and, when you import rights-cleared textbook text, the local full-text library. Results are educational, not patient-specific prescribing advice.</p>
 </div>
 <label>Patient factors confirmed/reviewed in this synthetic case</label><div class="factor-grid">%s</div>
 <label for="jurisdiction">Reference jurisdiction</label><select id="jurisdiction" name="jurisdiction"><option value="US" selected>United States (US)</option></select>
@@ -492,13 +535,18 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
                 # deliberately not passed to either external source.
                 public_lookup = lookup_public_drug_metadata(drug_lookup_name)
             education_result = None
+            knowledge_result = None
             education_requested = _one(form, "search_learning_library").lower() in {"1", "true", "on", "yes"}
             learning_topic = _one(form, "learning_topic")
             if education_requested:
                 if not learning_topic:
                     raise ValueError("Enter a pharmacology learning topic before searching the learning shelf.")
                 education_result = search_pharmacology_education(learning_topic)
-            self._send_html(200, render_page(form, review, public_lookup=public_lookup, education_result=education_result))
+                knowledge_result = search_knowledge_library(learning_topic)
+            self._send_html(200, render_page(
+                form, review, public_lookup=public_lookup,
+                education_result=education_result, knowledge_result=knowledge_result,
+            ))
         except (UnicodeDecodeError, ValueError, json.JSONDecodeError) as exc:
             self._send_html(400, render_page(error=str(exc)))
         except (OSError, KeyError) as exc:
