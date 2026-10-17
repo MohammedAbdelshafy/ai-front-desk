@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Public drug data sources for medication identity and label discovery. These sources do not constitute an interaction checker or prescribing guideline.",
+  "sources": [
+    {
+      "id": "rxnorm-api",
+      "title": "RxNorm API",
+      "publisher": "US National Library of Medicine (NLM)",
+      "url": "https://lhncbc.nlm.nih.gov/RxNav/APIs/RxNormAPIs.html",
+      "terms_url": "https://lhncbc.nlm.nih.gov/RxNav/TermsofService.html",
+      "access_cost": "free_of_charge",
+      "content_rights": "non_proprietary_RxNorm_content; RxClass includes SNOMED CT subject to separate terms",
+      "commercial_use_status": "eligible_for_name_normalization_subject_to_NLM_terms",
+      "attribution": "This product uses publicly available data from the U.S. National Library of Medicine (NLM), National Institutes of Health, Department of Health and Human Services; NLM is not responsible for the product and does not endorse or recommend this or any other product.",
+      "roles": [
+        "medication_name_normalization",
+        "ingredient_product_identity",
+        "RxCUI_mapping"
+      ],
+      "limits": [
+        "NLM API terms state 20 requests/second/IP and recommend 12–24 hour caching.",
+        "RxNav's Drug-Drug Interaction API was discontinued January 2, 2024.",
+        "Does not provide a complete drug-interaction screening service or patient-specific prescribing recommendation."
+      ],
+      "ingestion_status": "eligible_for_opt_in_metadata_lookup"
+    },
+    {
+      "id": "openfda-drug-label-api",
+      "title": "openFDA Drug Product Labeling API",
+      "publisher": "US Food and Drug Administration",
+      "url": "https://open.fda.gov/apis/drug/label/",
+      "terms_url": "https://open.fda.gov/terms/",
+      "access_cost": "public_API_subject_to_terms_and_rate_limits",
+      "content_rights": "CC0_or_public_domain_unless_specific_record_warns_of_third_party_rights",
+      "commercial_use_status": "eligible_for_metadata_discovery; omit records with third_party_rights_warning",
+      "attribution": "Data provided by the U.S. Food and Drug Administration (https://open.fda.gov)",
+      "roles": [
+        "label_record_discovery",
+        "manufacturer_submitted_label_metadata",
+        "source_version_discovery"
+      ],
+      "limits": [
+        "openFDA states data is generally CC0/public domain unless otherwise noted; some private-party material can carry third-party rights.",
+        "The labeling API can contain manufacturer-submitted labeling that FDA says may not be the label for currently distributed products or identical to the approved labeling.",
+        "The API documentation says not to rely on openFDA alone to make medical-care decisions.",
+        "Do not copy full label text into a curated knowledge base by default; display metadata and link to the authoritative source."
+      ],
+      "ingestion_status": "eligible_for_opt_in_metadata_lookup"
+    },
+    {
+      "id": "dailymed-spl-api",
+      "title": "DailyMed SPL Web Services",
+      "publisher": "US National Library of Medicine",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/app-support-web-services.cfm",
+      "access_cost": "public_API_no_paid_key_documented",
+      "content_rights": "record_level_rights_review_required",
+      "commercial_use_status": "link_and_discover_only_until_record_rights_checked",
+      "roles": [
+        "current_SPL_discovery",
+        "label_version_history",
+        "authoritative_label_link"
+      ],
+      "limits": [
+        "API provides current Structured Product Labeling (SPL) data and version history.",
+        "Do not assume public access alone authorizes bulk redistribution of all label content; check the specific record and applicable rights notices.",
+        "Labeling supports reference review but does not replace patient-specific clinical assessment."
+      ],
+      "ingestion_status": "eligible_for_link_and_version_discovery_only"
+    },
+    {
+      "id": "cdc-dental-antibiotic-stewardship",
+      "title": "CDC dental antibiotic prescribing and stewardship resources",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "url": "https://www.cdc.gov/antibiotic-use/media/pdfs/dental-fact-sheet-508.pdf",
+      "access_cost": "free_public_access",
+      "content_rights": "US_government_work_generally_public_domain_but_check_embedded_third_party_materials",
+      "commercial_use_status": "eligible_for_review_of_US_government_authored_content_subject_to_embedded_rights_check",
+      "roles": [
+        "dental_antibiotic_stewardship",
+        "clinical_workflow_checklist",
+        "history_and_risk_factor_checklist"
+      ],
+      "limits": [
+        "Scope depends on the specific patient population and clinical question described by the resource.",
+        "Check document version and any embedded third-party material before reuse.",
+        "Must be reviewed by a qualified dentist before a product evidence card is approved."
+      ],
+      "ingestion_status": "candidate_for_clinician_review"
+    },
+    {
+      "id": "ada-dental-guidelines",
+      "title": "ADA dental clinical practice guidelines and stewardship content",
+      "publisher": "American Dental Association",
+      "url": "https://www.ada.org/resources/ada-library/oral-health-topics/antibiotic-stewardship",
+      "access_cost": "free_to_read_where_published",
+      "content_rights": "copyright_and_specific_reuse_rights_need_confirmation",
+      "commercial_use_status": "reference_and_link_only_until_permission_or_applicable_license_confirmed",
+      "roles": [
+        "professional_dental_guidance",
+        "guideline_source_discovery"
+      ],
+      "limits": [
+        "Free online access is not by itself permission to copy or embed full text.",
+        "Check publisher/article-level license, current version, defined population, and supersession status before deriving product content."
+      ],
+      "ingestion_status": "reference_link_only_pending_rights_review"
+    },
+    {
+      "id": "rxnav-discontinued-ddi",
+      "title": "RxNav Drug-Drug Interaction API",
+      "publisher": "US National Library of Medicine",
+      "url": "https://lhncbc.nlm.nih.gov/RxNav/information/FAQs.html",
+      "access_cost": "discontinued",
+      "content_rights": "not_applicable_to_discontinued_service",
+      "commercial_use_status": "do_not_use",
+      "roles": [],
+      "limits": [
+        "NLM states the RxNav drug-drug interaction features were discontinued on January 2, 2024."
+      ],
+      "ingestion_status": "retired_do_not_integrate"
+    }
+  ]
+}
