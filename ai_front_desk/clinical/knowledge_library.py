@@ -61,12 +61,12 @@ def _get_ingestable_source(
     if source.get("commercial_reuse_permitted") is not True:
         raise PermissionError("source is not approved for commercial reuse; link-only or permission review required")
     license_id = str(source.get("license_id", "")).upper()
-    if "NC" in license_id or "ND" in license_id or "UNKNOWN" in license_id:
+    if any(token in license_id for token in ("CC-BY-NC", "CC-BY-ND", "NONCOMMERCIAL", "NO-DERIVATIVES", "UNKNOWN")):
         raise PermissionError("noncommercial, no-derivatives, or unknown license cannot be imported")
-    if source.get("ingestion_status") not in _ALLOWED_INGESTION_STATUSES:
-        raise PermissionError("source is not cleared for educational text ingestion")
+    if source.get("ingestion_status") != "approved_for_educational_content_only":
+        raise PermissionError("source is not explicitly cleared for educational text ingestion")
     limits = " ".join(str(item) for item in source.get("limits", [])).casefold()
-    needs_review = any(term in limits for term in ("chapter-level", "third-party content", "third-party elements"))
+    needs_review = any(term in limits for term in ("chapter-level", "third-party content", "third-party elements", "embedded third-party"))
     if needs_review and not confirm_rights_review:
         raise PermissionError(
             "this source has chapter/third-party rights caveats; verify the exact text selection, "
@@ -76,7 +76,6 @@ def _get_ingestable_source(
     if any(not source.get(key) for key in required):
         raise ValueError("source catalog entry is missing required provenance metadata")
     return source
-
 
 def _words(text: str) -> list[str]:
     return [term for term in re.findall(r"[a-z0-9]+", text.casefold()) if len(term) >= 2]
