@@ -267,6 +267,171 @@
       ],
       "ingestion_status": "approved_for_educational_content_only",
       "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "pmc-commercial-open-access-collection",
+      "title": "PubMed Central Open Access Subset: Commercial Use Collection",
+      "authors": [
+        "US National Library of Medicine"
+      ],
+      "publisher": "National Center for Biotechnology Information",
+      "published_year": 2026,
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/tools/ftp/",
+      "license_id": "Article-level license required; commercial-use collection index",
+      "license_url": "https://www.ncbi.nlm.nih.gov/pmc/tools/ftp/",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "NCBI official PMC FTP and Open Access Subset documentation",
+      "source_verification_url": "https://www.ncbi.nlm.nih.gov/pmc/tools/ftp/",
+      "roles": [
+        "research_article_discovery",
+        "bulk_open_access_manifest",
+        "biomedical_literature"
+      ],
+      "limits": [
+        "The collection index identifies articles available in a commercial-use collection; each article's license and files still need record-level validation.",
+        "Do not assume every article in PMC is reusable or available for commercial redistribution.",
+        "Use the official NCBI OA service and approved retrieval interfaces; do not scrape site pages."
+      ],
+      "ingestion_status": "catalog_and_validate_article_license_before_ingestion",
+      "clinical_evidence_status": "research_only_not_a_prescribing_authority"
+    },
+    {
+      "id": "who-model-list-essential-medicines-2025",
+      "title": "WHO Model List of Essential Medicines, 24th list (2025)",
+      "authors": [
+        "World Health Organization"
+      ],
+      "publisher": "World Health Organization",
+      "published_year": 2025,
+      "url": "https://www.who.int/publications/i/item/B09474",
+      "license_id": "WHO publication; verify record-specific terms before reuse",
+      "license_url": "https://www.who.int/about/policies/publishing/copyright",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "Official WHO publication page",
+      "source_verification_url": "https://www.who.int/publications/i/item/B09474",
+      "roles": [
+        "essential_medicines_reference",
+        "global_medicine_policy",
+        "formulary_context"
+      ],
+      "limits": [
+        "Global policy/formulary reference, not a dental prescribing guideline or patient-specific recommendation.",
+        "Do not ingest full text into the commercial corpus until WHO's applicable reuse permission is confirmed.",
+        "Use as a linked source and policy context; verify jurisdiction and the local formulary before clinical application."
+      ],
+      "ingestion_status": "link_only_pending_reuse_permission",
+      "clinical_evidence_status": "policy_reference_not_patient_specific_prescribing_authority"
+    },
+    {
+      "id": "egypt-national-essential-medicine-list-2025",
+      "title": "Egypt: National Essential Medicine List 2025 (English)",
+      "authors": [
+        "Ministry of Health and Population, Egypt"
+      ],
+      "publisher": "World Health Organization repository",
+      "published_year": 2025,
+      "url": "https://www.who.int/publications/m/item/egypt--national-essential-medicine-list-2025-%28english%29",
+      "license_id": "National publication hosted by WHO; verify country/publisher reuse terms",
+      "license_url": "https://www.who.int/about/policies/publishing/copyright",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "Official WHO national essential-medicine repository",
+      "source_verification_url": "https://www.who.int/publications/m/item/egypt--national-essential-medicine-list-2025-%28english%29",
+      "roles": [
+        "egypt_local_formulary_context",
+        "national_essential_medicine_list",
+        "jurisdiction_context"
+      ],
+      "limits": [
+        "Use for Egyptian policy/formulary context only, not as a substitute for current local prescribing regulations or clinical guidelines.",
+        "Do not index full text for commercial use until reuse rights from the national publisher are confirmed.",
+        "Record country, publication year, and status; do not apply automatically to a US clinical workflow."
+      ],
+      "ingestion_status": "link_only_pending_reuse_permission",
+      "clinical_evidence_status": "policy_reference_not_patient_specific_prescribing_authority"
+    },
+    {
+      "id": "cdc-dental-pain-swelling-materials-2026",
+      "title": "CDC Dental Pain and Swelling Materials",
+      "authors": [
+        "Centers for Disease Control and Prevention"
+      ],
+      "publisher": "US Centers for Disease Control and Prevention",
+      "published_year": 2026,
+      "url": "https://www.cdc.gov/antibiotic-use/communication-resources/dentists-be-antibiotics-aware-pain-swelling.html",
+      "license_id": "US government work generally public domain; check third-party items",
+      "license_url": "https://www.cdc.gov/other/agencymaterials.html",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "Official CDC page, updated September 17, 2026",
+      "source_verification_url": "https://www.cdc.gov/antibiotic-use/communication-resources/dentists-be-antibiotics-aware-pain-swelling.html",
+      "roles": [
+        "dental_antibiotic_stewardship",
+        "dental_pain_swelling",
+        "current_guidance_discovery"
+      ],
+      "limits": [
+        "Use only within the patient population, scope, and clinical question addressed by the specific CDC guidance.",
+        "Confirm the current underlying fact sheet/guideline version and any third-party elements before reusing text.",
+        "Any derivative product clinical card must be reviewed and approved by a qualified dentist."
+      ],
+      "ingestion_status": "candidate_for_source_version_and_clinician_review",
+      "clinical_evidence_status": "not_a_prescribing_authority_until_card_reviewed"
+    },
+    {
+      "id": "aae-clinical-guidelines-position-statements",
+      "title": "American Association of Endodontists Clinical Guidelines and Position Statements",
+      "authors": [
+        "American Association of Endodontists"
+      ],
+      "publisher": "American Association of Endodontists",
+      "url": "https://www.aae.org/specialty/clinical-resources/guidelines-position-statements/",
+      "license_id": "Copyrighted professional guidance; reuse terms require confirmation",
+      "license_url": "https://www.aae.org/terms-of-use/",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "Official AAE guidelines and position statements index",
+      "source_verification_url": "https://www.aae.org/specialty/clinical-resources/guidelines-position-statements/",
+      "roles": [
+        "endodontic_guidelines",
+        "specialist_scope",
+        "dental_clinical_reference_discovery"
+      ],
+      "limits": [
+        "Guidelines vary by topic, publication date, and status; the page notes that some statements are under review.",
+        "Link-only until the exact document's reuse license or permission is confirmed.",
+        "Do not convert position statements into recommendations outside their clinical scope."
+      ],
+      "ingestion_status": "link_only_pending_permission_and_review",
+      "clinical_evidence_status": "not_a_prescribing_authority_until_card_reviewed"
+    },
+    {
+      "id": "merck-manual-professional",
+      "title": "Merck Manual Professional Edition",
+      "authors": [
+        "Merck & Co., Inc."
+      ],
+      "publisher": "Merck Manual",
+      "url": "https://www.merckmanuals.com/professional",
+      "license_id": "Copyrighted; commercial reuse prohibited without written permission",
+      "license_url": "https://www.merckmanuals.com/professional/resourcespages/termsofuse",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "Merck Manual official permissions/terms page",
+      "source_verification_url": "https://www.merckmanuals.com/professional/resourcespages/faqs",
+      "roles": [
+        "external_reference_link",
+        "clinical_background_reading"
+      ],
+      "limits": [
+        "The official FAQ says users may share links but must not copy or commercially reuse text, images, audio, or video without written permission.",
+        "Never bulk-ingest or index full text into the commercial Dr. Mia corpus without explicit written permission.",
+        "Use source links for users to consult independently."
+      ],
+      "ingestion_status": "link_only_without_written_permission",
+      "clinical_evidence_status": "not_a_prescribing_authority_in_this_product"
     }
   ]
 }
