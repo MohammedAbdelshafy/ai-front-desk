@@ -384,15 +384,29 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Index a rights-cleared, UTF-8 text file from the Dr. Mia source allow-list for offline educational search."
     )
-    parser.add_argument("--source-id", required=True, help="Source ID from pharmacology_learning_library.json")
-    parser.add_argument("--file", required=True, help="Local UTF-8 .txt file from the verified source selection")
+    parser.add_argument("--source-id", help="Source ID from pharmacology_learning_library.json")
+    parser.add_argument("--file", help="Local UTF-8 .txt file from the verified source selection")
     parser.add_argument("--corpus-path", default=str(DEFAULT_INDEX_PATH), help="Local JSONL index path (default is outside the repo)")
     parser.add_argument("--manifest-path", default=str(DEFAULT_MANIFEST_PATH), help="Source allow-list JSON path")
+    parser.add_argument("--list-sources", action="store_true", help="List catalog sources and their ingest eligibility")
     parser.add_argument(
         "--confirm-rights-review", action="store_true",
         help="Confirm that chapter-level/third-party content in the selected text was checked and excluded if not reusable",
     )
     args = parser.parse_args()
+    if args.list_sources:
+        sources = load_source_catalog(args.manifest_path)
+        print(json.dumps([{
+            "id": item.get("id"),
+            "title": item.get("title"),
+            "license_id": item.get("license_id"),
+            "commercial_reuse_permitted": item.get("commercial_reuse_permitted"),
+            "ingestion_status": item.get("ingestion_status"),
+            "url": item.get("url"),
+        } for item in sources], indent=2, ensure_ascii=False))
+        return 0
+    if not args.source_id or not args.file:
+        parser.error("--source-id and --file are required unless --list-sources is used")
     try:
         result = index_text_file(
             args.source_id, args.file,
