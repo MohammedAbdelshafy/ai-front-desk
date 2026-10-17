@@ -82,8 +82,14 @@ class ClinicianCase:
     jurisdiction: str = "US"
     reviewed_factors: tuple[str, ...] = ()
     patient_risk_tags: tuple[str, ...] = ()
+    reported_allergies: str = ""
+    current_medications: str = ""
+    relevant_medical_history: str = ""
 
     def __post_init__(self) -> None:
+        for field_name in ("reported_allergies", "current_medications", "relevant_medical_history"):
+            if len(getattr(self, field_name)) > 1200:
+                raise ValueError("%s must be 1200 characters or fewer" % field_name)
         if not re.fullmatch(r"(?:case|synthetic|demo)[_-][A-Za-z0-9_-]{1,58}", self.case_id or "", re.IGNORECASE):
             raise ValueError("case_id must start with case_, synthetic_, or demo_ and contain no direct identifiers")
         if not self.jurisdiction.strip():
@@ -272,6 +278,11 @@ def build_evidence_review(
         "status": "clinician_review_required" if evidence_items else "no_verified_evidence",
         "jurisdiction": case.jurisdiction,
         "clinician_assessment": case.proposed_assessment,
+        "clinical_context_summary": {
+            "reported_allergies": case.reported_allergies or "Not entered",
+            "current_medications": case.current_medications or "Not entered",
+            "relevant_medical_history": case.relevant_medical_history or "Not entered",
+        },
         "matched_evidence": evidence_items,
         "flags": flags,
         "flag_count": len(flags),
@@ -299,6 +310,11 @@ def _empty_review(case: ClinicianCase, flags: list[dict[str, str]], source_count
         "status": "needs_clinician_input",
         "jurisdiction": case.jurisdiction,
         "clinician_assessment": case.proposed_assessment,
+        "clinical_context_summary": {
+            "reported_allergies": case.reported_allergies or "Not entered",
+            "current_medications": case.current_medications or "Not entered",
+            "relevant_medical_history": case.relevant_medical_history or "Not entered",
+        },
         "matched_evidence": [],
         "flags": flags,
         "flag_count": len(flags),
