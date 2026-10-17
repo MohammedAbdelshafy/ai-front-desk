@@ -69,6 +69,14 @@ I have **not verified a complete, current, commercially reusable free drug-drug 
 
 Do not substitute a scraped drug-interaction web page, an uncited LLM answer, or an incomplete research dataset and call it a validated interaction checker. A safer first step is to make Mia's public-data explorer retrieve drug identifiers and label metadata while the true interaction-checking layer remains explicitly unavailable until a defensible data source is found.
 
+## Implemented first learning slice
+
+The repository now contains `ai_front_desk/clinical/pharmacology_education_cards.json` and a local keyword-retrieval module, `pharmacology_education.py`. The initial set is a handful of original, short educational summaries about pharmacokinetics/ADME, pharmacodynamics, medication-history completeness, adverse medication outcomes, and antimicrobial concepts. Each note keeps source links, license metadata, attribution, and an explicit education-only scope.
+
+The workbench can optionally search this shelf locally. It makes no external call for the learning search, and the notes cannot support a patient-specific diagnosis, medicine selection, dose, interaction result, or safety conclusion.
+
+**What is not yet done:** the full books have not been bulk-downloaded or indexed. We deliberately start with a small, attributed concept set and keep the books linked as sources. Before expanding extraction, verify the exact rights and source version for each chapter and follow source-specific reuse and access rules. For example, the Open Textbook Library listing for the Virginia Tech preclinical book shows CC BY but does not specify a version, so the registry flags the exact version for confirmation before ingestion.
+
 ## How the intelligence layer should use books
 
 - Ingest only commercially reusable CC BY material and preserve attribution, license, edition, chapter/section, and a content hash.
