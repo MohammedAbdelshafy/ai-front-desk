@@ -111,3 +111,36 @@ def test_reindex_replaces_previous_chunks_for_same_source(tmp_path: Path):
     assert len({row["source_id"] for row in rows}) == 1
     assert all("New source-only" in row["text"] or "CHAPTER 1 NEW" in row["section"] for row in rows)
     assert not any("Old source-only" in row["text"] for row in rows)
+
+
+def test_noncommercial_flag_token_does_not_reject_plain_cc_by_licenses(tmp_path: Path):
+    source_text = tmp_path / "openrn.txt"
+    source_text.write_text("CHAPTER 1 OPEN\n\nAbsorption and metabolism.", encoding="utf-8")
+    result = index_text_file(
+        "openrn-nursing-pharmacology-2e",
+        source_text,
+        corpus_path=tmp_path / "index.jsonl",
+    )
+    assert result["status"] == "indexed"
+
+
+def test_license_catalogs_for_link_only_sources_are_rejected(tmp_path: Path):
+    source_text = tmp_path / "merck.txt"
+    source_text.write_text("Text that must not be ingested.", encoding="utf-8")
+    with pytest.raises(PermissionError, match="not approved for commercial reuse"):
+        index_text_file(
+            "merck-manual-professional",
+            source_text,
+            corpus_path=tmp_path / "index.jsonl",
+        )
+
+
+def test_unknown_or_pending_review_source_is_rejected(tmp_path: Path):
+    source_text = tmp_path / "who.txt"
+    source_text.write_text("Text awaiting permission.", encoding="utf-8")
+    with pytest.raises(PermissionError, match="not approved for commercial reuse"):
+        index_text_file(
+            "who-model-list-essential-medicines-2025",
+            source_text,
+            corpus_path=tmp_path / "index.jsonl",
+        )
