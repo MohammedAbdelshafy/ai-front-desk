@@ -66,3 +66,69 @@ def test_workbench_refuses_non_us_scope():
         assert "US jurisdiction" in str(exc)
     else:
         raise AssertionError("out-of-scope jurisdiction should be rejected")
+
+
+# HTTP smoke tests exercise the actual local handler, using loopback and an ephemeral port.
+import threading
+from http.server import HTTPServer
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError
+import pytest
+
+from ai_front_desk.clinical.medication_workbench import WorkbenchHandler
+
+
+@pytest.fixture
+def workbench_url():
+    server = HTTPServer(("127.0.0.1", 0), WorkbenchHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        yield "http://127.0.0.1:%d" % server.server_port
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)
+
+
+def test_workbench_http_smoke_and_security_headers(workbench_url):
+    with urlopen(workbench_url + "/") as response:
+        body = response.read().decode("utf-8")
+        assert response.status == 200
+        assert "Dr. Mia" in body
+        assert "DO NOT ENTER REAL PATIENT" in body
+        assert response.headers["Cache-Control"] == "no-store"
+        assert "default-src 'none'" in response.headers["Content-Security-Policy"]
+        assert response.headers["X-Content-Type-Options"] == "nosniff"
+
+
+def test_workbench_http_post_returns_no_evidence_for_candidate_only_registry(workbench_url):
+    payload = {
+        "case_id": "synthetic-case-http-01",
+        "proposed_assessment": "Synthetic smoke-test scenario",
+        "symptoms": "synthetic symptom",
+        "reported_allergies": "fictional allergy",
+        "current_medications": "fictional medication",
+        "relevant_medical_history": "fictional history",
+        "jurisdiction": "US",
+    }
+    request = Request(
+        workbench_url + "/",
+        data=urlencode(payload).encode("utf-8"),
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    with urlopen(request) as response:
+        body = response.read().decode("utf-8")
+        assert response.status == 200
+        assert "No verified evidence found" in body
+        assert "fictional allergy" in body
+        assert "not a medication recommendation" in body.lower()
+        assert response.headers["Cache-Control"] == "no-store"
+
+
+def test_workbench_http_unknown_routes_return_404(workbench_url):
+    with pytest.raises(HTTPError) as exc:
+        urlopen(workbench_url + "/unknown")
+    assert exc.value.code == 404
