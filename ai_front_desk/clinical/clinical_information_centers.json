@@ -15,8 +15,14 @@
       "id": "ada-acute-dental-pain-guidelines",
       "name": "American Dental Association — Acute Dental Pain Management Guideline",
       "publisher": "American Dental Association",
-      "jurisdictions": ["US"],
-      "roles": ["dental_clinical_guideline", "acute_dental_pain", "procedure_specific_recommendations"],
+      "jurisdictions": [
+        "US"
+      ],
+      "roles": [
+        "dental_clinical_guideline",
+        "acute_dental_pain",
+        "procedure_specific_recommendations"
+      ],
       "url": "https://www.ada.org/resources/research/science/evidence-based-dental-research/pain-management-guideline/",
       "access_mode": "official_web_reference",
       "update_policy": "living_guideline_and_manual_change_review",
@@ -31,8 +37,14 @@
       "id": "ada-antibiotic-guideline-dental-pain-swelling",
       "name": "American Dental Association — Antibiotics for Dental Pain and Swelling",
       "publisher": "American Dental Association",
-      "jurisdictions": ["US"],
-      "roles": ["dental_clinical_guideline", "antibiotic_stewardship", "pulpal_periapical_pain_swelling"],
+      "jurisdictions": [
+        "US"
+      ],
+      "roles": [
+        "dental_clinical_guideline",
+        "antibiotic_stewardship",
+        "pulpal_periapical_pain_swelling"
+      ],
       "url": "https://www.ada.org/resources/research/science/evidence-based-dental-research/antibiotics-for-dental-pain-and-swelling/",
       "access_mode": "official_web_reference",
       "update_policy": "manual_supersession_check",
@@ -47,9 +59,14 @@
       "id": "ada-antibiotic-stewardship-statement-2026",
       "name": "American Dental Association — Antibiotic Stewardship: Balancing Patient Care and Public Health",
       "publisher": "American Dental Association Council on Scientific Affairs / JADA",
-      "jurisdictions": ["US"],
-      "roles": ["antibiotic_stewardship", "dental_prescribing_quality"],
-      "url": "https://www.ada.org/resources/research/science/evidence-based-dental-research",
+      "jurisdictions": [
+        "US"
+      ],
+      "roles": [
+        "antibiotic_stewardship",
+        "dental_prescribing_quality"
+      ],
+      "url": "https://jada.ada.org/article/S0002-8177(26)00470-8/fulltext",
       "access_mode": "official_guideline_index_and_link",
       "published_on": "2026",
       "update_policy": "manual_change_and_supersession_review",
@@ -58,14 +75,21 @@
       "use_limits": [
         "Track the specific statement and chairside tool as separate versioned artifacts.",
         "A stewardship statement is not a comprehensive drug monograph or full patient-specific interaction screen."
-      ]
+      ],
+      "index_url": "https://www.ada.org/resources/research/science/evidence-based-dental-research"
     },
     {
       "id": "cdc-dental-pain-swelling-materials-2026",
       "name": "CDC — Dental Pain and Swelling Materials",
       "publisher": "US Centers for Disease Control and Prevention",
-      "jurisdictions": ["US"],
-      "roles": ["dental_antibiotic_stewardship", "clinical_workflow_checklist", "patient_education"],
+      "jurisdictions": [
+        "US"
+      ],
+      "roles": [
+        "dental_antibiotic_stewardship",
+        "clinical_workflow_checklist",
+        "patient_education"
+      ],
       "url": "https://www.cdc.gov/antibiotic-use/communication-resources/dentists-be-antibiotics-aware-pain-swelling.html",
       "access_mode": "official_web_reference",
       "source_page_updated_on": "2026-09-17",
@@ -82,8 +106,13 @@
       "id": "aapd-pediatric-acute-pain-2026",
       "name": "American Academy of Pediatric Dentistry — Acute Pain Management for Pediatric Dental Patients",
       "publisher": "American Academy of Pediatric Dentistry",
-      "jurisdictions": ["US"],
-      "roles": ["pediatric_dental_pain", "age_specific_medication_guidance"],
+      "jurisdictions": [
+        "US"
+      ],
+      "roles": [
+        "pediatric_dental_pain",
+        "age_specific_medication_guidance"
+      ],
       "url": "https://www.aapd.org/research/oral-health-policies--recommendations/pain-management-in-infants-children-adolescents-and-individuals-with-special-health-care-needs/",
       "access_mode": "official_web_reference",
       "source_revision": "2026",
@@ -99,8 +128,14 @@
       "id": "aapd-pediatric-antibiotic-therapy-2026",
       "name": "American Academy of Pediatric Dentistry — Use of Antibiotic Therapy for Pediatric Dental Patients",
       "publisher": "American Academy of Pediatric Dentistry",
-      "jurisdictions": ["US"],
-      "roles": ["pediatric_dental_infection", "antibiotic_stewardship", "age_specific_clinical_guidance"],
+      "jurisdictions": [
+        "US"
+      ],
+      "roles": [
+        "pediatric_dental_infection",
+        "antibiotic_stewardship",
+        "age_specific_clinical_guidance"
+      ],
       "url": "https://www.aapd.org/research/oral-health-policies--recommendations/use-of-antibiotic-therapy-for-pediatric-dental-patients/",
       "access_mode": "official_web_reference",
       "source_revision": "2026",
@@ -116,8 +151,13 @@
       "id": "aae-clinical-guidelines",
       "name": "American Association of Endodontists — Clinical Guidelines and Position Statements",
       "publisher": "American Association of Endodontists",
-      "jurisdictions": ["US"],
-      "roles": ["endodontic_clinical_guidance", "specialty_scope"],
+      "jurisdictions": [
+        "US"
+      ],
+      "roles": [
+        "endodontic_clinical_guidance",
+        "specialty_scope"
+      ],
       "url": "https://www.aae.org/specialty/clinical-resources/guidelines-position-statements/",
       "access_mode": "official_web_reference",
       "update_policy": "manual_change_and_supersession_review",
@@ -132,8 +172,16 @@
       "id": "rxnorm-nlm-api",
       "name": "NLM RxNorm API",
       "publisher": "US National Library of Medicine",
-      "jurisdictions": ["US", "global_terminology_support"],
-      "roles": ["ingredient_identity", "product_identity", "normalized_medicine_names", "rxcui_mapping"],
+      "jurisdictions": [
+        "US",
+        "global_terminology_support"
+      ],
+      "roles": [
+        "ingredient_identity",
+        "product_identity",
+        "normalized_medicine_names",
+        "rxcui_mapping"
+      ],
       "url": "https://lhncbc.nlm.nih.gov/RxNav/APIs/RxNormAPIs.html",
       "terms_url": "https://lhncbc.nlm.nih.gov/RxNav/TermsofService.html",
       "access_mode": "public_api",
@@ -150,8 +198,15 @@
       "id": "dailymed-versioned-labels",
       "name": "DailyMed Structured Product Labeling Web Services",
       "publisher": "US National Library of Medicine",
-      "jurisdictions": ["US"],
-      "roles": ["product_specific_label", "contraindications", "warnings", "label_version_history"],
+      "jurisdictions": [
+        "US"
+      ],
+      "roles": [
+        "product_specific_label",
+        "contraindications",
+        "warnings",
+        "label_version_history"
+      ],
       "url": "https://dailymed.nlm.nih.gov/dailymed/app-support-web-services.cfm",
       "access_mode": "public_api_and_official_label_links",
       "update_policy": "poll_version_history_and_invalidate_changed_dependent_cards",
@@ -167,8 +222,14 @@
       "id": "openfda-drug-labels",
       "name": "FDA openFDA Drug Product Labeling API",
       "publisher": "US Food and Drug Administration",
-      "jurisdictions": ["US"],
-      "roles": ["label_record_discovery", "label_metadata", "safety_warning_discovery"],
+      "jurisdictions": [
+        "US"
+      ],
+      "roles": [
+        "label_record_discovery",
+        "label_metadata",
+        "safety_warning_discovery"
+      ],
       "url": "https://open.fda.gov/apis/drug/label/",
       "terms_url": "https://open.fda.gov/terms/",
       "access_mode": "public_api",
@@ -185,8 +246,15 @@
       "id": "fda-drugs-at-fda",
       "name": "FDA Drugs@FDA Database and openFDA API",
       "publisher": "US Food and Drug Administration",
-      "jurisdictions": ["US"],
-      "roles": ["us_approval_status", "approval_letters", "review_documents", "label_approval_history"],
+      "jurisdictions": [
+        "US"
+      ],
+      "roles": [
+        "us_approval_status",
+        "approval_letters",
+        "review_documents",
+        "label_approval_history"
+      ],
       "url": "https://www.fda.gov/drugs/drug-approvals-and-databases/about-drugsfda",
       "api_url": "https://open.fda.gov/apis/drug/drugsfda/",
       "access_mode": "official_website_and_public_api",
@@ -202,8 +270,16 @@
       "id": "drugbank-clinical-api-ddi",
       "name": "DrugBank Clinical API — medication search and drug-drug interactions",
       "publisher": "DrugBank",
-      "jurisdictions": ["US", "Canada", "EU"],
-      "roles": ["licensed_drug_interaction_screening", "medication_search", "adverse_effect_lookup"],
+      "jurisdictions": [
+        "US",
+        "Canada",
+        "EU"
+      ],
+      "roles": [
+        "licensed_drug_interaction_screening",
+        "medication_search",
+        "adverse_effect_lookup"
+      ],
       "url": "https://docs.drugbank.com/api-docs",
       "account_url": "https://dev.drugbank.com/",
       "access_mode": "licensed_authenticated_api",
@@ -220,8 +296,14 @@
       "id": "eda-egyptian-drug-register",
       "name": "Egyptian Drug Authority — Egyptian Drug Register",
       "publisher": "Egyptian Drug Authority",
-      "jurisdictions": ["EG"],
-      "roles": ["egypt_drug_reference", "national_regulatory_context", "drug_class_reference"],
+      "jurisdictions": [
+        "EG"
+      ],
+      "roles": [
+        "egypt_drug_reference",
+        "national_regulatory_context",
+        "drug_class_reference"
+      ],
       "url": "https://www.edaegypt.gov.eg/ar/%D8%A7%D9%84%D9%85%D8%B1%D8%AC%D8%B9-%D8%A7%D9%84%D8%AA%D9%86%D8%B8%D9%8A%D9%85%D9%8A-%D9%84%D9%87%D9%8A%D8%A6%D8%A9-%D8%A7%D9%84%D8%AF%D9%88%D8%A7%D8%A1-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%8A%D8%A9/%D8%B3%D8%AC%D9%84-%D8%A7%D9%84%D8%AF%D9%88%D8%A7%D8%A1-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%8A/",
       "access_mode": "official_web_reference_manual_review",
       "update_policy": "check_new_edition_and_notices",
@@ -237,8 +319,16 @@
       "id": "eda-periodic-medicine-lists",
       "name": "Egyptian Drug Authority — Periodic Pharmaceutical Lists",
       "publisher": "Egyptian Drug Authority",
-      "jurisdictions": ["EG"],
-      "roles": ["essential_medicine_list", "high_risk_medicine_flag", "crushability_caution", "otc_classification", "safety_notice_discovery"],
+      "jurisdictions": [
+        "EG"
+      ],
+      "roles": [
+        "essential_medicine_list",
+        "high_risk_medicine_flag",
+        "crushability_caution",
+        "otc_classification",
+        "safety_notice_discovery"
+      ],
       "url": "https://www.edaegypt.gov.eg/ar/%D8%A5%D8%B5%D8%AF%D8%A7%D8%B1%D8%A7%D8%AA-%D9%88%D8%AA%D9%82%D8%A7%D8%B1%D9%8A%D8%B1-%D8%A7%D9%84%D9%87%D9%8A%D8%A6%D8%A9-%D9%81%D9%8A-%D8%A3%D8%B1%D9%82%D8%A7%D9%85/%D8%A5%D8%B5%D8%AF%D8%A7%D8%B1%D8%A7%D8%AA/%D9%82%D9%88%D8%A7%D8%A6%D9%85-%D8%AF%D9%88%D8%B1%D9%8A%D8%A9/",
       "access_mode": "official_web_reference_manual_review",
       "update_policy": "check_daily_or_on_notice_for_new_publication_signal_then_review_content",
@@ -253,8 +343,14 @@
       "id": "eda-pharmaceutical-information-center",
       "name": "Egyptian Drug Authority — Egyptian Pharmaceutical Information Center",
       "publisher": "Egyptian Drug Authority, Central Administration for Pharmaceutical Care",
-      "jurisdictions": ["EG"],
-      "roles": ["human_pharmacist_escalation", "complex_drug_information_query", "source_clarification"],
+      "jurisdictions": [
+        "EG"
+      ],
+      "roles": [
+        "human_pharmacist_escalation",
+        "complex_drug_information_query",
+        "source_clarification"
+      ],
       "url": "https://edaegypt.gov.eg/en/about-us/home-page-services/home-page-services/inquire-about-reliable-drug-information/",
       "access_mode": "human_expert_service",
       "update_policy": "contact_service_for_current_answer",
@@ -269,8 +365,13 @@
       "id": "who-egypt-essential-medicine-list-2025",
       "name": "WHO — Egypt National Essential Medicine List 2025 (English)",
       "publisher": "World Health Organization",
-      "jurisdictions": ["EG"],
-      "roles": ["national_formulary_context", "medicine_availability_policy_context"],
+      "jurisdictions": [
+        "EG"
+      ],
+      "roles": [
+        "national_formulary_context",
+        "medicine_availability_policy_context"
+      ],
       "url": "https://www.who.int/publications/m/item/egypt--national-essential-medicine-list-2025-%28english%29",
       "access_mode": "official_publication_link",
       "publication_date": "2026-04-08",
@@ -285,8 +386,12 @@
       "id": "who-model-essential-medicine-list-2025",
       "name": "WHO Model List of Essential Medicines",
       "publisher": "World Health Organization",
-      "jurisdictions": ["global_policy_context"],
-      "roles": ["global_formulary_policy_context"],
+      "jurisdictions": [
+        "global_policy_context"
+      ],
+      "roles": [
+        "global_formulary_policy_context"
+      ],
       "url": "https://www.who.int/publications/i/item/B09474",
       "access_mode": "official_publication_link",
       "content_rights": "link_only_pending_reuse_review",
@@ -299,8 +404,14 @@
       "id": "pubmed-central-evidence-discovery",
       "name": "PubMed / PubMed Central — biomedical literature discovery",
       "publisher": "US National Library of Medicine, National Institutes of Health",
-      "jurisdictions": ["global_evidence_discovery"],
-      "roles": ["systematic_review_discovery", "primary_research_discovery", "evidence_update_watch"],
+      "jurisdictions": [
+        "global_evidence_discovery"
+      ],
+      "roles": [
+        "systematic_review_discovery",
+        "primary_research_discovery",
+        "evidence_update_watch"
+      ],
       "url": "https://pubmed.ncbi.nlm.nih.gov/",
       "pmc_url": "https://pmc.ncbi.nlm.nih.gov/",
       "access_mode": "search_and_article_level_review",
