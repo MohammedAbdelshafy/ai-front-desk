@@ -186,6 +186,56 @@ def load_registry(path: str | Path) -> tuple[list[EvidenceSource], list[Evidence
     return sources, cards
 
 
+def _quality_checklist(case: ClinicianCase, matched_evidence_count: int) -> list[dict[str, str]]:
+    """Show review completeness; never compute a clinical quality or safety score."""
+    allergies_reviewed = "allergies" in case.reviewed_factors and bool(case.reported_allergies.strip())
+    medications_reviewed = "current_medications" in case.reviewed_factors and bool(case.current_medications.strip())
+    return [
+        {
+            "id": "clinician_assessment",
+            "label": "Clinician-entered assessment",
+            "state": "entered" if case.proposed_assessment.strip() else "missing",
+            "detail": "Entered by clinician" if case.proposed_assessment.strip() else "Required before assessment-specific retrieval",
+        },
+        {
+            "id": "symptoms",
+            "label": "Symptoms",
+            "state": "entered" if case.symptoms else "not_entered",
+            "detail": "One or more symptoms entered" if case.symptoms else "Not entered in this synthetic case",
+        },
+        {
+            "id": "allergies",
+            "label": "Allergies and reactions",
+            "state": "reviewed" if allergies_reviewed else "review_required",
+            "detail": "Context entered and marked reviewed" if allergies_reviewed else "Enter context and confirm review, including 'none reported' or 'unknown' where appropriate",
+        },
+        {
+            "id": "current_medications",
+            "label": "Current medicines and supplements",
+            "state": "reviewed" if medications_reviewed else "review_required",
+            "detail": "Context entered and marked reviewed" if medications_reviewed else "Enter context and confirm review, including 'none reported' or 'unknown' where appropriate",
+        },
+        {
+            "id": "medical_history",
+            "label": "Relevant medical history",
+            "state": "entered" if case.relevant_medical_history.strip() else "not_entered",
+            "detail": "Context entered" if case.relevant_medical_history.strip() else "Not entered in this synthetic case",
+        },
+        {
+            "id": "evidence",
+            "label": "Approved evidence match",
+            "state": "source_match" if matched_evidence_count else "no_verified_evidence",
+            "detail": "A source match was retrieved; it is not a medication recommendation" if matched_evidence_count else "No approved evidence card matched; do not infer a medicine is appropriate or safe",
+        },
+        {
+            "id": "supervising_review",
+            "label": "Supervising dentist review",
+            "state": "required",
+            "detail": "Always required; this prototype does not record or approve a clinical decision",
+        },
+    ]
+
+
 def _baseline_review_flags(case: ClinicianCase) -> list[dict[str, str]]:
     """Critical medication-context review prompts apply even when no card matches."""
     required_factors = {
@@ -304,6 +354,7 @@ def build_evidence_review(
             "relevant_medical_history": case.relevant_medical_history or "Not entered",
         },
         "matched_evidence": evidence_items,
+        "quality_checklist": _quality_checklist(case, len(evidence_items)),
         "flags": flags,
         "flag_count": len(flags),
         "excluded_source_count": sum(reason is not None for reason in source_reasons.values()),
@@ -336,6 +387,7 @@ def _empty_review(case: ClinicianCase, flags: list[dict[str, str]], source_count
             "relevant_medical_history": case.relevant_medical_history or "Not entered",
         },
         "matched_evidence": [],
+        "quality_checklist": _quality_checklist(case, 0),
         "flags": flags,
         "flag_count": len(flags),
         "excluded_source_count": source_count,
