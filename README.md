@@ -51,7 +51,10 @@ Start with a narrow, clinician-reviewed set of common dental medication scenario
 - `ai_front_desk/clinical/server.py`: local demo server with patient intake, dentist dashboard, record review, corrections, audit history, and FHIR export endpoints.
 - `ai_front_desk/clinical/medication_support.py`: versioned source/evidence models, source eligibility checks, exact-phrase retrieval, source provenance, baseline medication-history prompts, and a non-scoring clinical-completeness checklist. It is not a drug-interaction or dosage engine.
 - `ai_front_desk/clinical/medication_workbench.py`: local clinician-facing synthetic-case UI at port 8767; no case persistence and no external calls.
-- `ai_front_desk/clinical/medication_evidence_registry.json`: candidate reference links only; no approved evidence cards are enabled.
+- `ai_front_desk/clinical/medication_evidence_registry.json`: candidate clinical reference links only; no approved evidence cards are enabled.
+- `ai_front_desk/clinical/pharmacology_learning_library.json`: open-license pharmacology books and reuse/attribution constraints.
+- `ai_front_desk/clinical/drug_data_sources.json`: drug-data sources, terms, API scope, and known limitations.
+- `ai_front_desk/clinical/public_drug_data.py`: opt-in name-only metadata lookup through NLM RxNorm and openFDA. It does not fetch or transmit the clinical case, and it is not an interaction checker.
 - `docs/DENTAL_AI_MVP_BUILD_SPEC.md`, `docs/DENTAL_AI_GITHUB_RESEARCH.md`, `docs/DENTAL_AI_PRODUCTION_REFERENCE.md`: scope, research, and production architecture notes.
 - `docs/MIA_CLINICAL_PLATFORM_BUILD_PLAN.md`: multi-app Mia runtime and multi-specialty clinical platform plan.
 - `docs/DR_MIA_PRODUCT_POSITIONING.md`: core strategy, supporting features, upsells, and claims boundaries.
@@ -59,6 +62,7 @@ Start with a narrow, clinician-reviewed set of common dental medication scenario
 - `docs/MEDICATION_SUPPORT_FOUNDATION.md`: workbench architecture and development test instructions.
 - `docs/CLINICAL_SOURCE_REGISTER.md`: candidate sources and evidence approval checklist.
 - `docs/CLINICAL_DATA_PROVIDER_OPTIONS.md`: source/terminology/interaction-provider comparison and integration decision criteria.
+- `docs/OPEN_PHARMACOLOGY_AND_DRUG_DATA.md`: free/open textbook licenses, public drug-data options, attribution, and reuse guardrails.
 - `docs/adr/001-clinical-data-store.md`: development storage decision and production prerequisites.
 
 ## Run the Mia Clinical intake demo
@@ -78,9 +82,7 @@ The demo database is stored at `~/.mia-clinical-demo/clinical-demo.sqlite3` by d
 
 ## Run the Dr. Mia Evidence Workbench demo
 
-The workbench is local-only, uses the candidate-source registry, stores no submitted case, and makes no external calls. Use synthetic cases only. Since no approved medication evidence cards are enabled, it intentionally returns **No verified evidence found**.
-
-After installing the project:
+After installing the project, run:
 
 ```bash
 dr-mia-workbench
@@ -88,7 +90,13 @@ dr-mia-workbench
 python -m ai_front_desk.clinical.medication_workbench
 ```
 
-Open **http://127.0.0.1:8767**. The demo only retrieves cards marked approved with current review metadata, cleared content rights, and a matching US jurisdiction. It does not prescribe, calculate doses, or perform comprehensive drug-interaction checks.
+Open **http://127.0.0.1:8767**. The workbench uses synthetic cases only and stores no submissions. By default it makes no external API calls. The candidate evidence registry has zero approved medication evidence cards, so it intentionally returns **No verified evidence found**.
+
+The form includes an optional public drug-data lookup. It remains off unless you check the box, and you should enter only one medicine name or active ingredient. The app then sends **only that standalone name** to NLM RxNorm and openFDA to retrieve identity/label metadata. The clinical case, symptoms, allergies, medications in the case, and medical history are not sent to those APIs. Do not enter real patient data anywhere in this prototype.
+
+This lookup normalizes medication names and finds label metadata; it does not recommend medicines, calculate doses, assess interactions, or establish safety. Use the linked source labels and appropriate clinical guidelines, and require clinician review.
+
+See [Free and Open-Licensed Pharmacology Knowledge](docs/OPEN_PHARMACOLOGY_AND_DRUG_DATA.md) for textbook licenses, API limitations, and required attribution.
 
 ## Test
 
