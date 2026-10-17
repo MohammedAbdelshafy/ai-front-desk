@@ -106,7 +106,11 @@ def test_provider_failures_are_nonfatal_statuses():
 
 
 def test_lookup_does_not_echo_or_persist_case_details():
-    result = drugdata.lookup_public_drug_metadata("Synthetic drug")
+    def fake_fetch(url, timeout=4):
+        if url.startswith(drugdata.RXNORM_BASE):
+            return {"drugGroup": {"conceptGroup": []}}
+        raise drugdata.PublicDrugDataNotFound("none")
+    result = drugdata.lookup_public_drug_metadata("Synthetic drug", fetch_json=fake_fetch)
     assert "patient" in result["source_notice"].lower()
     assert "allergies" not in result
     assert "medical_history" not in result
