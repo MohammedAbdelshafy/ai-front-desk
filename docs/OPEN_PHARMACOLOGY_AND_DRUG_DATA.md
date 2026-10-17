@@ -30,10 +30,10 @@ They record reuse permissions separately from clinical approval. The current evi
 - **Critical limitation:** educational background only, not a current drug monograph or patient-specific prescribing authority.
 
 ### 3. [Microbiology, Pharmacology, and Immunology for Pre-Clinical Students](https://open.umn.edu/opentextbooks/textbooks/1778)
-- **License:** CC BY according to Open Textbook Library metadata.
-- **Commercial reuse:** allowed with attribution, subject to individual element rights checks.
+- **License:** Virginia Tech's official announcement identifies CC BY 4.0, but the same page also describes use as "not primarily commercial," which appears inconsistent with the standard CC BY 4.0 license terms.
+- **Commercial reuse:** **blocked pending written clarification from the publisher**. The machine-readable source catalog sets commercial reuse to false until the ambiguity is resolved.
 - **Good for:** preclinical medical foundations, microbiology, immunology, infections, and broad treatment mechanisms.
-- **Critical limitation:** not a drug-interaction service or a dental prescribing guideline.
+- **Critical limitation:** this is not a drug-interaction service or a dental prescribing guideline. Do not ingest the text into the commercial index while reuse terms remain unresolved.
 
 ## Free-to-read sources not approved for commercial copying
 
