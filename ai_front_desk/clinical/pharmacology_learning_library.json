@@ -78,8 +78,8 @@
       "publisher": "Virginia Tech Publishing",
       "published_year": 2025,
       "url": "https://open.umn.edu/opentextbooks/textbooks/1778",
-      "license_id": "CC-BY-4.0",
-      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "license_id": "CC-BY (version not specified in listing)",
+      "license_url": "https://open.umn.edu/opentextbooks/textbooks/1778",
       "commercial_reuse_permitted": true,
       "attribution_required": true,
       "source_verified_from": "Open Textbook Library usage-rights metadata",
@@ -92,10 +92,11 @@
         "treatment_mechanisms"
       ],
       "limits": [
-        "Preclinical medical education reference, not a medication monograph or dental prescribing guideline.",
-        "Verify chapter-level attribution and third-party content before reuse."
+        "Open Textbook Library lists the conditions of use as CC BY, but its listing does not establish the exact version. Confirm the original publisher's exact license before copying or adapting content.",
+        "Verify chapter-level attribution and third-party content before reuse.",
+        "Preclinical medical education reference, not a medication monograph or dental prescribing guideline."
       ],
-      "ingestion_status": "approved_for_educational_content_only",
+      "ingestion_status": "candidate_confirm_exact_license_version_before_ingestion",
       "clinical_evidence_status": "not_a_prescribing_authority"
     },
     {
