@@ -124,7 +124,7 @@ def test_workbench_http_post_returns_no_evidence_for_candidate_only_registry(wor
         assert response.status == 200
         assert "No verified evidence found" in body
         assert "fictional allergy" in body
-        assert "not a medication recommendation" in body.lower()
+        assert "do not infer that any medicine is appropriate or safe" in body.lower()
         assert response.headers["Cache-Control"] == "no-store"
 
 
