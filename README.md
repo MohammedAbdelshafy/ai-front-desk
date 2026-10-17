@@ -1,23 +1,40 @@
-# Dr. Mia — AI Front Desk & Dental Clinic Copilot
+# Dr. Mia — Dental Clinical Quality & Prescribing Copilot
 
-Dr. Mia is the dental-practice product direction built on this AI Front Desk repository: a friendly, character-led assistant designed to help clinics respond to patient inquiries, capture appointment requests that arrive after hours, prepare patient histories before visits, and make follow-up more consistent.
+**Your AI clinical co-pilot for more confident, consistent dental care.**
 
-**Core product promise:** fewer patient inquiries falling through the cracks, better-prepared consultations, and clearer handoffs between patients and clinic staff. The aim is to reduce repetitive administration, while measuring real outcomes in a clinic pilot rather than promising unverified savings or revenue.
+Dr. Mia is a character-led clinical support product direction for dental practices. Her core job is to help dentists, especially junior clinicians, review patient-specific medication considerations against reliable, traceable clinical references and support consistent practice standards. The product vision also includes pre-visit patient history, appointment communication, patient feedback, and optional front-desk and growth add-ons.
 
-> **Status:** This repository contains reference workflows and a local clinical demo, not a live managed service. Phone answering, live outbound messages, production scheduling, public review campaigns, and medication decision support are not currently shipped. The clinical demo uses synthetic data only.
+**The core product is clinical quality and prescribing support.** The AI front desk, retention automation, and Lead Engine are optional expansions, not the product's identity.
 
-## Dr. Mia product direction
+> **Current status:** this repository contains reference communication workflows, testable administrative logic, and a local clinical-intake demo using synthetic data. The prescribing copilot described below is a product direction, not an implemented capability. Live phone answering, production messaging, appointment scheduling, and production clinical decision support are not shipped.
 
-The proposed product is organized into modules so a practice can start with patient access and expand only when the workflow is proven.
+## Core product: Clinical Quality & Prescribing Copilot
 
-- **AI Front Desk — planned:** work toward after-hours and overflow inquiry capture, including a future phone/voice integration. The assistant should collect a caller's reason for contacting the clinic, preferred callback details, and appointment preferences, answer only clinic-approved administrative questions, and route requests to staff. A request must never be described as a confirmed appointment unless a trusted scheduling workflow confirms it.
-- **Smart Patient Intake — prototype:** a pre-visit dental history workflow and dentist-facing history dashboard. The questionnaire is still a draft and requires review by a qualified dentist before clinical use.
-- **Appointment messaging — planned:** send booking confirmations and reminders from verified scheduling events, including a one-hour reminder when enabled by the clinic, plus appropriate post-visit follow-up.
-- **Patient feedback — planned:** gather feedback about waiting time, communication, comfort, and the overall experience; summarize patterns for the practice to improve. Public review invitations should be neutral and must not be gated on private feedback scores.
-- **Optional Growth / Lead Engine — proposed add-on:** help practices capture and track new-patient campaign inquiries, route callbacks, and run approved follow-up. Marketing outreach needs its own appropriate permission and opt-out. Clinical records must not be repurposed as a marketing list.
-- **Clinician-facing medication support — future concept, not in the MVP:** potentially provide dentists with evidence-linked medication information and patient-specific safety checks for clinician review. It must not independently diagnose, prescribe, or send medication orders, and requires qualified clinical governance and jurisdiction-specific review before real-world use.
+The proposed dentist-facing workflow lets a clinician enter their assessment and relevant patient context, including symptoms, allergies and reactions, current medicines, medical history, and other clinically relevant factors. Dr. Mia retrieves applicable evidence from approved, current dental and medication references and presents a structured review for the dentist to assess.
 
-See [Dr. Mia product positioning and copy](docs/DR_MIA_PRODUCT_POSITIONING.md) for the fuller feature descriptions and honest launch messaging.
+The intended review may include:
+- Evidence-linked medication options relevant to the clinician-entered assessment.
+- A plain-language explanation of why each option may be considered and what the source says.
+- Patient-specific safety considerations, such as recorded allergy conflicts, possible interactions, contraindications, dose-relevant factors, and missing information.
+- Reference title, edition/version and section or page where available, with publication/effective date and jurisdiction where relevant.
+- A clear indication of uncertainty or when a supervising clinician or other qualified professional should review the case.
+
+Dr. Mia supports the dentist's reasoning; she does not independently diagnose, issue a prescription, sign or transmit medication orders, or replace clinical judgment. A disclaimer alone is not a safety system: real-world use requires qualified clinical governance, source licensing and currency controls, rigorous evaluations, access controls, auditability, and jurisdiction-specific review.
+
+### Quality assurance and supervision
+
+The broader quality-assurance layer can help a practice standardize its workflows: clinic-approved protocols, evidence-linked checklists, review of missing information, clear escalation to a lead dentist, and auditable records of what the assistant surfaced. Any performance or prescribing-quality analytics must use defined, validated measures and appropriate access controls. Mia must not silently judge clinicians or turn unvalidated AI outputs into quality scores.
+
+### Scope the first release
+
+Start with a narrow, clinician-reviewed set of common dental medication scenarios and sources, then expand based on dentist feedback and clinical review capacity. Do not claim to cover every medication or every medical specialty on day one.
+
+## Expansion modules (upsells)
+
+- **Smart Patient Intake — prototype:** pre-visit dental history and a dentist-facing summary. The questionnaire remains a draft awaiting qualified dentist review.
+- **Patient Retention & Feedback — planned:** booking confirmations and reminders from verified scheduling events, post-visit feedback, appropriate follow-up and clinic-approved recall messages. Marketing permission and opt-out must be handled separately from care communications.
+- **AI Front Desk — optional add-on, planned:** after-hours and overflow inquiry capture, including a future voice/phone integration, with callback summaries and human handoff. A request must never be described as a confirmed booking unless a trusted scheduling workflow confirms it.
+- **Growth / Lead Engine — optional add-on, proposed:** campaign inquiry capture, callback routing, source tracking and verifiable outcomes. Marketing contacts require appropriate permission; clinical data must not be repurposed as a marketing list.
 
 ## What's in this repository today
 
@@ -34,10 +51,10 @@ See [Dr. Mia product positioning and copy](docs/DR_MIA_PRODUCT_POSITIONING.md) f
 - `ai_front_desk/clinical/server.py`: local demo server with patient intake, dentist dashboard, record review, corrections, audit history, and FHIR export endpoints.
 - `docs/DENTAL_AI_MVP_BUILD_SPEC.md`, `docs/DENTAL_AI_GITHUB_RESEARCH.md`, `docs/DENTAL_AI_PRODUCTION_REFERENCE.md`: scope, research, and production architecture notes.
 - `docs/MIA_CLINICAL_PLATFORM_BUILD_PLAN.md`: multi-app Mia runtime and multi-specialty clinical platform plan.
-- `docs/DR_MIA_PRODUCT_POSITIONING.md`: product narrative, module descriptions, proposed add-on, and honest claims boundary.
+- `docs/DR_MIA_PRODUCT_POSITIONING.md`: updated core strategy, feature descriptions, upsells, and claims boundaries.
 - `docs/adr/001-clinical-data-store.md`: development storage decision and production prerequisites.
 
-## Run the Mia Clinical demo
+## Run the Mia Clinical intake demo
 
 Requires Python 3.9 or newer. From the repository root:
 
@@ -46,7 +63,7 @@ python -m pip install -e .
 python -m ai_front_desk.clinical.server
 ```
 
-Open **http://127.0.0.1:8766**. Pick a fictional demo clinic, submit a fictional history, and then inspect the dentist dashboard. The server deliberately binds to loopback only.
+Open **http://127.0.0.1:8766**. Pick a fictional demo clinic, submit a fictional history, and inspect the dentist dashboard. The server deliberately binds to loopback only.
 
 The demo database is stored at `~/.mia-clinical-demo/clinical-demo.sqlite3` by default. Set `CLINICAL_DB` to override the local path. This is a development prototype, not an EHR.
 
@@ -60,21 +77,11 @@ python -m pip install pytest
 python -m pytest -q
 ```
 
-The GitHub Actions workflow runs the test suite on relevant branches and pull requests. Check the actual workflow status before claiming a build is green.
-
-## Original WhatsApp reference flow
-
-```bash
-VERIFY_TOKEN=mysecret PORT=8765 ai-front-desk-webhook
-# in another shell:
-curl "http://127.0.0.1:8765/webhook?hub.mode=subscribe&hub.verify_token=mysecret&hub.challenge=ping"
-```
-
-Before enabling live messaging, the actual configuration needs provider signature verification, idempotency, tenant-scoped persistence, durable outbound retries, staff handoff, retention/deletion controls, and privacy/security review. Clinic-approved messages and explicit consent are required. An appointment request is not a confirmed booking unless a trusted scheduling workflow confirms it.
+Check the actual workflow status before claiming a build is green.
 
 ## Safety and claims
 
-This repository is a reference build, not a managed service. Do not claim that it is HIPAA-compliant, clinically validated, or safe for production patient data. The dental questionnaire remains a draft pending qualified dentist review. It only captures and organizes information; it does not diagnose, prescribe, recommend medicines, or replace a clinician.
+This repository is a reference build, not a managed service. Do not claim that it is compliant with a healthcare privacy regime, clinically validated, or safe for production patient data without evidence. The dental questionnaire remains a draft pending qualified dentist review. It captures and organizes information; it does not diagnose, prescribe, recommend medicines, or replace a clinician. No clinical-support feature should be marketed as available until implemented and appropriately evaluated.
 
 ## License
 
