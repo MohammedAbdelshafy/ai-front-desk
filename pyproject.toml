@@ -14,6 +14,7 @@ license = { text = "MIT" }
 [project.scripts]
 ai-front-desk-webhook = "ai_front_desk.webhook:main"
 dr-mia-workbench = "ai_front_desk.clinical.medication_workbench:main"
+dr-mia-index-library = "ai_front_desk.clinical.knowledge_library:main"
 
 [tool.setuptools.packages.find]
 include = ["ai_front_desk*"]
