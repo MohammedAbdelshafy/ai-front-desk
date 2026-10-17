@@ -55,6 +55,8 @@ Start with a narrow, clinician-reviewed set of common dental medication scenario
 - `ai_front_desk/clinical/pharmacology_learning_library.json`: open-license pharmacology books and reuse/attribution constraints.
 - `ai_front_desk/clinical/drug_data_sources.json`: drug-data sources, terms, API scope, and known limitations.
 - `ai_front_desk/clinical/public_drug_data.py`: opt-in name-only metadata lookup through NLM RxNorm and openFDA. It does not fetch or transmit the clinical case, and it is not an interaction checker.
+- `ai_front_desk/clinical/pharmacology_education.py`: local keyword retrieval over original, source-linked educational notes; no external calls and no patient-specific prescribing advice.
+- `ai_front_desk/clinical/pharmacology_education_cards.json`: educational summaries attributed to open-license pharmacology books and linked public sources; these are not approved prescribing recommendations.
 - `docs/DENTAL_AI_MVP_BUILD_SPEC.md`, `docs/DENTAL_AI_GITHUB_RESEARCH.md`, `docs/DENTAL_AI_PRODUCTION_REFERENCE.md`: scope, research, and production architecture notes.
 - `docs/MIA_CLINICAL_PLATFORM_BUILD_PLAN.md`: multi-app Mia runtime and multi-specialty clinical platform plan.
 - `docs/DR_MIA_PRODUCT_POSITIONING.md`: core strategy, supporting features, upsells, and claims boundaries.
@@ -63,6 +65,7 @@ Start with a narrow, clinician-reviewed set of common dental medication scenario
 - `docs/CLINICAL_SOURCE_REGISTER.md`: candidate sources and evidence approval checklist.
 - `docs/CLINICAL_DATA_PROVIDER_OPTIONS.md`: source/terminology/interaction-provider comparison and integration decision criteria.
 - `docs/OPEN_PHARMACOLOGY_AND_DRUG_DATA.md`: free/open textbook licenses, public drug-data options, attribution, and reuse guardrails.
+- `docs/OPEN_PHARMACOLOGY_AND_DRUG_DATA.md`: open book selection, public drug-data options, reuse limits, and attribution rules.
 - `docs/adr/001-clinical-data-store.md`: development storage decision and production prerequisites.
 
 ## Run the Mia Clinical intake demo
