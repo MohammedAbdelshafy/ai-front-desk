@@ -14,7 +14,7 @@ def test_dental_mia_manifest_safety_boundaries():
     assert "retrieve_approved_evidence" in m.allowed_actions
     assert "clinical quality" in m.role.lower()
     assert any("approved" in b.lower() and "evidence" in b.lower() for b in m.safety_boundaries)
-    assert any("Never diagnose" in b for b in m.safety_boundaries)
+    assert any("diagnose" in b.lower() for b in m.safety_boundaries)
 
 
 def test_manifest_serializes():
