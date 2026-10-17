@@ -1,10 +1,25 @@
-# AI Front Desk
+# Dr. Mia — AI Front Desk & Dental Clinic Copilot
 
-A WhatsApp support-agent reference build using **WhatsApp Business Cloud API + n8n + OpenAI**. WhatsApp intake → qualification → human escalation → follow-up. No vendor lock-in.
+Dr. Mia is the dental-practice product direction built on this AI Front Desk repository: a friendly, character-led assistant designed to help clinics respond to patient inquiries, capture appointment requests that arrive after hours, prepare patient histories before visits, and make follow-up more consistent.
 
-This repository now also contains the **Mia Clinical Platform demo**: dental pre-visit intake plus a dentist-facing history dashboard, with reusable foundations for future specialties. The clinical demo uses synthetic data only and is not suitable for real patient records.
+**Core product promise:** fewer patient inquiries falling through the cracks, better-prepared consultations, and clearer handoffs between patients and clinic staff. The aim is to reduce repetitive administration, while measuring real outcomes in a clinic pilot rather than promising unverified savings or revenue.
 
-## What's inside
+> **Status:** This repository contains reference workflows and a local clinical demo, not a live managed service. Phone answering, live outbound messages, production scheduling, public review campaigns, and medication decision support are not currently shipped. The clinical demo uses synthetic data only.
+
+## Dr. Mia product direction
+
+The proposed product is organized into modules so a practice can start with patient access and expand only when the workflow is proven.
+
+- **AI Front Desk — planned:** work toward after-hours and overflow inquiry capture, including a future phone/voice integration. The assistant should collect a caller's reason for contacting the clinic, preferred callback details, and appointment preferences, answer only clinic-approved administrative questions, and route requests to staff. A request must never be described as a confirmed appointment unless a trusted scheduling workflow confirms it.
+- **Smart Patient Intake — prototype:** a pre-visit dental history workflow and dentist-facing history dashboard. The questionnaire is still a draft and requires review by a qualified dentist before clinical use.
+- **Appointment messaging — planned:** send booking confirmations and reminders from verified scheduling events, including a one-hour reminder when enabled by the clinic, plus appropriate post-visit follow-up.
+- **Patient feedback — planned:** gather feedback about waiting time, communication, comfort, and the overall experience; summarize patterns for the practice to improve. Public review invitations should be neutral and must not be gated on private feedback scores.
+- **Optional Growth / Lead Engine — proposed add-on:** help practices capture and track new-patient campaign inquiries, route callbacks, and run approved follow-up. Marketing outreach needs its own appropriate permission and opt-out. Clinical records must not be repurposed as a marketing list.
+- **Clinician-facing medication support — future concept, not in the MVP:** potentially provide dentists with evidence-linked medication information and patient-specific safety checks for clinician review. It must not independently diagnose, prescribe, or send medication orders, and requires qualified clinical governance and jurisdiction-specific review before real-world use.
+
+See [Dr. Mia product positioning and copy](docs/DR_MIA_PRODUCT_POSITIONING.md) for the fuller feature descriptions and honest launch messaging.
+
+## What's in this repository today
 
 - `ai_front_desk/logic.py`: generic qualification state machine as pure, importable Python.
 - `ai_front_desk/webhook.py`: local development/test harness for the Meta webhook contract. `DRY_RUN=1` by default.
@@ -19,6 +34,7 @@ This repository now also contains the **Mia Clinical Platform demo**: dental pre
 - `ai_front_desk/clinical/server.py`: local demo server with patient intake, dentist dashboard, record review, corrections, audit history, and FHIR export endpoints.
 - `docs/DENTAL_AI_MVP_BUILD_SPEC.md`, `docs/DENTAL_AI_GITHUB_RESEARCH.md`, `docs/DENTAL_AI_PRODUCTION_REFERENCE.md`: scope, research, and production architecture notes.
 - `docs/MIA_CLINICAL_PLATFORM_BUILD_PLAN.md`: multi-app Mia runtime and multi-specialty clinical platform plan.
+- `docs/DR_MIA_PRODUCT_POSITIONING.md`: product narrative, module descriptions, proposed add-on, and honest claims boundary.
 - `docs/adr/001-clinical-data-store.md`: development storage decision and production prerequisites.
 
 ## Run the Mia Clinical demo
