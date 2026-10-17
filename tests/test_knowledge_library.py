@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from ai_front_desk.clinical.knowledge_library import (
+    check_source_updates,
     index_text_file,
     search_knowledge_library,
 )
@@ -144,3 +145,47 @@ def test_unknown_or_pending_review_source_is_rejected(tmp_path: Path):
             source_text,
             corpus_path=tmp_path / "index.jsonl",
         )
+
+
+def test_source_update_checker_reports_unavailable_without_false_freshness(tmp_path: Path, monkeypatch):
+    import urllib.error
+
+    def unavailable(request, timeout=12):
+        raise urllib.error.URLError("network disabled in test")
+
+    monkeypatch.setattr("urllib.request.urlopen", unavailable)
+    result = check_source_updates(
+        previous_status_path=tmp_path / "status.json",
+    )
+    assert result["check_type"] == "source_header_update_discovery_only"
+    assert result["source_count"] > 0
+    assert all(item["status"] == "check_unavailable" for item in result["records"])
+    assert all("No currentness claim" in item["note"] for item in result["records"])
+
+
+def test_source_update_checker_detects_header_change_as_review_trigger(tmp_path: Path, monkeypatch):
+    import urllib.request
+
+    class FakeResponse:
+        status = 200
+        headers = {"Last-Modified": "Sat, 17 Oct 2026 12:00:00 GMT", "ETag": '"new-tag"'}
+        def __enter__(self):
+            return self
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fakeopen(request, timeout=12):
+        return FakeResponse()
+
+    monkeypatch.setattr("urllib.request.urlopen", fakeopen)
+    previous_path = tmp_path / "previous.json"
+    previous_path.write_text(json.dumps({
+        "openrn-nursing-pharmacology-2e": {
+            "last_modified": "Fri, 16 Oct 2026 12:00:00 GMT",
+            "etag": '"old-tag"',
+        }
+    }), encoding="utf-8")
+    result = check_source_updates(previous_status_path=previous_path)
+    item = next(x for x in result["records"] if x["source_id"] == "openrn-nursing-pharmacology-2e")
+    assert item["status"] == "version_signal_changed"
+    assert "re-review" in item["note"]
