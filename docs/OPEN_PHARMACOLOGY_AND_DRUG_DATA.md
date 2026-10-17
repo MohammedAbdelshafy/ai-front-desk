@@ -71,19 +71,32 @@ Do not substitute a scraped drug-interaction web page, an uncited LLM answer, or
 
 ## Implemented first learning slice
 
-The repository now contains `ai_front_desk/clinical/pharmacology_education_cards.json` and a local keyword-retrieval module, `pharmacology_education.py`. The initial set is a handful of original, short educational summaries about pharmacokinetics/ADME, pharmacodynamics, medication-history completeness, adverse medication outcomes, and antimicrobial concepts. Each note keeps source links, license metadata, attribution, and an explicit education-only scope.
+The repository now has two local retrieval layers:
 
-The workbench can optionally search this shelf locally. It makes no external call for the learning search, and the notes cannot support a patient-specific diagnosis, medicine selection, dose, interaction result, or safety conclusion.
+- `pharmacology_education_cards.json` and `pharmacology_education.py` provide concise original summaries about ADME, pharmacodynamics, medication-history completeness, adverse outcomes, and antimicrobial concepts.
+- `knowledge_library.py` provides an offline full-text indexing/search engine. It chunks operator-supplied UTF-8 text, performs BM25-style lexical ranking, and returns source links, section, edition/version, attribution, license, content hash, and index date. The `dr-mia-index-library` command uses an explicit source allow-list and blocks noncommercial, unknown, or unresolved commercial licenses.
 
-**What is not yet done:** the full books have not been bulk-downloaded or indexed. We deliberately start with a small, attributed concept set and keep the books linked as sources. Before expanding extraction, verify the exact rights and source version for each chapter and follow source-specific reuse and access rules. For example, the Open Textbook Library listing for the Virginia Tech preclinical book shows CC BY but does not specify a version, so the registry flags the exact version for confirmation before ingestion.
+The workbench can search both layers locally. Neither sends learning queries or indexed text to an external service. The engine is implemented and tested, but **the full-text index is empty by default**: no complete book text is bundled in the repository and no source text has been imported yet. An operator must obtain source text through a permitted workflow, verify the selected chapter's rights, then index it locally. The command does not crawl or download books automatically.
+
+The license catalog includes a CC BY pharmacy casebook and CC BY educational-research papers about pharmacology competencies, case-based teaching, and generic-versus-brand education. These are valuable for teaching and curriculum design, not medication-specific treatment instructions. The Virginia Tech preclinical book is blocked from commercial ingestion until its publisher clarifies inconsistent commercial-use wording. The OpenStax nursing pharmacology book remains link-only because its license is noncommercial unless separate permission is obtained.
+
+## How to import and use the local library
+
+After obtaining UTF-8 plain text through a rights-cleared workflow, index it with:
+
+```bash
+dr-mia-index-library --source-id openrn-nursing-pharmacology-2e --file /path/to/rights-cleared-extract.txt
+```
+
+If a catalog entry has chapter-level or third-party-content caveats, check the exact selected content first and use `--confirm-rights-review` only after excluding any material not covered by the license. The flag is an operator attestation, not legal proof.
 
 ## How the intelligence layer should use books
 
-- Ingest only commercially reusable CC BY material and preserve attribution, license, edition, chapter/section, and a content hash.
-- Keep educational passages separate from clinical guideline cards and product-label metadata.
+- Ingest only commercially reusable material and preserve attribution, license, edition, chapter/section, source hash, and index date.
+- Keep raw educational passages separate from clinical guideline cards and product-label metadata.
 - Have a qualified dentist/pharmacist review any derived clinical statement before it can enter the approved evidence registry.
-- Link every clinical output to a specific source version and section.
-- Mark outdated or uncertain information as such; avoid unsupported extrapolation.
+- Link every clinical output to an exact source version and section.
+- Track source updates, expiry, corrections, and superseded editions; mark outdated or uncertain information.
 - Keep evaluation cases synthetic until privacy, security, clinical governance, and applicable regulatory reviews are complete.
 
-This catalog creates a lawful starting library; it does not mean the clinical content has already been ingested, validated, or approved for use in patient care.
+The local search engine is code, not a populated corpus. A textbook or article appearing in the study search must never by itself trigger a medication choice, dose, interaction result, or patient-specific safety conclusion.
