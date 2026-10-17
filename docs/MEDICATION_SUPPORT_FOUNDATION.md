@@ -9,6 +9,7 @@ This is the initial backend foundation for the dentist-facing clinical quality a
 - `ai_front_desk/clinical/medication_workbench.py`: local synthetic-case web UI at `http://127.0.0.1:8767`. It binds only to loopback and does not persist cases. It makes no API calls by default; an explicit opt-in sends only one standalone medicine name to NLM RxNorm and openFDA for identity/label metadata, never the case context. The review screen surfaces a completeness checklist and requires a supervising-dentist review state; it does not record a prescription or clinical approval.
 - `ai_front_desk/clinical/public_drug_data.py`: opt-in public-source adapter for RxNorm name normalization and openFDA label metadata only. No interaction checking or medication recommendations.
 - `ai_front_desk/clinical/pharmacology_learning_library.json`: books with license and reuse records; CC BY sources are educational inputs, not prescribing authorities.
+- `ai_front_desk/clinical/pharmacology_education_cards.json` and `pharmacology_education.py`: original educational summaries indexed by topic with linked book/source references and license/attribution metadata. These are not patient-specific clinical evidence cards.
 - `ai_front_desk/clinical/drug_data_sources.json`: API and source rights/limitations catalog.
 - `ai_front_desk/clinical/medication_support.py`
   - Versioned source and evidence-card data models.
@@ -40,6 +41,8 @@ This is the initial backend foundation for the dentist-facing clinical quality a
 An evidence-card match means only that a reviewed entry matched the clinician-entered assessment phrase. It does **not** mean that the medication is appropriate, preferred, effective, or safe for the patient.
 
 ## Boundaries and next build steps
+
+The local UI now has two separate optional tools: a standalone medicine-name lookup against free public metadata APIs, and a local search of source-linked pharmacology learning notes. The learning shelf makes no external calls and never reads case fields as the search query. It does not ingest entire books or turn their educational content into prescribing advice.
 
 The local UI is a form-and-results workbench, not a production clinical service. There is no general-purpose drug database, automated drug-interaction checker, dose calculation, prescription writing, EHR/PMS integration, real-patient storage, authentication, or clinical validation. It accepts a non-identifying case reference and is intended for synthetic development cases only.
 
