@@ -64,10 +64,19 @@ def case_from_form(form: Mapping[str, Any]) -> ClinicianCase:
     jurisdiction = _one(form, "jurisdiction", "US")
     if jurisdiction not in ALLOWED_JURISDICTIONS:
         raise ValueError("This demo is limited to the US jurisdiction.")
-    reviewed = tuple(
+    reported_allergies = _one(form, "reported_allergies")[:1200]
+    current_medications = _one(form, "current_medications")[:1200]
+    relevant_medical_history = _one(form, "relevant_medical_history")[:1200]
+    checked_factors = {
         name for name in FACTOR_LABELS
         if _one(form, "reviewed_" + name).lower() in {"1", "true", "on", "yes"}
-    )
+    }
+    # A checked box cannot stand in for recording the relevant synthetic fact.
+    if not reported_allergies:
+        checked_factors.discard("allergies")
+    if not current_medications:
+        checked_factors.discard("current_medications")
+    reviewed = tuple(name for name in FACTOR_LABELS if name in checked_factors)
     risk_tags = _split_values(_one(form, "patient_risk_tags"), limit=12)
     return ClinicianCase(
         case_id=case_id,
@@ -76,9 +85,9 @@ def case_from_form(form: Mapping[str, Any]) -> ClinicianCase:
         jurisdiction=jurisdiction,
         reviewed_factors=reviewed,
         patient_risk_tags=risk_tags,
-        reported_allergies=_one(form, "reported_allergies")[:1200],
-        current_medications=_one(form, "current_medications")[:1200],
-        relevant_medical_history=_one(form, "relevant_medical_history")[:1200],
+        reported_allergies=reported_allergies,
+        current_medications=current_medications,
+        relevant_medical_history=relevant_medical_history,
     )
 
 
@@ -218,8 +227,8 @@ footer{margin:25px 0 10px;color:var(--muted);font-size:12px}
 <p class="hint">Use a reference such as synthetic-case-001, never a patient name, date of birth, or chart number.</p>
 <label for="proposed_assessment">Clinician-entered working assessment</label><textarea id="proposed_assessment" name="proposed_assessment" maxlength="800" placeholder="Enter a synthetic scenario for source retrieval, not a real patient case." required>%s</textarea>
 <label for="symptoms">Symptoms (synthetic)</label><textarea id="symptoms" name="symptoms" maxlength="1200" placeholder="Separate sample symptoms with commas or new lines">%s</textarea>
-<label for="reported_allergies">Reported allergies / reactions (synthetic)</label><textarea id="reported_allergies" name="reported_allergies" maxlength="1200" placeholder="Demo-only context, e.g. fictional allergy note">%s</textarea>
-<label for="current_medications">Current medicines / supplements (synthetic)</label><textarea id="current_medications" name="current_medications" maxlength="1200" placeholder="Demo-only context">%s</textarea>
+<label for="reported_allergies">Reported allergies / reactions (synthetic)</label><textarea id="reported_allergies" name="reported_allergies" maxlength="1200" placeholder="Demo-only context, e.g. fictional allergy note">%s</textarea><p class="hint">Record a synthetic answer such as “none reported” or “unknown” when relevant; do not mark this factor reviewed while the field is blank.</p>
+<label for="current_medications">Current medicines / supplements (synthetic)</label><textarea id="current_medications" name="current_medications" maxlength="1200" placeholder="Demo-only context">%s</textarea><p class="hint">Record “none reported” or “unknown” when applicable; do not mark this factor reviewed while the field is blank.</p>
 <label for="relevant_medical_history">Relevant medical history (synthetic)</label><textarea id="relevant_medical_history" name="relevant_medical_history" maxlength="1200" placeholder="Demo-only context">%s</textarea>
 <label for="patient_risk_tags">Reviewer-configured caution tags (demo only)</label><input type="text" id="patient_risk_tags" name="patient_risk_tags" maxlength="800" value="%s" placeholder="comma-separated reviewer tags">
 <label>Patient factors confirmed/reviewed in this synthetic case</label><div class="factor-grid">%s</div>
