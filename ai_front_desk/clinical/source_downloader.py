@@ -85,7 +85,7 @@ def _extension(url: str, content_type: str) -> str:
     lower_type = content_type.split(";", 1)[0].strip().lower()
     if lower_url.endswith(".tar.gz") or "application/gzip" == lower_type or "application/x-gzip" == lower_type:
         return ".tar.gz"
-    if lower_type == "application/pdf" or "/pdf/" in lower_url or lower_url.endswith(".pdf"):
+    if lower_type == "application/pdf" or "/pdf/" in lower_url or "-pdf/" in lower_url or lower_url.endswith(".pdf"):
         return ".pdf"
     ext = mimetypes.guess_extension(lower_type) if lower_type else None
     if ext in {".pdf", ".txt", ".gz", ".zip", ".epub"}:
