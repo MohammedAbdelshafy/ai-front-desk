@@ -489,6 +489,33 @@
         "Book is CC BY 4.0 except where otherwise noted. Confirm the exact chapter and third-party rights before extracting or adapting content.",
         "Use only for education and medication-safety concepts; never as the sole basis for a patient-specific drug decision."
       ]
+    },
+    {
+      "id": "uic-essentials-of-pharmacology",
+      "name": "UIC / Medicine LibreTexts — Essentials of Pharmacology",
+      "publisher": "University of Illinois Chicago / Medicine LibreTexts",
+      "jurisdictions": [
+        "global_education"
+      ],
+      "roles": [
+        "foundational_pharmacology_education",
+        "pharmacokinetics",
+        "pharmacodynamics",
+        "pharmacogenomics",
+        "unintended_medication_outcomes"
+      ],
+      "url": "https://med.libretexts.org/Courses/University_of_Illinois_Chicago/Essentials_of_Pharmacology",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "content_rights": "CC BY 4.0 metadata at book level; check chapter-level and third-party notices",
+      "access_mode": "official_LibreTexts_reader_with_Download_Full_Book_PDF_option",
+      "clinical_status": "education_only_not_a_drug_reference",
+      "update_policy": "manual_book_and_chapter_rights_review",
+      "use_limits": [
+        "Foundational pharmacology teaching text, not dental prescribing guidance or a current drug monograph.",
+        "Official reader offers a Download Full Book (PDF) option. Review chapter-level and third-party content notices before extracting or reusing content.",
+        "Do not turn textbook passages into patient-specific recommendations."
+      ]
     }
   ]
 }
