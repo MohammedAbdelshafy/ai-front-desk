@@ -480,7 +480,7 @@ def _render_information_centers(jurisdiction: str = "US") -> str:
         if not isinstance(source, dict):
             continue
         jurisdictions = source.get("jurisdictions", [])
-        if jurisdiction not in jurisdictions and "global_evidence_discovery" not in jurisdictions:
+        if jurisdiction not in jurisdictions and not ({"global_evidence_discovery", "global_education"} & set(jurisdictions)):
             continue
         url = str(source.get("url", ""))
         if not url.startswith(("https://", "http://")):
@@ -500,7 +500,7 @@ def _render_information_centers(jurisdiction: str = "US") -> str:
         status = str(source.get("clinical_status", source.get("integration_status", "reference only")))
         out.append(
             "<article class='source-link'><a href='%s' target='_blank' rel='noopener noreferrer'>%s</a>"
-            "<p>%s</p><p>Role: %s</p><p class='source-status'>Status: %s</p></article>"
+            "<p>%s</p><p>Role: %s</p><p class='source-status'>Status: %s</p>"
             % (
                 esc(source.get("url", "")),
                 esc(source.get("name", source.get("title", "Reference source"))),
@@ -509,6 +509,33 @@ def _render_information_centers(jurisdiction: str = "US") -> str:
                 esc(status.replace("_", " ")),
             )
         )
+        download_url = str(source.get("download_url", ""))
+        if download_url.startswith(("https://", "http://")):
+            download_status = str(source.get("download_status", source.get("content_rights", "check source terms")))
+            out.append(
+                "<p class='source-download'><a href='%s' target='_blank' rel='noopener noreferrer'>Open / download source file</a>"
+                "<span class='muted'> · Reuse: %s</span></p>"
+                % (esc(download_url), esc(download_status.replace("_", " ")))
+            )
+        for download in source.get("additional_downloads", []):
+            if not isinstance(download, dict):
+                continue
+            extra_url = str(download.get("url", ""))
+            if not extra_url.startswith(("https://", "http://")):
+                continue
+            out.append(
+                "<p class='source-download'><a href='%s' target='_blank' rel='noopener noreferrer'>Open / download: %s</a>"
+                "<span class='muted'> · %s</span></p>"
+                % (
+                    esc(extra_url),
+                    esc(download.get("name", "Additional source file")),
+                    esc(str(download.get("reuse_status", "review terms first")).replace("_", " ")),
+                )
+            )
+        content_rights = str(source.get("content_rights", ""))
+        if content_rights:
+            out.append("<p class='muted'>Reuse rights: %s</p>" % esc(content_rights.replace("_", " ")))
+        out.append("</article>")
     out.append(
         "<p class='muted'>Source pages may change and may carry reuse restrictions. Mia does not scrape these pages or turn them into recommendations automatically. Only current, jurisdiction-matched, rights-cleared, clinician-approved evidence cards can support clinical retrieval. The DDI provider is not currently integrated.</p></section>"
     )
@@ -581,7 +608,7 @@ button{margin-top:18px;background:var(--teal);color:#fff;border:0;padding:12px 1
 .results{margin-top:18px}.result-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.pill{font-size:11px;font-weight:750;border-radius:30px;background:#e5f4ef;color:#13644e;padding:7px 10px}.context-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.context-grid article{padding:12px;border:1px solid var(--line);background:#fbfdfd;border-radius:12px;overflow-wrap:anywhere}.context-grid p{margin:0;white-space:pre-wrap;font-size:13px}
 .flags{margin:20px 0}.flag{border-left:3px solid #bd7d00;background:var(--amber);padding:10px 12px;margin:8px 0;border-radius:6px}.flag p{margin:4px 0 0;font-size:13px}
 .quality-checklist{margin:20px 0}.quality-grid{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.quality-item{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fbfdfd;min-width:0}.quality-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.quality-item strong{font-size:12px}.quality-item p{font-size:12px;color:var(--muted);margin:6px 0 0}.quality-state{font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;padding:4px 6px;border-radius:20px;background:#e1f4eb;color:#146049;white-space:nowrap}.quality-state.attention{background:#fff0c9;color:#815100}
-.draft-evidence{margin-top:18px;background:#fff;border:2px solid #ddc27b;border-radius:14px;padding:16px}.draft-banner{padding:10px 12px;border-radius:8px;background:#fff0c9;color:#744d00;font-size:12px;font-weight:800}.draft-evidence h2{font-size:20px;margin:10px 0}.draft-evidence h3{margin:14px 0 6px}.draft-evidence li{font-size:13px;margin:5px 0}.draft-card{border-top:1px solid #e6dfc9;padding:12px 0}.draft-card a{color:#086e7b;font-weight:700;overflow-wrap:anywhere}.draft-evidence p{font-size:13px}.source-directory{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 6px 18px rgba(13,53,61,.04)}.source-directory h2{font-size:18px;margin:5px 0 8px}.source-directory .source-link{padding:10px 0;border-top:1px solid #e2ecee}.source-directory .source-link a{font-size:13px;color:#086e7b;font-weight:750;overflow-wrap:anywhere}.source-directory .source-link p{font-size:11px;color:var(--muted);margin:4px 0 0}.source-directory .source-status{font-weight:750;text-transform:capitalize}
+.draft-evidence{margin-top:18px;background:#fff;border:2px solid #ddc27b;border-radius:14px;padding:16px}.draft-banner{padding:10px 12px;border-radius:8px;background:#fff0c9;color:#744d00;font-size:12px;font-weight:800}.draft-evidence h2{font-size:20px;margin:10px 0}.draft-evidence h3{margin:14px 0 6px}.draft-evidence li{font-size:13px;margin:5px 0}.draft-card{border-top:1px solid #e6dfc9;padding:12px 0}.draft-card a{color:#086e7b;font-weight:700;overflow-wrap:anywhere}.draft-evidence p{font-size:13px}.source-directory{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 6px 18px rgba(13,53,61,.04)}.source-directory h2{font-size:18px;margin:5px 0 8px}.source-directory .source-link{padding:10px 0;border-top:1px solid #e2ecee}.source-directory .source-link a{font-size:13px;color:#086e7b;font-weight:750;overflow-wrap:anywhere}.source-directory .source-link p{font-size:11px;color:var(--muted);margin:4px 0 0}.source-directory .source-link .source-download a{font-size:12px;font-weight:800}.source-directory .source-status{font-weight:750;text-transform:capitalize}
 .empty-evidence{background:#f2f7f8;border:1px dashed #aac4c9;border-radius:12px;padding:15px;margin-top:14px}.empty-evidence h3{color:#7a5200}.empty-evidence p{font-size:13px;margin-bottom:0}
 .notice{background:#e8f5f2;border:1px solid #c5e7dd;padding:12px;border-radius:10px;margin-top:12px;font-size:13px}.evidence-card{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;overflow-wrap:anywhere}.evidence-card p{font-size:13px;margin:8px 0}.evidence-card a{color:#086e7b;font-weight:700}
 .disclaimer{border-top:1px solid var(--line);padding-top:12px;color:var(--muted);font-size:12px;margin-top:18px}
