@@ -1944,19 +1944,24 @@ function MiaApp() {
                   <span>Owner: {doc.owner}</span>
                 </div>
                 <span className={statusClass(doc.state)}>{doc.state}</span>
-                <button
+                <a
                   className="icon-btn"
-                  aria-label={'Open ' + doc.title}
-                  onClick={() =>
-                    showToast(
-                      'Draft template for ' +
-                        doc.title +
-                        ' is planned in the repository governance pack.'
-                    )
-                  }
+                  href={'https://github.com/MohammedAbdelshafy/ai-front-desk/blob/feat/mia-clinical-os/docs/clinical-governance/' + ({
+                    'GOV-01': '01-intended-use-and-data-classes.md',
+                    'GOV-02': '02-data-inventory-and-data-flow.md',
+                    'GOV-03': '03-privacy-notice-and-consent-template.md',
+                    'GOV-04': '05-security-threat-model-and-incident-response.md',
+                    'GOV-05': '06-clinical-risk-and-validation-plan.md',
+                    'GOV-06': '07-source-rights-and-evidence-card-template.md',
+                    'GOV-07': '08-regulatory-classification-and-launch-gates.md',
+                    'GOV-08': '04-vendor-and-cross-border-review.md'
+                  } as Record<string, string>)[doc.id]}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={'Open draft document ' + doc.title}
                 >
                   <ArrowUpRight size={15} />
-                </button>
+                </a>
               </div>
             ))}
           </div>
