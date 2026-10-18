@@ -2,7 +2,9 @@
   "schema_version": "1.0",
   "purpose": "Small source-cited review pack for testing the Dr. Mia workbench with synthetic cases. Every card is draft-only and requires review by a qualified dentist before any clinical use.",
   "status": "draft_for_clinician_review",
-  "jurisdictions": ["US"],
+  "jurisdictions": [
+    "US"
+  ],
   "policy": {
     "keyword_matching_is_not_diagnosis": true,
     "not_a_prescription": true,
@@ -21,14 +23,29 @@
         "jurisdiction": "US",
         "population": "Adolescents, adults, and older adults within the ADA adult/adolescent guideline scope",
         "setting": "Temporary management of toothache when definitive care is not immediately available, or acute pain after tooth extraction",
-        "out_of_scope": ["children under 12", "chronic pain", "undifferentiated medical emergencies", "any patient context the source guideline does not cover"]
+        "out_of_scope": [
+          "children under 12",
+          "chronic pain",
+          "undifferentiated medical emergencies",
+          "any patient context the source guideline does not cover"
+        ]
       },
-      "match_terms": ["toothache", "dental pain", "acute dental pain", "tooth extraction", "postoperative dental pain", "pulpitis"],
+      "match_terms": [
+        "toothache",
+        "dental pain",
+        "acute dental pain",
+        "tooth extraction",
+        "postoperative dental pain",
+        "pulpitis"
+      ],
       "evidence_summary": "The ADA's 2024 adult/adolescent acute dental pain guidance identifies nonopioid medicines as first-line for temporary toothache and acute post-extraction pain. ADA's oral-analgesics overview says NSAIDs, alone or with acetaminophen, are generally favored over opioid analgesics for acute dental pain. This is a source summary for clinician review, not a patient-specific selection.",
       "candidate_options_for_review": [
         {
           "name": "NSAID option",
-          "examples_named_in_ADA_overview": ["ibuprofen", "naproxen sodium"],
+          "examples_named_in_ADA_overview": [
+            "ibuprofen",
+            "naproxen sodium"
+          ],
           "use_status": "candidate_class_only",
           "note": "Dentist must check patient-specific contraindications, product/strength, route, current local label, and complete medication context."
         },
@@ -66,7 +83,9 @@
         }
       ],
       "approval_status": "draft_for_dentist_review",
-      "last_verified": "2026-10-18"
+      "last_verified": "2026-10-18",
+      "content_rights_status": "pending_rights_and_current_version_review",
+      "commercial_reuse_permitted": false
     },
     {
       "id": "draft-us-pulpal-periapical-antibiotic-stewardship",
@@ -76,9 +95,26 @@
         "jurisdiction": "US",
         "population": "CDC/ADA summary describes immunocompetent adults without additional comorbidities; individual guideline scope must be verified",
         "setting": "Specific pulpal/periapical dental pain and localized swelling scenarios described in the referenced ADA guideline summary",
-        "out_of_scope": ["children", "immunocompromised patients", "prophylaxis", "infections outside the cited pulpal/periapical scope", "unassessed systemic illness", "any scenario not covered by the cited source"]
+        "out_of_scope": [
+          "children",
+          "immunocompromised patients",
+          "prophylaxis",
+          "infections outside the cited pulpal/periapical scope",
+          "unassessed systemic illness",
+          "any scenario not covered by the cited source"
+        ]
       },
-      "match_terms": ["dental swelling", "tooth swelling", "dental abscess", "apical abscess", "pulpal pain", "periapical pain", "antibiotic for tooth", "dental infection", "facial swelling"],
+      "match_terms": [
+        "dental swelling",
+        "tooth swelling",
+        "dental abscess",
+        "apical abscess",
+        "pulpal pain",
+        "periapical pain",
+        "antibiotic for tooth",
+        "dental infection",
+        "facial swelling"
+      ],
       "evidence_summary": "The CDC's dental pain/swelling materials, which summarize ADA guidance, emphasize definitive conservative dental treatment and state antibiotics are not needed for most urgent pulpal/periapical pain and swelling scenarios in immunocompetent adults without additional comorbidities when definitive dental treatment is available. Antibiotic use depends on the exact condition, systemic involvement, and whether definitive care is available. Verify the current ADA statement/guideline before approving this card.",
       "candidate_options_for_review": [
         {
@@ -144,7 +180,9 @@
         }
       ],
       "approval_status": "draft_for_dentist_review",
-      "last_verified": "2026-10-18"
+      "last_verified": "2026-10-18",
+      "content_rights_status": "pending_rights_and_current_version_review",
+      "commercial_reuse_permitted": false
     },
     {
       "id": "draft-us-penicillin-allergy-stop-and-review",
@@ -155,7 +193,13 @@
         "population": "Any patient with a reported or unclear relevant antibiotic allergy",
         "setting": "Pre-prescription medication review"
       },
-      "match_terms": ["penicillin allergy", "amoxicillin allergy", "allergic to penicillin", "allergic to amoxicillin", "antibiotic allergy"],
+      "match_terms": [
+        "penicillin allergy",
+        "amoxicillin allergy",
+        "allergic to penicillin",
+        "allergic to amoxicillin",
+        "antibiotic allergy"
+      ],
       "evidence_summary": "The CDC fact sheet directs clinicians with penicillin allergy to the ADA guideline rather than providing an alternative regimen. Mia should not infer an alternative antibiotic from the allergy label alone. Confirm the actual reaction and obtain current guideline/pharmacist input.",
       "candidate_options_for_review": [],
       "required_review_before_clinical_use": [
@@ -179,7 +223,10 @@
         }
       ],
       "approval_status": "draft_for_dentist_review",
-      "last_verified": "2026-10-18"
+      "last_verified": "2026-10-18",
+      "content_rights_status": "pending_rights_and_current_version_review",
+      "commercial_reuse_permitted": false
     }
-  ]
+  ],
+  "content_rights_status": "pending_review_per_source_not_approved_for_commercial_ingestion"
 }
