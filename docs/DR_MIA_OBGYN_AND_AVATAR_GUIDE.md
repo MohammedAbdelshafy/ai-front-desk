@@ -17,7 +17,41 @@ The OB-GYN screen also has an explicitly opt-in U.S. medicine-label lookup, usin
 
 The urgent-prompt list covers potential major bleeding, seizure/loss of consciousness, collapse/shock, severe breathlessness, chest pain, severe headache/visual changes, severe abdominal/pelvic pain, fever/systemic illness, reduced fetal movement and postpartum deterioration. Selecting a prompt only displays an escalation reminder. The form is not a triage algorithm and cannot rule out an emergency. The hospital's approved emergency protocol and senior clinical response take priority.
 
-### Clinical boundary
+### Suggested synthetic test cases for Dr. Shafy
+
+1. **Postpartum haemorrhage reference routing**
+   - Jurisdiction: `EG` or `GLOBAL`; care stage: `Postpartum care`.
+   - Clinical question: `postpartum haemorrhage guideline version and local emergency protocol`.
+   - Expected: WHO PPH guidance and relevant Egyptian/local sources are shown as references. The selected urgent-prompt checklist is not a substitute for hospital emergency activation or local haemorrhage protocol.
+
+2. **Hypertension / preeclampsia**
+   - Jurisdiction: `EG`; care stage: `Pregnancy / antenatal care`.
+   - Clinical question: `preeclampsia hypertensive disorders pregnancy local protocol`.
+   - Expected: Egypt/global links appear; the app does not silently substitute a US ACOG protocol for local hospital policy.
+
+3. **Medicine during pregnancy or lactation**
+   - Jurisdiction: `GLOBAL` or `US`; care stage: `Medication during pregnancy or lactation`.
+   - Clinical question: `breastfeeding medicine exposure` or `medication in pregnancy`.
+   - Expected: links to relevant LactMed, MotherToBaby and/or UKTIS/BUMPS references appear with their role and rights status. Topic matching is not a risk assessment and does not determine whether a medicine should be started, stopped or changed.
+
+4. **Egypt-specific regulatory reference**
+   - Jurisdiction: `EG`; care stage: `General OB-GYN question`.
+   - Clinical question: `Egyptian Drug Register pregnancy medication safety alert`.
+   - Expected: the EDA and MOHP reference links are available. The optional US label lookup must reject this jurisdiction rather than call openFDA.
+
+5. **Optional public label lookup**
+   - Jurisdiction: `US`; medicine field: `ibuprofen`; check the medicine-label lookup checkbox and optionally the label-sections checkbox.
+   - Expected: if the public API is reachable, Mia shows RxNorm/openFDA identity and label information. Only `ibuprofen` is sent externally. This does **not** check safety in pregnancy or lactation, patient-specific contraindications or interactions; the app must show its reference-only warning.
+
+6. **Emergency escalation prompt**
+   - Select a synthetic `heavy bleeding` or `seizure` prompt.
+   - Expected: a clear instruction to activate the hospital's local emergency response appears. Do not wait for Mia when an actual person may be deteriorating.
+
+7. **Avatar**
+   - Change to each preset, upload a test image, and confirm the avatar updates throughout the current app. Export the profile and import it in the other local app on its separate port, then reset to default.
+   - Expected: the photo remains in browser storage and no network request sends it to the Mia server or an AI endpoint. Do not use a real patient's photo.
+
+## Clinical boundary
 
 This is a **reference-routing prototype**, not a prescribing engine. It does not diagnose, recommend a medicine, calculate a dose, determine delivery management, or approve care. Reference relevance is based on topic text, not clinical applicability. Copyrighted, commercially restricted or uncertain source content remains link-only until reuse rights are confirmed. Any future OB-GYN medication pathway requires jurisdiction-specific source selection, exact product/version checks, qualified obstetric/gynaecology and pharmacy review, clinical governance approval and evaluation.
 
