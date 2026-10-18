@@ -289,3 +289,50 @@ def test_workbench_displays_draft_candidates_with_sources_and_gate():
     assert "pain-management-guideline" in page
     assert "no interaction or patient-safety check has been performed" in page
     assert "No verified evidence found" in page
+
+
+
+def test_workbench_exposes_opt_in_label_sections_lookup_and_source_warnings():
+    page = render_page()
+    assert 'name="lookup_label_sections"' in page
+    assert "indications, contraindications, warnings, interactions and dosage text" in page
+    assert "Label excerpts are not patient-specific guidance" in page
+
+
+def test_workbench_renders_label_sections_with_reference_only_warning():
+    form = {
+        "case_id": "synthetic-case-020",
+        "proposed_assessment": "synthetic assessment for label reference",
+        "jurisdiction": "US",
+    }
+    review, _case = run_review(form)
+    lookup = {
+        "lookup_term": "synthetic ingredient",
+        "status": "found",
+        "rxnorm": {"status": "not_found", "items": []},
+        "openfda_labels": {"status": "not_found", "items": []},
+        "patient_context_sent": False,
+        "label_reference": {
+            "status": "found",
+            "items": [{
+                "brand_name": "Synthetic brand",
+                "generic_name": "synthetic ingredient",
+                "route": "ORAL",
+                "dosage_form": "TABLET",
+                "effective_time": "20261001",
+                "full_label_link": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=abcdef12-1234-1234-1234-123456789abc",
+                "sections": [{
+                    "field": "contraindications",
+                    "heading": "Contraindications",
+                    "excerpt": "Synthetic source-reference warning.",
+                    "truncated": False,
+                }],
+            }],
+            "interaction_check_performed": False,
+        },
+    }
+    page = render_page(form, review, public_lookup=lookup)
+    assert "Source-linked label excerpts" in page
+    assert "Synthetic source-reference warning." in page
+    assert "not a drug-interaction check" in page
+    assert "Open full DailyMed label" in page
