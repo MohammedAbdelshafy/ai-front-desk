@@ -460,6 +460,35 @@
         "Use only for foundational education, preserve attribution and license notice, and do not treat textbook excerpts as patient-specific medication authority.",
         "The PDF is very large (about 145 MB); keep downloaded source files in a local rights-cleared folder and do not duplicate the entire book inside the application repository."
       ]
+    },
+    {
+      "id": "public-health-pharmacy-practice-casebook-2e",
+      "name": "Public Health in Pharmacy Practice: A Casebook, 2nd edition (2021)",
+      "publisher": "Milne Open Textbooks / SUNY Geneseo",
+      "jurisdictions": [
+        "global_education"
+      ],
+      "roles": [
+        "medication_safety_education",
+        "pharmacy_case_based_learning",
+        "patient_communication",
+        "public_health_pharmacy"
+      ],
+      "url": "https://milneopentextbooks.org/public-health-in-pharmacy-practice-a-casebook-2nd-edition/",
+      "download_url": "https://milneopentextbooks.org/download/public-health-in-pharmacy-pdf/",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "attribution": "Covvey, J. R., Arya, V., DiPietro Mager, N. A., Gilman, N. V., Herring, M., Lukas, S., Ochs, L., & Waddington, L. (2021). Public Health in Pharmacy Practice: A Casebook (2nd ed.). Milne Open Textbooks. CC BY 4.0.",
+      "commercial_reuse_permitted": true,
+      "content_rights": "CC BY 4.0 except where otherwise noted; chapter-level and third-party rights review required before reusing specific content",
+      "access_mode": "official_book_page_and_PDF_download",
+      "clinical_status": "education_only_not_a_drug_reference",
+      "update_policy": "manual_new_edition_and_chapter_rights_check",
+      "use_limits": [
+        "Public health pharmacy teaching casebook, not dental prescribing guidance or a current medicine monograph.",
+        "Book is CC BY 4.0 except where otherwise noted. Confirm the exact chapter and third-party rights before extracting or adapting content.",
+        "Use only for education and medication-safety concepts; never as the sole basis for a patient-specific drug decision."
+      ]
     }
   ]
 }
