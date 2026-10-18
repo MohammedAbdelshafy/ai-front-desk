@@ -1,0 +1,150 @@
+{
+  "status": "draft_template_registry",
+  "notice": "DRAFT — PROFESSIONAL REVIEW REQUIRED. Presence of this index does not establish legal compliance, clinical validation or production security.",
+  "documents": [
+    {
+      "id": "intended-use",
+      "title": "Intended-use & prohibited-use statement",
+      "ownerRole": "Product owner",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "data-inventory",
+      "title": "Data inventory & data-flow map",
+      "ownerRole": "Privacy lead",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "privacy-notice",
+      "title": "Patient and staff privacy-notice templates",
+      "ownerRole": "Privacy counsel",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "consent-records",
+      "title": "Consent, authorization & notice records",
+      "ownerRole": "Privacy counsel",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "dpia",
+      "title": "Data-protection impact and cross-border transfer assessment",
+      "ownerRole": "Privacy counsel",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "vendors",
+      "title": "Hosting, AI-provider and subprocessor assessment",
+      "ownerRole": "Security and privacy leads",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "retention",
+      "title": "Retention, deletion and data-rights procedure",
+      "ownerRole": "Privacy lead",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "threat-model",
+      "title": "Security threat model and control checklist",
+      "ownerRole": "Security lead",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "access-audit",
+      "title": "Access-control and audit-log policy",
+      "ownerRole": "Security lead",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "incident-response",
+      "title": "Incident and breach response plan",
+      "ownerRole": "Security lead",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "continuity",
+      "title": "Backup, disaster recovery and continuity plan",
+      "ownerRole": "Operations owner",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "clinical-risk",
+      "title": "Clinical hazard log and risk-management file",
+      "ownerRole": "Clinical safety officer",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "clinical-validation",
+      "title": "Clinical validation and human-factors plan",
+      "ownerRole": "OB-GYN lead and pharmacist",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "source-rights",
+      "title": "Evidence source, license and attribution register",
+      "ownerRole": "Knowledge steward",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "evidence-card",
+      "title": "Clinical evidence-card and approval template",
+      "ownerRole": "OB-GYN lead and pharmacist",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "regulatory-classification",
+      "title": "Jurisdiction-specific regulatory classification memo",
+      "ownerRole": "Regulatory counsel",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "staff-training",
+      "title": "Staff training and acceptable-use policy",
+      "ownerRole": "Clinical governance lead",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    },
+    {
+      "id": "release-gates",
+      "title": "Production release and rollback gates",
+      "ownerRole": "Product, security and clinical leads",
+      "status": "review_required",
+      "jurisdiction": "Egypt-first; confirm exact applicability",
+      "blocksLiveUse": true
+    }
+  ]
+}
