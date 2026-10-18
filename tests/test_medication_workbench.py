@@ -337,3 +337,13 @@ def test_workbench_renders_label_sections_with_reference_only_warning():
     assert "Synthetic source-reference warning." in page
     assert "not a drug-interaction check" in page
     assert "Open full DailyMed label" in page
+
+
+
+def test_reference_center_shows_official_downloads_and_reuse_limits():
+    page = render_page()
+    assert "Clinical information centers" in page
+    assert "Open / download source file" in page
+    assert "dental-fact-sheet-508.pdf" in page
+    assert "Nursing Pharmacology, 2nd edition (2023)" in page
+    assert "noncommercial license requires separate permission for commercial use" in page
