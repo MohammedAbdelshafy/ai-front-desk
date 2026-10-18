@@ -39,7 +39,7 @@ This replaces the earlier front-desk-first commercial recommendation recorded in
 
 ## Evidence and source readiness today
 
-The experimental draft cards are loaded separately from the approved clinical registry. They are shown only as a source-cited review preview after keyword matching; they have not been approved by a qualified dentist, their source reuse rights still require review, and matching text is not diagnosis or medicine selection. The live approved registry still contains zero approved cards. The current workbench only supports the US jurisdiction. Direct source links are available in the UI; the full Open RN textbook and source PDFs are not bundled into the repository. Optional openFDA label excerpts are non-persistent reference text, not verified product matching or a drug-interaction check.
+The experimental draft cards are loaded separately from the approved clinical registry. They are shown only as a source-cited review preview after keyword matching; they have not been approved by a qualified dentist, their source reuse rights still require review, and matching text is not diagnosis or medicine selection. The live approved registry still contains zero approved cards. The workbench UI supports US and Egypt as source-reference jurisdictions. The three draft clinical pathways are US-only; selecting Egypt shows EDA/WHO references but deliberately returns no medication candidate cards. Direct source links/downloads are available in the UI; the full Open RN textbook and other source PDFs are not bundled into the repository. Optional openFDA label excerpts are non-persistent reference text, not verified product matching or a drug-interaction check.
 
 ## Explicit non-goals for the current prototype
 
