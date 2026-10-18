@@ -1,0 +1,92 @@
+[
+  {
+    "name": "Doctor can review a synthetic patient and ask Mia for references",
+    "sanity": true,
+    "viewport": "desktop",
+    "covers": [
+      "OB-GYN-only navigation",
+      "synthetic patient search/profile",
+      "appointment detail",
+      "Mia reference chat",
+      "source citations",
+      "no approved medication pathway notice"
+    ],
+    "description": "Exercises the primary doctor journey from dashboard through a synthetic patient appointment to source-cited chat, without prescribing.",
+    "steps": [
+      "Open the dashboard and verify the 'SYNTHETIC DATA ONLY' badge.",
+      "Open Appointments and select 'Antenatal follow-up' for Demo Patient A.",
+      "Open Mia chat, ask 'Find guidance for postpartum haemorrhage', and submit.",
+      "Review the returned links and the safety note."
+    ],
+    "expected": "The appointment shows synthetic history; Mia displays relevant clickable source links and explicitly says no approved medication pathway is configured. No dental navigation appears."
+  },
+  {
+    "name": "Questionnaire supports conditional intake and local demo submission",
+    "viewport": "desktop",
+    "covers": [
+      "pre-visit questionnaire",
+      "conditional gestational-week field",
+      "required validation",
+      "synthetic-only submission",
+      "submission review state"
+    ],
+    "description": "Checks that questionnaire branching follows pregnancy status and submission is labelled as a browser demo.",
+    "steps": [
+      "Open Questionnaires.",
+      "Change 'Are you currently pregnant?' to 'No' and verify the gestational-week field is hidden.",
+      "Change the answer back to 'Yes', complete the required fields if needed, and click 'Mark demo intake submitted'."
+    ],
+    "expected": "The gestational-week field appears only when 'Yes' is selected. Submission shows the browser-demo confirmation and clinician-verification warning; no real patient link is issued."
+  },
+  {
+    "name": "Unknown allergies are never represented as a negative finding",
+    "viewport": "mobile",
+    "covers": [
+      "patient allergy provenance",
+      "unknown-versus-negative safety distinction",
+      "responsive profile layout"
+    ],
+    "description": "Checks the mobile patient view preserves unknown allergy status and the safety warning.",
+    "steps": [
+      "At mobile viewport, open Patients and select Demo Patient B.",
+      "Inspect the Allergies & reactions card.",
+      "Open Mia chat and review the visible synthetic-only boundary."
+    ],
+    "expected": "The profile displays 'Unknown' and 'Must confirm', not 'No known allergies', and identifies the record as synthetic."
+  },
+  {
+    "name": "Jurisdiction filters do not present US-only guidance as Egypt authority",
+    "viewport": "desktop",
+    "covers": [
+      "jurisdiction-aware retrieval",
+      "Egypt-specific references",
+      "US-only source exclusion in Egypt mode",
+      "source directory provenance"
+    ],
+    "description": "Verifies a reference search in Egypt mode returns Egypt/global sources and excludes US-only ACOG guidance.",
+    "steps": [
+      "Open Mia chat and set jurisdiction to 'Egypt · EG'.",
+      "Ask 'preeclampsia hypertension pregnancy' and send.",
+      "Review the source results and source jurisdiction labels."
+    ],
+    "expected": "The results may show Egypt/global references but not ACOG's US-only practice bulletin. The interface labels the response source discovery and does not recommend a drug."
+  },
+  {
+    "name": "Arabic UI toggle, avatar customization, and governance warning are available",
+    "viewport": "desktop",
+    "covers": [
+      "English/Arabic interface toggle",
+      "RTL layout",
+      "local avatar presets",
+      "readiness/governance block",
+      "real-patient-use warning"
+    ],
+    "description": "Checks localization controls, client-only avatar selection and the production readiness block.",
+    "steps": [
+      "Click the Arabic language toggle and verify the main navigation changes to Arabic and layout direction switches.",
+      "Open the profile menu and select the Clinician avatar preset.",
+      "Open Safety & readiness."
+    ],
+    "expected": "Arabic navigation and RTL layout appear; the local avatar changes without uploading a portrait; readiness states live clinical use is blocked and warns not to enter real patient data."
+  }
+]
