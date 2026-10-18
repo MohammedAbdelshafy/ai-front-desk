@@ -322,10 +322,10 @@ textarea{min-height:112px;resize:vertical}button{background:var(--teal);color:#f
 %s
 <p class="disclaimer">Source matching is based on text/topic overlap, not evidence grading. Many specialist guidelines are copyrighted and/or access-restricted. Public access is not permission to copy. Every derived protocol would require local jurisdiction review, source-version checks, rights review and approval by an appropriately qualified clinical governance group.</p>
 </main></body></html>""" % (
+        render_avatar_customizer("Personalize your OB-GYN Mia"),
         esc(case_id), jurisdiction_options, stage_options,
         esc(_one(form, "gestational_week", "")), esc(_one(form, "postpartum_day", "")),
-        esc(_one(form, "medication_context", "")), esc(query), urgent_checks, result_html,
-        render_avatar_customizer("Personalize your OB-GYN Mia")
+        esc(_one(form, "medication_context", "")), esc(query), urgent_checks, result_html
     )
 
 
