@@ -140,9 +140,9 @@ def test_openfda_label_sections_returns_bounded_source_excerpts_only():
     def fake_fetch(url, timeout=4):
         parsed = urlparse(url)
         params = parse_qs(parsed.query)
-        assert "fields" in params
-        assert "contraindications" in params["fields"][0]
-        assert params["limit"] == ["5"]
+        assert "search" in params
+        assert "fields" not in params
+        assert params["limit"] == [str(drugdata.LABEL_REFERENCE_QUERY_LIMIT)]
         return {
             "results": [{
                 "set_id": "abcdef12-1234-1234-1234-123456789abc",
