@@ -191,6 +191,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Download only approved, CC BY 4.0 clinical education sources")
     parser.add_argument("--list", action="store_true", help="List source files eligible for automated download")
     parser.add_argument("--source-id", help="Source ID to download")
+    parser.add_argument("--all-eligible", action="store_true", help="Download every catalog entry explicitly approved for commercial educational reuse")
     parser.add_argument("--directory", default=str(DEFAULT_DOWNLOAD_DIR), help="Destination folder")
     parser.add_argument("--confirm-rights-review", action="store_true", help="Confirm you reviewed source rights and attribution obligations")
     args = parser.parse_args()
@@ -198,8 +199,24 @@ def main() -> None:
     if args.list:
         print(json.dumps(list_downloadable_sources(), ensure_ascii=False, indent=2))
         return
+    if args.all_eligible:
+        if not args.confirm_rights_review:
+            parser.error("--all-eligible requires --confirm-rights-review after checking license and attribution terms")
+        try:
+            results = [
+                download_source(
+                    source["id"],
+                    directory=args.directory,
+                    confirm_rights_review=True,
+                )
+                for source in list_downloadable_sources()
+            ]
+        except (PermissionError, ValueError, SourceDownloadError) as exc:
+            parser.error(str(exc))
+        print(json.dumps(results, ensure_ascii=False, indent=2))
+        return
     if not args.source_id:
-        parser.error("provide --list or --source-id")
+        parser.error("provide --list, --source-id, or --all-eligible")
     try:
         result = download_source(
             args.source_id,
