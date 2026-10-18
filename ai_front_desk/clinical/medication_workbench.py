@@ -390,7 +390,7 @@ def _render_draft_evidence(assessment: str, symptoms: str = "", jurisdiction: st
             "<p>The review-only evidence pack could not be loaded. No candidate option is shown.</p></section>"
         )
     out = [
-        "<section class='draft-evidence'><div class='draft-banner'>PROTOTYPE DRAFT · NOT APPROVED FOR CLINICAL USE · KEYWORD MATCH ONLY</div>"
+        "<section class='draft-evidence'><div class='draft-banner'>PROTOTYPE DRAFT · NOT APPROVED FOR CLINICAL USE · RIGHTS REVIEW PENDING · KEYWORD MATCH ONLY</div>"
         "<h2>Source-cited candidates for dentist review</h2>"
         "<p class='muted'>Mia found source cards using phrase matching only. That is not a diagnosis or proof that an option fits this case. Use synthetic scenarios only. No dosage is generated and no interaction or patient-safety check has been performed.</p>"
     ]
