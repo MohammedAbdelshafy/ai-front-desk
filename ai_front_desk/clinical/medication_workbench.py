@@ -22,6 +22,7 @@ from .public_drug_data import lookup_public_drug_metadata
 from .pharmacology_education import search_pharmacology_education
 from .knowledge_library import search_knowledge_library
 from .clinical_evidence_drafts import match_draft_cards
+from .avatar_customizer import AVATAR_ASSETS, render_avatar_customizer
 
 BASE = Path(__file__).resolve().parent
 REGISTRY_PATH = BASE / "medication_evidence_registry.json"
@@ -630,10 +631,11 @@ footer{margin:25px 0 10px;color:var(--muted);font-size:12px}
 </style></head><body>
 <div class="banner">LOCAL DEMO ONLY · USE SYNTHETIC CASES · DO NOT ENTER REAL PATIENT IDENTIFIERS OR HEALTH INFORMATION</div>
 <main class="wrap">
-<header><img class="avatar" src="/assets/mia-stand-hi.webp" alt="Mia, AI clinical assistant"><div>
+<header><div class="mia-avatar-shell" data-mia-avatar-shell><img class="avatar" src="/assets/mia-stand-hi.webp" alt="Mia, AI clinical assistant" data-mia-avatar-image data-default-src="/assets/mia-stand-hi.webp"><span data-mia-avatar-emoji aria-hidden="true" hidden>🤖</span></div><div>
 <div class="eyebrow">Dentistry · evidence workbench prototype</div><h1>Dr. Mia</h1>
 <p class="sub">Clinical quality &amp; prescribing copilot. Evidence retrieval and review prompts for a clinician, not an automated prescriber.</p>
 </div></header>
+%s
 <div class="layout"><section class="panel"><div class="eyebrow">Clinician workspace</div><h2 style="margin-top:5px">Review a synthetic case</h2>
 <p class="hint">The current evidence registry is intentionally unpopulated until sources receive rights review and qualified clinical approval.</p>
 %s
@@ -676,6 +678,7 @@ It does not diagnose, prescribe, calculate doses, or perform comprehensive drug-
 <footer>Dr. Mia · Local prototype · No case persistence · External calls only when explicitly requested · Not for real patient use</footer>
 </main></body></html>
 """ % (
+        render_avatar_customizer(),
         error_html,
         value("case_id", "synthetic-case-001"),
         value("proposed_assessment"),
@@ -709,7 +712,7 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header(
             "Content-Security-Policy",
-            "default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; "
+            "default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; "
             "form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
         )
         self.end_headers()
@@ -718,6 +721,22 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         if self.path == "/":
             self._send_html(200, render_page())
+            return
+        asset_name = self.path.rsplit("/", 1)[-1]
+        if self.path.startswith("/assets/") and asset_name in AVATAR_ASSETS:
+            content_type, filename = AVATAR_ASSETS[asset_name]
+            try:
+                data = (BASE / "static" / filename).read_bytes()
+            except OSError:
+                self.send_error(404, "Avatar customization asset not found")
+                return
+            self.send_response(200)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.end_headers()
+            self.wfile.write(data)
             return
         if self.path == "/assets/mia-stand-hi.webp":
             asset = BASE / "static" / "mia-stand-hi.webp"
