@@ -487,7 +487,7 @@ def _render_information_centers(jurisdiction: str = "US") -> str:
             continue
         matched.append(source)
     out = [
-        "<section class='source-directory'><div class='eyebrow'>Official reference links</div>"
+        "<section class='source-directory'><div class='eyebrow'>Clinical information centers · official reference links</div>"
         "<h2>%s information centers</h2>"
         "<p class='muted'>Open primary sources for clinician review. These links are not approved evidence cards and do not generate or validate a medication recommendation.</p>"
         % esc("US" if jurisdiction == "US" else jurisdiction)
