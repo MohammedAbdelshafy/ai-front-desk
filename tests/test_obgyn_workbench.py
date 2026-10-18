@@ -26,6 +26,7 @@ def test_obgyn_reference_catalog_has_unique_https_sources_and_versions():
     assert "uktis-bumps" in ids
     assert "eda-drug-register" in ids
     assert "eda-pharmaceutical-information-center" in ids
+    assert "mohp-eg-safe-maternity-services" in ids
 
 
 def test_synthetic_case_references_reject_patient_like_identifiers():
