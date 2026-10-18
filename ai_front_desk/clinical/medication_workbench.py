@@ -197,6 +197,53 @@ def _render_public_lookup(lookup: dict[str, Any] | None) -> str:
                     esc(item.get("dailymed_url", "")),
                 )
             )
+    label_reference = lookup.get("label_reference")
+    if isinstance(label_reference, dict):
+        out.append(
+            "<section class='label-reference'><div class='eyebrow'>Source-linked label excerpts</div>"
+            "<h3>Official label sections for clinician reference</h3>"
+            "<p class='muted'>Optional excerpts from FDA-submitted labels. These are not patient-specific advice; product identity and current local label must be confirmed.</p>"
+        )
+        reference_items = label_reference.get("items", [])
+        if label_reference.get("status") == "unavailable":
+            out.append("<p>openFDA label-section lookup is unavailable. No label section was returned.</p>")
+        elif not reference_items:
+            out.append("<p>No key label sections were returned for this query. Open DailyMed to identify the exact product and label version manually.</p>")
+        else:
+            for reference_item in reference_items:
+                out.append(
+                    "<article class='evidence-card'><h3>%s</h3>"
+                    "<p><strong>Ingredient:</strong> %s · <strong>Route:</strong> %s · "
+                    "<strong>Form:</strong> %s · <strong>Label effective time:</strong> %s</p>"
+                    "<p><a href='%s' target='_blank' rel='noopener noreferrer'>Open full DailyMed label</a></p>"
+                    % (
+                        esc(reference_item.get("brand_name") or reference_item.get("generic_name") or "Label record"),
+                        esc(reference_item.get("generic_name", "")),
+                        esc(reference_item.get("route", "")),
+                        esc(reference_item.get("dosage_form", "")),
+                        esc(reference_item.get("effective_time", "")),
+                        esc(reference_item.get("full_label_link", reference_item.get("dailymed_url", ""))),
+                    )
+                )
+                section_items = reference_item.get("sections", [])
+                if not section_items:
+                    out.append("<p>No selected label sections were present in this record.</p>")
+                for section in section_items:
+                    note = " Excerpt truncated; open the source for the full text." if section.get("truncated") else ""
+                    out.append(
+                        "<details><summary><strong>%s</strong></summary><p class='label-excerpt'>%s</p><p class='muted'>%s</p></details>"
+                        % (
+                            esc(section.get("heading", section.get("field", "Label section"))),
+                            esc(section.get("excerpt", "")),
+                            esc("Source field: " + str(section.get("field", "")) + "." + note),
+                        )
+                    )
+                out.append("</article>")
+        out.append(
+            "<p class='muted'>These excerpts may be incomplete or may refer to a product different from the one available locally. "
+            "openFDA explicitly warns against relying on the dataset alone for medical-care decisions. "
+            "This is not a drug-interaction check, allergy assessment, dose calculation, or safety conclusion.</p></section>"
+        )
     out.append(
         "<p class='muted'>This lookup sent only the standalone medicine name to RxNorm/openFDA. "
         "The clinical case, symptoms, allergies, current medicines, medical history, and patient identifiers were not sent.</p>"
@@ -529,7 +576,7 @@ textarea{min-height:74px;resize:vertical}.hint,.muted{font-size:12px;color:var(-
 .factor-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.check{display:flex;align-items:flex-start;gap:7px;margin:0;padding:9px;background:var(--wash);border:1px solid #e0ebec;border-radius:9px;font-weight:500;font-size:12px}.check input{margin-top:4px}
 button{margin-top:18px;background:var(--teal);color:#fff;border:0;padding:12px 17px;border-radius:10px;font-weight:750;font-size:14px;cursor:pointer}button:hover{background:#056c76}
 .note{background:#eff8f7;border:1px solid #d0e9e5;padding:12px 14px;border-radius:12px;font-size:13px}.note strong{display:block;margin-bottom:4px}.error{margin:12px 0;padding:12px;background:#ffe8e8;border:1px solid #f4bcbc;border-radius:10px;color:#8c2020}
-.public-query-panel{margin-top:22px;border:1px dashed #9cc7cc;padding:14px;border-radius:12px;background:#f8fcfc}.public-query-panel .check{margin-top:9px}.public-lookup{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}.public-lookup h2{font-size:20px;margin:5px 0 12px}.public-lookup h3{margin-top:18px}.public-lookup li{font-size:13px;margin:8px 0;overflow-wrap:anywhere}.public-lookup a{color:#086e7b;font-weight:700}
+.public-query-panel{margin-top:22px;border:1px dashed #9cc7cc;padding:14px;border-radius:12px;background:#f8fcfc}.public-query-panel .check{margin-top:9px}.public-lookup{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}.public-lookup h2{font-size:20px;margin:5px 0 12px}.public-lookup h3{margin-top:18px}.public-lookup li{font-size:13px;margin:8px 0;overflow-wrap:anywhere}.public-lookup a{color:#086e7b;font-weight:700}.label-reference{margin-top:16px;border:1px dashed #b7cfd3;border-radius:12px;background:#f8fcfc;padding:12px}.label-reference h3{margin-top:7px}.label-reference details{padding:8px 0;border-top:1px solid #e1ebed}.label-excerpt{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;max-height:240px;overflow:auto}
 .education-query-panel{margin-top:16px;border:1px solid #c6d6f4;padding:14px;border-radius:12px;background:#f4f7ff}.education-query-panel .check{margin-top:9px}.education-search{margin-top:18px;border:1px solid #d5e1f6;border-radius:14px;padding:16px;background:#fcfdff}.education-search h2{font-size:20px;margin:5px 0 12px}.education-card{border:1px solid #d5e1f6;border-radius:12px;background:#fff;padding:14px;margin:12px 0}.education-card h3{margin-top:0}.education-card li{font-size:13px;margin:5px 0}.education-sources{border-top:1px solid #e4eaf7;padding-top:10px;margin-top:10px}.education-sources p{font-size:12px;overflow-wrap:anywhere}.education-sources a{color:#3557b7;font-weight:700}
 .results{margin-top:18px}.result-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.pill{font-size:11px;font-weight:750;border-radius:30px;background:#e5f4ef;color:#13644e;padding:7px 10px}.context-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.context-grid article{padding:12px;border:1px solid var(--line);background:#fbfdfd;border-radius:12px;overflow-wrap:anywhere}.context-grid p{margin:0;white-space:pre-wrap;font-size:13px}
 .flags{margin:20px 0}.flag{border-left:3px solid #bd7d00;background:var(--amber);padding:10px 12px;margin:8px 0;border-radius:6px}.flag p{margin:4px 0 0;font-size:13px}
@@ -564,7 +611,8 @@ footer{margin:25px 0 10px;color:var(--muted);font-size:12px}
 <label for="drug_lookup_name">One medicine name or active ingredient</label>
 <input type="text" id="drug_lookup_name" name="drug_lookup_name" maxlength="120" value="%s" placeholder="e.g. a generic ingredient or brand name">
 <label class="check"><input type="checkbox" name="lookup_public_sources" value="1"%s> Look up medication identity and label metadata</label>
-<p class="hint">Only use this for one standalone medicine name. When checked, only that name is sent to NLM RxNorm and openFDA. Never place a patient name, symptoms, allergies, medical history, or case details here. This is not an interaction checker.</p>
+<label class="check"><input type="checkbox" name="lookup_label_sections" value="1"%s> Also retrieve key FDA label sections (indications, contraindications, warnings, interactions and dosage text) for clinician reference</label>
+<p class="hint">Only one standalone medicine name is sent to NLM RxNorm/openFDA. Label excerpts are not patient-specific guidance, may be incomplete or US-specific, and are not an interaction check. Never place a patient name, symptoms, allergies, medical history, or case details here.</p>
 </div>
 <div class="education-query-panel">
 <div class="eyebrow">Local searchable book library + learning shelf</div>
@@ -598,6 +646,7 @@ It does not diagnose, prescribe, calculate doses, or perform comprehensive drug-
         value("patient_risk_tags"),
         value("drug_lookup_name"),
         _checked(_one(form, "lookup_public_sources").lower() in {"1", "true", "on", "yes"}),
+        _checked(_one(form, "lookup_label_sections").lower() in {"1", "true", "on", "yes"}),
         value("learning_topic"),
         _checked(_one(form, "search_learning_library").lower() in {"1", "true", "on", "yes"}),
         factors,
@@ -670,14 +719,20 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
                 raise ValueError("One or more fields are too long.")
             review, case = run_review(form)
             public_lookup = None
-            lookup_requested = _one(form, "lookup_public_sources").lower() in {"1", "true", "on", "yes"}
+            lookup_requested = (
+                _one(form, "lookup_public_sources").lower() in {"1", "true", "on", "yes"}
+                or _one(form, "lookup_label_sections").lower() in {"1", "true", "on", "yes"}
+            )
+            include_label_sections = _one(form, "lookup_label_sections").lower() in {"1", "true", "on", "yes"}
             drug_lookup_name = _one(form, "drug_lookup_name")
             if lookup_requested:
                 if not drug_lookup_name:
                     raise ValueError("Enter one medicine name or active ingredient before enabling the public lookup.")
                 # Only a single medicine name is sent. Clinical case details are
-                # deliberately not passed to either external source.
-                public_lookup = lookup_public_drug_metadata(drug_lookup_name)
+                # deliberately not passed to the external sources.
+                public_lookup = lookup_public_drug_metadata(
+                    drug_lookup_name, include_label_sections=include_label_sections
+                )
             education_result = None
             knowledge_result = None
             education_requested = _one(form, "search_learning_library").lower() in {"1", "true", "on", "yes"}
