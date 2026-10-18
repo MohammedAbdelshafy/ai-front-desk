@@ -11,6 +11,10 @@ Use three distinct knowledge layers:
 The source catalogs live in:
 - `ai_front_desk/clinical/pharmacology_learning_library.json`
 - `ai_front_desk/clinical/drug_data_sources.json`
+- `ai_front_desk/clinical/clinical_information_centers.json`
+- `ai_front_desk/clinical/clinical_evidence_drafts.json` (draft-only, rights and clinician review pending)
+
+See [Clinical Knowledge Downloads](CLINICAL_KNOWLEDGE_DOWNLOADS.md) for official PDF/archive links, version checks, and reuse restrictions.
 
 They record reuse permissions separately from clinical approval. The current evidence registry still has **zero approved medication evidence cards**.
 
@@ -52,7 +56,7 @@ NLM says the RxNav Drug-Drug Interaction API was discontinued on January 2, 2024
 ### [openFDA drug-label API](https://open.fda.gov/apis/drug/label/)
 The openFDA terms state that, unless otherwise noted, their data/documentation is public domain/CC0 and may be used commercially. Some records include private-party material whose rights are limited, so exclude or separately review any record with a third-party-rights warning. FDA also says submitted labels may not match the label for currently distributed products or be identical to the approved label, and it does not guarantee data accuracy or availability.
 
-**Implementation choice:** initially display drug-label metadata and a link to the source record, not copied full label text. Label data is reference information, not an independent prescription decision.
+**Implementation choice:** the default optional lookup displays RxNorm identity and openFDA label metadata. A second opt-in checkbox now retrieves a small whitelist of label sections (indications, dosage, contraindications, boxed warning, warnings, interactions, populations, adverse reactions) truncated to 1,800 characters per section. This sends only the standalone medicine name, does not store the label text, preserves a DailyMed link, and is clearly marked for clinician reference only. It is not a patient-specific safety assessment or interaction checker; openFDA itself warns not to rely on the data alone for medical-care decisions.
 
 ### [DailyMed SPL web services](https://dailymed.nlm.nih.gov/dailymed/app-support-web-services.cfm)
 DailyMed exposes current Structured Product Labeling (SPL) information and label version history through a free public API. Before storing, redistributing, or adapting any label content, assess record-level rights and source notices. Use it as a label/version discovery and linking source first.
