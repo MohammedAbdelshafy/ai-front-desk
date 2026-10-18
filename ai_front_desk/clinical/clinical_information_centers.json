@@ -31,7 +31,9 @@
       "use_limits": [
         "Adult/adolescent 2024 resources and pediatric resources have different age scopes; select the matching population.",
         "Do not transform into patient-specific advice until exact recommendation, source version, reuse rights, and qualified dental review are documented."
-      ]
+      ],
+      "download_url": "https://www.ada.org/-/media/project/ada-organization/ada/ada-org/files/resources/research/2024-pain-guidelines/14205d_chairside_guide_adult_pulpitis_final.pdf?hash=E43649D6F665F117A7B82B39534689E0&rev=6a794a6f646745488af4d1e8cfd160ec",
+      "download_status": "link_only_noncommercial_license_requires_separate_permission_for_commercial_use"
     },
     {
       "id": "ada-antibiotic-guideline-dental-pain-swelling",
@@ -100,6 +102,14 @@
         "Confirm the exact downloadable fact sheet or content artifact and its version before creating a card.",
         "Check embedded third-party material and intended audience.",
         "Do not present this resource as a universal antibiotic-selection database."
+      ],
+      "download_url": "https://www.cdc.gov/antibiotic-use/media/pdfs/ADA-treatment-guidelines-508.pdf",
+      "additional_downloads": [
+        {
+          "name": "CDC Checklist for Antibiotic Prescribing in Dentistry",
+          "url": "https://www.cdc.gov/antibiotic-use/media/pdfs/dental-fact-sheet-508.pdf",
+          "reuse_status": "review_exact_version_and_embedded_rights"
+        }
       ]
     },
     {
@@ -420,6 +430,35 @@
       "use_limits": [
         "Search results and abstracts must not be treated as prescribing guidance.",
         "Review study design, recency, population, risk of bias, external validity, and article-level reuse rights before using an article in a curated card."
+      ]
+    },
+    {
+      "id": "openrn-nursing-pharmacology-2e",
+      "name": "Open RN — Nursing Pharmacology, 2nd edition (2023)",
+      "publisher": "Chippewa Valley Technical College / Open Resources for Nursing",
+      "jurisdictions": [
+        "global_education"
+      ],
+      "roles": [
+        "foundational_pharmacology_education",
+        "analgesic_classes",
+        "adverse_effect_education",
+        "pharmacokinetics"
+      ],
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK595000/",
+      "download_url": "https://www.ncbi.nlm.nih.gov/books/n/openrnnp/pdf/",
+      "bulk_download_url": "https://ftp.ncbi.nlm.nih.gov/pub/litarch/dc/08/openrnnp_NBK595000.tar.gz",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "access_mode": "official_NCBI_Bookshelf_PDF_and_authorized_LitArch_bulk_download",
+      "content_rights": "CC_BY_4_0_with_attribution",
+      "commercial_reuse_permitted": true,
+      "clinical_status": "education_only_not_a_drug_reference",
+      "update_policy": "manual_new_edition_check",
+      "use_limits": [
+        "The book is explicitly not intended to be used as a drug reference.",
+        "Use only for foundational education, preserve attribution and license notice, and do not treat textbook excerpts as patient-specific medication authority.",
+        "The PDF is very large (about 145 MB); keep downloaded source files in a local rights-cleared folder and do not duplicate the entire book inside the application repository."
       ]
     }
   ]
