@@ -59,7 +59,7 @@
 - Test: `apps/mia-obgyn/src/lib/evidence/search.test.ts`
 
 **Interfaces:**
-- `searchObgynSources(query: string, filters: { jurisdiction: "EG" | "GLOBAL" | "US" | "UK; careStage?: string; limit?: number }): EvidenceSource[]`
+- `searchObgynSources(query: string, filters: { jurisdiction: "EG" | "GLOBAL" | "US" | "UK"; careStage?: string; limit?: number }): EvidenceSource[]`
 - Search normalization uses safe length caps, Unicode normalization, stemming-light token matching and existing topic/source metadata.
 - The result order is relevance order only; do not label it “quality”, “safest” or “recommended”.
 
