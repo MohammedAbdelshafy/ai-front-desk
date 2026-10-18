@@ -270,3 +270,22 @@ def test_learning_shelf_requires_a_topic_when_enabled(workbench_url):
         body = exc.read().decode("utf-8")
         assert exc.code == 400
         assert "Enter a pharmacology learning topic" in body
+
+
+
+def test_workbench_displays_draft_candidates_with_sources_and_gate():
+    form = {
+        "case_id": "synthetic-case-019",
+        "proposed_assessment": "acute dental pain after tooth extraction",
+        "symptoms": "synthetic post-extraction pain",
+        "jurisdiction": "US",
+    }
+    review, _case = run_review(form)
+    page = render_page(form, review)
+    assert "PROTOTYPE DRAFT" in page
+    assert "NOT APPROVED FOR CLINICAL USE" in page
+    assert "Options named for review, not selected for this case" in page
+    assert "ibuprofen" in page
+    assert "pain-management-guideline" in page
+    assert "no interaction or patient-safety check has been performed" in page
+    assert "No verified evidence found" in page
