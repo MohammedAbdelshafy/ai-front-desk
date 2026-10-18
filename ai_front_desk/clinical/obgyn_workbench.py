@@ -262,7 +262,7 @@ def render_page(form: Optional[Mapping[str, Any]] = None, review: Optional[Dict[
                 % (esc(query or "general reference search"), esc(jurisdiction), esc(CARE_STAGES[care_stage]), _sources_html(sources))
             )
 
-    return """<!doctype html>
+    page = """<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; form-action 'self'; base-uri 'none'; frame-ancestors 'none'">
@@ -287,7 +287,7 @@ textarea{min-height:112px;resize:vertical}button{background:var(--teal);color:#f
 <body>
 <header><div class="kicker">Hospital clinician reference · Prototype</div><h1>Dr. Mia · OB-GYN</h1>
 <p>Clinical information routing for obstetrics and gynaecology. Search WHO, specialist guidance, medication-in-pregnancy/lactation resources, product labels, and Egypt-specific regulatory references.</p>
-%s</header>
+__MIA_AVATAR_WIDGET__</header>
 <main>
 <div class="banner">SYNTHETIC CASES ONLY · NO PATIENT IDENTIFIERS · SOURCE LINKS, NOT TREATMENT ORDERS</div>
 """ + flag_html + """
@@ -322,11 +322,11 @@ textarea{min-height:112px;resize:vertical}button{background:var(--teal);color:#f
 %s
 <p class="disclaimer">Source matching is based on text/topic overlap, not evidence grading. Many specialist guidelines are copyrighted and/or access-restricted. Public access is not permission to copy. Every derived protocol would require local jurisdiction review, source-version checks, rights review and approval by an appropriately qualified clinical governance group.</p>
 </main></body></html>""" % (
-        render_avatar_customizer("Personalize your OB-GYN Mia"),
         esc(case_id), jurisdiction_options, stage_options,
         esc(_one(form, "gestational_week", "")), esc(_one(form, "postpartum_day", "")),
         esc(_one(form, "medication_context", "")), esc(query), urgent_checks, result_html
     )
+    return page.replace("__MIA_AVATAR_WIDGET__", render_avatar_customizer("Personalize your OB-GYN Mia"))
 
 
 class ObgynWorkbenchHandler(BaseHTTPRequestHandler):
