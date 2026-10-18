@@ -4,8 +4,8 @@ from __future__ import annotations
 from html import escape
 
 AVATAR_ASSETS = {
-    "mia-avatar.js": ("application/javascript; charset=utf-8", "mia-avatar.js"),
-    "mia-avatar.css": ("text/css; charset=utf-8", "mia-avatar.css"),
+    "mia-avatar.js": ("application/javascript", "mia-avatar.js"),
+    "mia-avatar.css": ("text/css", "mia-avatar.css"),
 }
 
 
