@@ -20,6 +20,10 @@ dr-mia-workbench --port 8767
 
 Open `http://127.0.0.1:8767`. Use only synthetic scenarios. The download command saves reusable education books outside the repository with SHA-256/provenance sidecars; it does not promote textbook passages into clinical evidence. The Open RN book is not a drug reference, and the current medication cards remain draft-only.
 
+## Dentist test guide
+
+Start with [the synthetic clinical test session](docs/DR_MIA_CLINICAL_TEST_SESSION.md). It covers acute dental pain, antibiotic stewardship, allergy abstention, Egypt reference-only mode, and source-linked FDA label lookup using synthetic examples.
+
 ## Clinical data and test references
 
 See [Clinical Information Centers](docs/CLINICAL_INFORMATION_CENTERS.md), [Clinical Knowledge Downloads](docs/CLINICAL_KNOWLEDGE_DOWNLOADS.md), and the machine-readable directories `ai_front_desk/clinical/clinical_information_centers.json` and `ai_front_desk/clinical/clinical_evidence_drafts.json`. Official pages and PDFs are linked in the workbench; large source books and restricted clinical guidance are not bulk-copied into the app.
