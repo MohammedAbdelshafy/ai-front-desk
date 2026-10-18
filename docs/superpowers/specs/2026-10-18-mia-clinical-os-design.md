@@ -1,6 +1,6 @@
 # Dr. Mia Clinical OS: Full Workflow Design
 
-- **Status:** Proposed specification for review
+- **Status:** Approved for planning; refined scope accepted 2026-10-18
 - **Date:** 2026-10-18
 - **Repository:** `MohammedAbdelshafy/ai-front-desk`
 - **Branch:** `feat/mia-clinical-os`
@@ -8,7 +8,7 @@
 
 ## 1. Purpose and product intent
 
-Build a polished, responsive clinical web application for doctors, starting with an Egypt-first OB-GYN workflow while preserving the existing dental workbench as a second specialty. A doctor should be able to find a patient, inspect the history relevant to an appointment, send or complete a pre-visit questionnaire, review the patient's answers, and consult Mia through a conversational evidence-retrieval interface.
+Build a polished, responsive Egypt-first **OB-GYN-only** clinical web application. This app must contain only obstetrics/gynaecology content and workflows: no dental navigation, dental patient examples, dental evidence, or cross-specialty retrieval. Every clinic/specialty gets its own app deployment and, before real use, its own data resources by default. The first prototype models one fictional OB-GYN clinic. A doctor should find a patient, inspect appointment-relevant history, send or complete a pre-visit questionnaire in a demo flow, review answers, and consult Mia through an evidence-retrieval chat.
 
 The app must make a reliable distinction between:
 1. **A product UI prototype** using fictional records and simulated workflows.
@@ -117,7 +117,7 @@ Required policy/document templates:
 - Regulatory classification memorandum for each launch jurisdiction (including whether the intended functionality may qualify as software as a medical device/clinical decision support) and a launch-gate checklist.
 
 ### Non-negotiable security rules
-- Every tenant-owned database row and object must be scoped to the clinic/tenant and authorization must be enforced server-side.
+- Separate each clinic/specialty deployment's app configuration, database, storage, auth configuration, secrets and backups. No shared patient database across clinic apps by default. When later supporting shared infrastructure, enforce tenant scoping and authorization server-side for every request and object.
 - Deny by default; verify role, tenant, record and action on every request. Never trust a client-provided clinic ID as proof of access.
 - Use least-privilege roles and MFA for staff where supported. Protect service secrets; never send privileged backend keys to the browser.
 - Audit sensitive read/write, export, deletion, consent changes, clinical approval, and evidence-card releases. Audit logs must not indiscriminately duplicate entire clinical records or secrets.
@@ -128,18 +128,18 @@ Required policy/document templates:
 ## 6. Proposed technical architecture
 
 ### Recommended direction
-- **Web UI:** a new TypeScript/Next.js App Router application with accessible reusable components, responsive design tokens and a clear UI/application/data boundary. Preserve existing Python workbenches until the new prototype covers their functionality.
+- **Web UI:** a new TypeScript/Next.js App Router application under `apps/mia-obgyn/`, with accessible reusable components, responsive design tokens and a clear UI/application/data boundary. This app is OB-GYN-only. Preserve existing Python workbenches in their current paths, but do not embed the dental workbench or its content in this app.
 - **Phase-one demo data:** fictional seed records and deterministic browser/mock repository. Prominently label the app “Prototype • Synthetic data only.” No external model call and no backend PHI storage in this phase. Avoid suggesting that browser-local state is secure clinical storage.
 - **Application contracts:** define typed interfaces for PatientRepository, AppointmentRepository, QuestionnaireRepository, EvidenceRetriever, ChatResponder and AuditRecorder. The prototype uses seed/mock adapters; a future production adapter must satisfy the same contracts and security tests.
 - **Future hosted identity/data:** evaluate a dedicated, isolated backend such as Supabase Auth/Postgres/Storage with RLS only after the team selects organization, region and legal data-hosting posture. Do not reuse existing unrelated Supabase projects (current projects have unrelated names and regions) or create a new paid project during the design/spec stage.
-- **Deployment:** use Vercel for the frontend only after connecting the intended repo/project deliberately. Current Vercel team has no linked projects reported for this repo. Preview deployments must remain password/team-protected where possible, with no real health data.
+- **Deployment:** create a dedicated Vercel Git project for `apps/mia-obgyn/` (proposed project slug `mia-obgyn-prototype`) on the existing `money-beastx` team. Do not repurpose the unrelated `mbm-dialer-app` project. The current workspace shows no linked project for this repository. Preview deployments must remain protected where possible and contain synthetic data only. Each later clinic/specialty instance gets its own project and separate storage/database configuration.
 - **AI gateway/provider:** provider-neutral interface; no provider call in synthetic phase one. Before implementation, inspect current AI Gateway model/catalog, SDK version and data-retention terms; configure a hard spend cap. A future RAG answer must be grounded in retrieved evidence, expose citations, and abstain on conflicts/missing facts.
 - **Retrieval:** parse only rights-cleared content into chunks carrying source ID, section/page where available, version/date, license, jurisdiction, approval state and content hash. In phase one a small local lexical index is enough; a vector database is not required until evaluation demonstrates need.
 - **Interoperability:** design the domain model to permit future FHIR mapping, but do not claim certified interoperability or connect an EHR in phase one.
 - **Avatar:** retain preset/photo upload and export/import; in phase one photos remain client-side only. Production cross-device profiles require authenticated storage, retention and deletion controls.
 
 ### Data model concepts
-Tenant/Clinic; User/Role; Clinician; Patient; Allergy/Reaction; MedicationStatement; MedicalHistoryItem; ObstetricHistory; Appointment; Encounter; QuestionnaireTemplate; QuestionnaireVersion; QuestionnaireResponse; ClinicalNote; Observation; AttachmentMetadata; Consent/NoticeRecord; EvidenceSource; EvidenceChunk; ClinicalEvidenceCard; ChatSession; ChatMessageMetadata; Citation; AuditEvent; SafetyIncident.
+Clinic configuration (fixed to one app instance in phase one); User/Role; Clinician; Patient; Allergy/Reaction; MedicationStatement; MedicalHistoryItem; ObstetricHistory; Appointment; Encounter; QuestionnaireTemplate; QuestionnaireVersion; QuestionnaireResponse; ClinicalNote; Observation; AttachmentMetadata; Consent/NoticeRecord; EvidenceSource; EvidenceChunk; ClinicalEvidenceCard; ChatSession; ChatMessageMetadata; Citation; AuditEvent; SafetyIncident. Do not add shared multi-tenant patient tables to the first prototype.
 
 The full sensitive medical content schema, FHIR mapping and retention values require review; this spec must not be treated as a final production database schema.
 
@@ -188,7 +188,7 @@ Could deliver persistence/auth earlier, but requires choosing a region/organizat
 ## 10. Decisions and gates
 
 - **Approved in principle:** full doctor/patient workflow, pre-visit questionnaires, appointment/history pages, medication evidence chat, shared knowledge library, futuristic UI and avatar personalization.
-- **Selected for first release:** Option B, with synthetic data and no external model call by default.
+- **Selected for first release:** Option B, with synthetic data and no external model call by default, in a dedicated `apps/mia-obgyn/` Next.js app and a new Vercel project. Existing unrelated projects are left untouched.
 - **Not yet approved:** create/connect a Supabase project; select hosting region for real health data; enable a live AI provider; collect real patient information; launch public patient links; deploy e-prescribing or EHR integrations.
 - **Required before production:** review and approve this spec and implementation plan; clinician/pharmacist approval of named clinical pathways; local legal and regulatory review; threat model and security verification; contractual approval of every hosting/AI subprocessor; clinical validation; formal production release sign-off.
 
