@@ -18,7 +18,7 @@
 - Do not repurpose Vercel project `mbm-dialer-app`; later create the dedicated `mia-obgyn-prototype` project with root directory `apps/mia-obgyn`.
 - Future clinic/specialty deployments are isolated instances with separate secrets, auth, database, storage and backups by default. Do not implement shared multi-clinic records in this phase.
 - Medication answers are source retrieval and review prompts only; there are no approved prescribing pathways. Do not imply clinical approval.
-- Maintain keyboard accessibility, semantic controls, visible focus, high contrast, responsive layouts and `prefers-reduced-motion`.
+- Maintain keyboard accessibility, semantic controls, visible focus, high contrast, responsive layouts and `prefers-reduced-motion`. Include curated English/Arabic UI labels with an English/Arabic toggle and correctly mirrored RTL layout; never auto-translate clinical instructions.
 - Keep existing Python apps and workflows intact.
 
 ## Review Focus
@@ -82,7 +82,7 @@
 - Test: shell/dashboard component tests.
 
 **Interfaces:**
-- Navigation routes: `/dashboard`, `/patients`, `/appointments/[id]`, `/questionnaires`, `/mia`, `/evidence`, `/governance`.
+- Navigation routes: `/dashboard`, `/patients`, `/appointments/[id]`, `/questionnaires`, `/mia`, `/evidence`, `/governance`. The shell provides English/Arabic labels and switches document direction to LTR/RTL.
 - Shell owns accessible nav, status badge, page content, avatar-customization trigger and mobile nav.
 
 - [ ] **Step 1: Write failing tests** for navigation destinations, synthetic-only badge, reduced-motion fallback, mobile menu keyboard behavior, Arabic UI toggle and RTL direction.
