@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+import ai_front_desk.clinical.obgyn_workbench as obgyn
 from ai_front_desk.clinical.obgyn_workbench import (
     ALLOWED_JURISDICTIONS,
     DEFAULT_CATALOG_PATH,
@@ -90,3 +91,50 @@ def test_care_stage_catalog_covers_obstetrics_and_gynaecology():
     assert "contraception" in CARE_STAGES
     assert "fertility" in CARE_STAGES
     assert "medication_pregnancy_lactation" in CARE_STAGES
+
+
+
+def test_obgyn_public_lookup_is_off_by_default():
+    assert obgyn.optional_drug_lookup({"medication_context": "ibuprofen"}, "US") is None
+
+
+def test_obgyn_public_lookup_refuses_us_label_api_for_egypt(monkeypatch):
+    called = []
+    monkeypatch.setattr(obgyn, "lookup_public_drug_metadata", lambda *args, **kwargs: called.append((args, kwargs)))
+    with pytest.raises(ValueError, match="currently US-only"):
+        obgyn.optional_drug_lookup({
+            "medication_context": "ibuprofen",
+            "lookup_public_sources": "1",
+        }, "EG")
+    assert called == []
+
+
+def test_obgyn_public_lookup_sends_only_standalone_medicine_name(monkeypatch):
+    called = []
+    expected = {
+        "lookup_term": "ibuprofen",
+        "status": "unavailable",
+        "rxnorm": {"status": "unavailable", "items": []},
+        "openfda_labels": {"status": "unavailable", "items": []},
+    }
+    def fake_lookup(name, include_label_sections=False):
+        called.append((name, include_label_sections))
+        return expected
+    monkeypatch.setattr(obgyn, "lookup_public_drug_metadata", fake_lookup)
+    result = obgyn.optional_drug_lookup({
+        "medication_context": "ibuprofen",
+        "clinical_question": "synthetic pregnancy scenario",
+        "gestational_week": "20",
+        "lookup_public_sources": "1",
+        "lookup_label_sections": "1",
+    }, "US")
+    assert result is expected
+    assert called == [("ibuprofen", True)]
+
+
+def test_obgyn_workbench_exposes_opt_in_medicine_label_lookup():
+    page = render_page()
+    assert 'name="lookup_public_sources"' in page
+    assert 'name="lookup_label_sections"' in page
+    assert "US mode only" in page
+    assert "This is not a pregnancy risk assessment" in page
