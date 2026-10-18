@@ -30,4 +30,4 @@
 
 The current runtime has optional RxNorm/openFDA **medicine-name metadata lookup** and the workbench now shows source-linked draft summaries for synthetic testing. The three draft evidence cards have not been clinically approved, and no interaction checker is configured. The repository contains the source directory and authored summaries/metadata, **not a bundled full copy of the Open RN book or CDC/ADA PDFs**.
 
-In this chat's execution environment, attempts to fetch the raw PDF/archive binaries failed. The official links above remain available for a dentist to open/download directly. This avoids pretending the full source books were downloaded when only their source records and review summaries are present.
+The repository does not bundle a full copy of the Open RN textbook or the CDC/ADA PDFs. Use the official download links above for source review, keep any locally downloaded material in a rights-cleared source folder, and follow each source's license and reuse limits. The repository contains source metadata and authored review summaries, not full copies of these publications.
