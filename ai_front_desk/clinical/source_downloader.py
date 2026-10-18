@@ -202,18 +202,24 @@ def main() -> None:
     if args.all_eligible:
         if not args.confirm_rights_review:
             parser.error("--all-eligible requires --confirm-rights-review after checking license and attribution terms")
-        try:
-            results = [
-                download_source(
-                    source["id"],
-                    directory=args.directory,
-                    confirm_rights_review=True,
-                )
-                for source in list_downloadable_sources()
-            ]
-        except (PermissionError, ValueError, SourceDownloadError) as exc:
-            parser.error(str(exc))
-        print(json.dumps(results, ensure_ascii=False, indent=2))
+        results = []
+        failures = []
+        for source in list_downloadable_sources():
+            try:
+                results.append({
+                    "source_id": source["id"],
+                    "status": "downloaded",
+                    "result": download_source(
+                        source["id"],
+                        directory=args.directory,
+                        confirm_rights_review=True,
+                    ),
+                })
+            except (PermissionError, ValueError, SourceDownloadError) as exc:
+                failures.append({"source_id": source["id"], "status": "failed", "error": str(exc)})
+        print(json.dumps({"results": results, "failures": failures}, ensure_ascii=False, indent=2))
+        if failures:
+            parser.exit(status=1, message="One or more source downloads failed; check the JSON results above.\n")
         return
     if not args.source_id:
         parser.error("provide --list, --source-id, or --all-eligible")
