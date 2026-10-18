@@ -199,6 +199,6 @@ Could deliver persistence/auth earlier, but requires choosing a region/organizat
 - WHO PPH implementation guide: https://www.who.int/publications/i/item/9789240116115
 - FDA Clinical Decision Support Software final guidance: https://www.fda.gov/regulatory-information/search-fda-guidance-documents/clinical-decision-support-software
 - HHS HIPAA risk-analysis guidance: https://www.hhs.gov/hipaa/for-professionals/security/guidance/guidance-risk-analysis/index.html
-- EU GDPR consolidated regulation: https://eur-lex.europa.eu/legal/content/EN/TXT/?uri=CELEX:32016R0679
+- EU GDPR consolidated regulation: https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng
 - Egypt Personal Data Protection Center material referencing Law 151/2020 and Decision 816/2025: https://pdpc.gov.eg/assets/pdf-data/Guidelines/DPO.pdf
 - EDA SaMD/UDI regulatory document: https://www.edaegypt.gov.eg/media/goxpgwu3/8_regulatory-guideline-on-requirements-for-unique-device.pdf
