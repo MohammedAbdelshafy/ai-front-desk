@@ -21,6 +21,7 @@ from .medication_support import ClinicianCase, build_evidence_review, load_regis
 from .public_drug_data import lookup_public_drug_metadata
 from .pharmacology_education import search_pharmacology_education
 from .knowledge_library import search_knowledge_library
+from .clinical_evidence_drafts import match_draft_cards
 
 BASE = Path(__file__).resolve().parent
 REGISTRY_PATH = BASE / "medication_evidence_registry.json"
@@ -328,6 +329,94 @@ def _render_evidence(review: dict[str, Any]) -> str:
     return "".join(out)
 
 
+
+
+def _render_draft_evidence(assessment: str, symptoms: str = "", jurisdiction: str = "US") -> str:
+    """Display source-cited draft options without elevating them to approved recommendations."""
+    if not assessment.strip():
+        return ""
+    try:
+        cards = match_draft_cards(assessment, symptoms, jurisdiction)
+    except (OSError, ValueError, json.JSONDecodeError):
+        return (
+            "<section class='draft-evidence'><div class='draft-banner'>DRAFT EVIDENCE UNAVAILABLE</div>"
+            "<p>The review-only evidence pack could not be loaded. No candidate option is shown.</p></section>"
+        )
+    out = [
+        "<section class='draft-evidence'><div class='draft-banner'>PROTOTYPE DRAFT · NOT APPROVED FOR CLINICAL USE · KEYWORD MATCH ONLY</div>"
+        "<h2>Source-cited candidates for dentist review</h2>"
+        "<p class='muted'>Mia found source cards using phrase matching only. That is not a diagnosis or proof that an option fits this case. Use synthetic scenarios only. No dosage is generated and no interaction or patient-safety check has been performed.</p>"
+    ]
+    if not cards:
+        out.append("<p>No review-only evidence card matched these words for the selected jurisdiction. Mia must not invent an option or borrow another country's guidance.</p></section>")
+        return "".join(out)
+    for card in cards:
+        scope = card.get("scope", {})
+        out.append(
+            "<article class='draft-card'><div class='eyebrow'>Draft card · %s</div><h3>%s</h3>"
+            "<p><strong>Scope:</strong> %s · %s</p><p>%s</p>"
+            % (
+                esc(", ".join(card.get("matched_terms_for_display_only", []))),
+                esc(card.get("title", "Clinical evidence draft")),
+                esc(scope.get("jurisdiction", "")),
+                esc(scope.get("population", "Population scope not set")),
+                esc(card.get("evidence_summary", "")),
+            )
+        )
+        out.append("<h3>Options named for review, not selected for this case</h3>")
+        options = card.get("candidate_options_for_review", [])
+        if not options:
+            out.append("<p>No medicine option is surfaced by this card. Review the cited guideline or escalate uncertainty.</p>")
+        else:
+            out.append("<ul>")
+            for option in options:
+                if not isinstance(option, dict):
+                    continue
+                examples = option.get("examples_named_in_ADA_overview", [])
+                example_text = " Examples: " + ", ".join(str(value) for value in examples) + "." if examples else ""
+                out.append(
+                    "<li><strong>%s</strong>%s<p>%s</p></li>"
+                    % (
+                        esc(option.get("name", "")),
+                        esc(example_text),
+                        esc(option.get("note", option.get("use_status", "").replace("_", " "))),
+                    )
+                )
+            out.append("</ul>")
+        exclusions = scope.get("out_of_scope", [])
+        if exclusions:
+            out.append("<p><strong>Outside this card's stated scope:</strong> %s</p>" % esc("; ".join(str(v) for v in exclusions)))
+        flags = card.get("red_flag_escalation", [])
+        if flags:
+            out.append("<p><strong>Escalation prompts in source summary:</strong></p><ul>")
+            for flag in flags:
+                out.append("<li>%s</li>" % esc(flag))
+            out.append("</ul>")
+        checks = card.get("required_review_before_clinical_use", [])
+        if checks:
+            out.append("<details><summary><strong>Required clinician review checklist</strong></summary><ul>")
+            for item in checks:
+                out.append("<li>%s</li>" % esc(item))
+            out.append("</ul></details>")
+        sources = card.get("sources", [])
+        if sources:
+            out.append("<h3>Sources</h3><ul>")
+            for source in sources:
+                url = str(source.get("url", ""))
+                if not url.startswith(("https://", "http://")):
+                    continue
+                out.append(
+                    "<li><a href='%s' target='_blank' rel='noopener noreferrer'>%s</a> <span class='muted'>· %s</span></li>"
+                    % (esc(url), esc(source.get("title", source.get("source_id", "Official source"))), esc(source.get("version", "Version not recorded")))
+                )
+            out.append("</ul>")
+        out.append("</article>")
+    out.append(
+        "<p class='muted'><strong>Prototype boundary:</strong> These cards are source-linked summaries in draft review status. They have not been approved by a qualified clinician, do not provide a patient-specific recommendation, do not include doses, and do not substitute for local product labeling, allergy/contraindication review, or a licensed interaction checker. Do not use them to guide live patient treatment.</p></section>"
+    )
+    return "".join(out)
+
+
 def _render_information_centers(jurisdiction: str = "US") -> str:
     """Render official reference links without treating them as approved evidence."""
     try:
@@ -406,7 +495,7 @@ def render_page(
             "<article><h3>Reported allergies</h3><p>%s</p></article>"
             "<article><h3>Current medicines</h3><p>%s</p></article>"
             "<article><h3>Relevant history</h3><p>%s</p></article></div>"
-            "%s%s%s%s%s%s<p class='disclaimer'>This demo does not diagnose, prescribe, calculate doses, "
+            "%s%s%s%s%s%s%s<p class='disclaimer'>This demo does not diagnose, prescribe, calculate doses, "
             "or perform comprehensive interaction checks. Submitted cases are not saved. External APIs are queried only when you explicitly check the public lookup box, and only the standalone medicine name is sent. The learning notes and full-text book library are local-only.</p></section>"
             % (
                 esc(evidence_state.replace("_", " ").title()),
@@ -417,6 +506,7 @@ def render_page(
                 _render_quality_checklist(review),
                 _render_flags(review),
                 _render_evidence(review),
+                _render_draft_evidence(_one(form, "proposed_assessment"), _one(form, "symptoms"), _one(form, "jurisdiction", "US")),
                 _render_public_lookup(public_lookup),
                 _render_education_search(education_result),
                 _render_knowledge_library(knowledge_result),
@@ -444,7 +534,7 @@ button{margin-top:18px;background:var(--teal);color:#fff;border:0;padding:12px 1
 .results{margin-top:18px}.result-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.pill{font-size:11px;font-weight:750;border-radius:30px;background:#e5f4ef;color:#13644e;padding:7px 10px}.context-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.context-grid article{padding:12px;border:1px solid var(--line);background:#fbfdfd;border-radius:12px;overflow-wrap:anywhere}.context-grid p{margin:0;white-space:pre-wrap;font-size:13px}
 .flags{margin:20px 0}.flag{border-left:3px solid #bd7d00;background:var(--amber);padding:10px 12px;margin:8px 0;border-radius:6px}.flag p{margin:4px 0 0;font-size:13px}
 .quality-checklist{margin:20px 0}.quality-grid{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.quality-item{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fbfdfd;min-width:0}.quality-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.quality-item strong{font-size:12px}.quality-item p{font-size:12px;color:var(--muted);margin:6px 0 0}.quality-state{font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;padding:4px 6px;border-radius:20px;background:#e1f4eb;color:#146049;white-space:nowrap}.quality-state.attention{background:#fff0c9;color:#815100}
-.source-directory{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 6px 18px rgba(13,53,61,.04)}.source-directory h2{font-size:18px;margin:5px 0 8px}.source-directory .source-link{padding:10px 0;border-top:1px solid #e2ecee}.source-directory .source-link a{font-size:13px;color:#086e7b;font-weight:750;overflow-wrap:anywhere}.source-directory .source-link p{font-size:11px;color:var(--muted);margin:4px 0 0}.source-directory .source-status{font-weight:750;text-transform:capitalize}
+.draft-evidence{margin-top:18px;background:#fff;border:2px solid #ddc27b;border-radius:14px;padding:16px}.draft-banner{padding:10px 12px;border-radius:8px;background:#fff0c9;color:#744d00;font-size:12px;font-weight:800}.draft-evidence h2{font-size:20px;margin:10px 0}.draft-evidence h3{margin:14px 0 6px}.draft-evidence li{font-size:13px;margin:5px 0}.draft-card{border-top:1px solid #e6dfc9;padding:12px 0}.draft-card a{color:#086e7b;font-weight:700;overflow-wrap:anywhere}.draft-evidence p{font-size:13px}.source-directory{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 6px 18px rgba(13,53,61,.04)}.source-directory h2{font-size:18px;margin:5px 0 8px}.source-directory .source-link{padding:10px 0;border-top:1px solid #e2ecee}.source-directory .source-link a{font-size:13px;color:#086e7b;font-weight:750;overflow-wrap:anywhere}.source-directory .source-link p{font-size:11px;color:var(--muted);margin:4px 0 0}.source-directory .source-status{font-weight:750;text-transform:capitalize}
 .empty-evidence{background:#f2f7f8;border:1px dashed #aac4c9;border-radius:12px;padding:15px;margin-top:14px}.empty-evidence h3{color:#7a5200}.empty-evidence p{font-size:13px;margin-bottom:0}
 .notice{background:#e8f5f2;border:1px solid #c5e7dd;padding:12px;border-radius:10px;margin-top:12px;font-size:13px}.evidence-card{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;overflow-wrap:anywhere}.evidence-card p{font-size:13px;margin:8px 0}.evidence-card a{color:#086e7b;font-weight:700}
 .disclaimer{border-top:1px solid var(--line);padding-top:12px;color:var(--muted);font-size:12px;margin-top:18px}
