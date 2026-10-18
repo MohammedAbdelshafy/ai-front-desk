@@ -81,6 +81,7 @@ Start with a narrow, clinician-reviewed set of common dental medication scenario
 - `docs/MIA_KNOWLEDGE_LIBRARY_BLUEPRINT.md`: searchable library architecture, candidate sources, licensing rules, importer workflow, and clinical-evidence governance.
 - `docs/DENTAL_AI_MVP_BUILD_SPEC.md`, `docs/DENTAL_AI_GITHUB_RESEARCH.md`, `docs/DENTAL_AI_PRODUCTION_REFERENCE.md`: scope, research, and production architecture notes.
 - `docs/MIA_CLINICAL_PLATFORM_BUILD_PLAN.md`: multi-app Mia runtime and multi-specialty clinical platform plan.
+- `docs/DR_MIA_OBGYN_AND_AVATAR_GUIDE.md`: OB-GYN workbench, reference-source scope, and cross-app avatar customization.
 - `docs/DR_MIA_PRODUCT_POSITIONING.md`: core strategy, supporting features, upsells, and claims boundaries.
 - `docs/DR_MIA_CLINICAL_COPILOT_MVP_SPEC.md`: clinical-first MVP scope, evaluation gates, and pilot boundaries.
 - `docs/MEDICATION_SUPPORT_FOUNDATION.md`: workbench architecture and development test instructions.
@@ -133,6 +134,27 @@ dr-mia-index-library --source-id openrn-nursing-pharmacology-2e --file /path/to/
 The local index defaults to `~/.mia-dental-os/knowledge-library.jsonl`, outside the repository. The source catalog blocks noncommercial and unresolved-license texts. For a source with chapter/third-party content caveats, review and exclude any material not covered by the license before using `--confirm-rights-review`. This flag is an operator attestation, not a substitute for permissions.
 
 **Current status:** the indexing engine is implemented and tested, but the full-text index is empty by default and no complete textbook is bundled. Import only rights-cleared content. Study retrieval does not make clinical recommendations; the clinical evidence registry still has zero approved medication evidence cards.
+
+## Run the Dr. Mia OB-GYN reference workbench
+
+The OB-GYN workbench is a separate specialty app. From the repository root:
+
+```bash
+python -m pip install -e .
+dr-mia-obgyn-workbench --port 8768
+```
+
+Open **http://127.0.0.1:8768**. It routes synthetic OB-GYN questions to reference centers by care stage and jurisdiction, including WHO maternal-health guidance, ACOG/RCOG references, LactMed, MotherToBaby, UKTIS/BUMPS, official label sources, and Egyptian Drug Authority resources. It also surfaces explicit hospital emergency-escalation prompts for selected red flags.
+
+This is a reference-routing prototype, not an obstetric triage or medication-selection engine. It does not diagnose, choose or prescribe medicines, calculate doses, or determine a delivery/management plan. Clinical protocols require qualified OB-GYN/pharmacist review, exact source-version and rights checks, and local hospital governance. Bind to loopback; never expose it publicly or enter real patient information.
+
+## Personalize Mia's avatar across apps
+
+The shared avatar customizer is available in the main Mia intake demo, dental workbench, and OB-GYN workbench. Users can choose a built-in persona or upload their own portrait. Supported photos are resized in-browser and saved to that browser's local storage; they are **not uploaded to the server or sent to an AI service**.
+
+Because the local prototypes run on different ports, their browser storage areas are separate. Use **Export for other Mia apps** in one app and import the avatar-profile JSON in another. Exported files can contain a personal photo and should be kept private. A production deployment should save the preference in the authenticated user's profile for account-level sync. Avatar choice changes only appearance, never clinical role, permissions, evidence sources, or safety rules.
+
+See [OB-GYN and Avatar Guide](docs/DR_MIA_OBGYN_AND_AVATAR_GUIDE.md).
 
 ## Test
 
