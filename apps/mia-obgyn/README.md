@@ -23,3 +23,18 @@ Build with `npm run build`.
 ## Separate deployment principle
 
 This app contains only obstetrics and gynaecology content. Each clinic/specialty should get a separate deployment and, before production, separate auth, secrets, storage, database and backups by default.
+
+## Governance document pack
+
+Draft templates for review are in [`docs/clinical-governance/`](https://github.com/MohammedAbdelshafy/ai-front-desk/tree/feat/mia-clinical-os/docs/clinical-governance):
+
+- Intended use and data classes
+- Data inventory and data-flow worksheet
+- Patient/staff privacy notice and consent templates
+- Vendor and cross-border review
+- Security threat model and incident response
+- Clinical risk and validation plan
+- Source rights and clinical evidence-card template
+- Regulatory classification and launch gates
+
+These are **drafts for professional review**, not legal advice, certification, or evidence that the system is approved for real patient care. The app's readiness screen links directly to each draft. Live patient use remains blocked.
