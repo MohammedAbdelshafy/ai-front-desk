@@ -6,7 +6,19 @@ Dr. Mia is a character-led clinical support product direction for dental practic
 
 **The core product is clinical quality and prescribing support.** The AI front desk, retention automation, and Lead Engine are optional expansions, not the product's identity.
 
-> **Current status:** this repository contains a local medication evidence workbench using synthetic data, a source directory with official reference/download links, three draft source-cited dental medication review pathways for a dentist to evaluate, and optional RxNorm/openFDA name-only lookup. Draft options are clearly marked **not approved**, **rights review pending**, and **keyword-match only**; they are not patient-specific recommendations. The approved evidence registry still has **zero approved medication evidence cards**. Optional FDA label-section excerpts are for clinician reference only, not an interaction check. The app does not diagnose, prescribe, calculate or validate doses, or perform comprehensive drug-interaction screening. It remains a local prototype and is not approved for real-patient use.
+> **Current status:** this repository contains a local medication evidence workbench using synthetic data, a source directory with official reference/download links, three draft source-cited dental medication review pathways for a dentist to evaluate, US and Egypt source-reference modes (Egypt is link-only with no medication candidates), a rights-gated local education-source downloader, and optional RxNorm/openFDA name-only lookup. Draft options are clearly marked **not approved**, **rights review pending**, and **keyword-match only**; they are not patient-specific recommendations. The approved evidence registry still has **zero approved medication evidence cards**. Optional FDA label-section excerpts are for clinician reference only, not an interaction check. The app does not diagnose, prescribe, calculate or validate doses, or perform comprehensive drug-interaction screening. It remains a local prototype and is not approved for real-patient use.
+
+## Local prototype setup
+
+```bash
+python -m pip install -e .
+dr-mia-download-sources --list
+# After reviewing the listed CC BY 4.0 source terms and attribution:
+dr-mia-download-sources --all-eligible --confirm-rights-review
+dr-mia-workbench --port 8767
+```
+
+Open `http://127.0.0.1:8767`. Use only synthetic scenarios. The download command saves reusable education books outside the repository with SHA-256/provenance sidecars; it does not promote textbook passages into clinical evidence. The Open RN book is not a drug reference, and the current medication cards remain draft-only.
 
 ## Clinical data and test references
 
