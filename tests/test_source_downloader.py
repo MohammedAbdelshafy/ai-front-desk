@@ -113,3 +113,15 @@ def test_download_refuses_empty_source_response(tmp_path):
             confirm_rights_review=True,
             opener=lambda request, timeout=45: FakeResponse(b""),
         )
+
+
+
+def test_repository_catalog_exposes_only_the_two_cc_by_education_downloads():
+    from ai_front_desk.clinical.source_downloader import list_downloadable_sources as list_repo_sources
+
+    sources = list_repo_sources()
+    ids = {item["id"] for item in sources}
+    assert "openrn-nursing-pharmacology-2e" in ids
+    assert "public-health-pharmacy-practice-casebook-2e" in ids
+    assert all(item["license_id"] == "CC-BY-4.0" for item in sources)
+    assert not any("ada-" in item["id"] or "cdc-" in item["id"] for item in sources)
