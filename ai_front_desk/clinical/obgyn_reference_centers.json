@@ -596,6 +596,38 @@
       "notes": [
         "Guidance may be US-specific; no automatic cross-jurisdiction transfer."
       ]
+    },
+    {
+      "id": "mohp-eg-safe-maternity-services",
+      "title": "Egyptian Ministry of Health and Population — Safe Maternity and Obstetric Services",
+      "publisher": "Egyptian Ministry of Health and Population (MOHP)",
+      "jurisdiction": [
+        "EG"
+      ],
+      "topics": [
+        "obstetrics",
+        "gynaecology",
+        "safe delivery",
+        "delivery protocols",
+        "maternity emergency",
+        "maternal mortality review",
+        "obstetric referral",
+        "labour",
+        "postpartum care"
+      ],
+      "url": "https://www.mohp.gov.eg/SectorServices.aspx?Deptcode=28&SectorCode=5",
+      "version": "Official ministry service page; capture the version/date of any linked protocol before clinical use",
+      "published_on": "",
+      "access": "official MOHP service page; linked protocols may require separate access",
+      "reuse_rights": "public access does not establish commercial text reuse permission; link-only until reviewed",
+      "ingest_status": "official_egypt_reference_link_only",
+      "clinical_role": "Egypt-specific maternal and obstetric service context; exact protocol artifacts must be identified and reviewed",
+      "update_cadence": "manual page change monitoring and protocol-version review",
+      "notes": [
+        "The page describes standardized obstetric protocols, staff training, and hospital maternal-death review activity.",
+        "This is not itself a current clinical protocol or medicine guide. Do not derive medication recommendations from the index page.",
+        "Any protocol card requires local hospital policy reconciliation, exact version capture, rights review, and qualified Egyptian OB-GYN approval."
+      ]
     }
   ]
 }
