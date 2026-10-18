@@ -17,6 +17,20 @@
 | Egyptian Drug Authority (EDA) | [Egyptian Drug Register](https://www.edaegypt.gov.eg/ar/%D8%A7%D9%84%D9%85%D8%B1%D8%AC%D8%B9-%D8%A7%D9%84%D8%AA%D9%86%D8%B8%D9%8A%D9%85%D9%8A-%D9%84%D9%87%D9%8A%D8%A6%D8%A9-%D8%A7%D9%84%D8%AF%D9%88%D8%A7%D8%A1-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%8A%D8%A9/%D8%B3%D8%AC%D9%84-%D8%A7%D9%84%D8%AF%D9%88%D8%A7%D8%A1-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%8A/) · [Periodic pharmaceutical lists](https://www.edaegypt.gov.eg/ar/%D8%A5%D8%B5%D8%AF%D8%A7%D8%B1%D8%A7%D8%AA-%D9%88%D8%AA%D9%82%D8%A7%D8%B1%D9%8A%D8%B1-%D8%A7%D9%84%D9%87%D9%8A%D8%A6%D8%A9-%D9%81%D9%8A-%D8%A3%D8%B1%D9%82%D8%A7%D9%85/%D8%A5%D8%B5%D8%AF%D8%A7%D8%B1%D8%A7%D8%AA/%D9%82%D9%88%D8%A7%D8%A6%D9%85-%D8%AF%D9%88%D8%B1%D9%8A%D8%A9/) · [Reliable drug-information inquiry service](https://edaegypt.gov.eg/en/about-us/home-page-services/home-page-services/inquire-about-reliable-drug-information/) | Egypt-specific product/regulatory context and expert escalation | Public access does not establish bulk-reuse rights or a supported API. Do not scrape at scale. Confirm current product/registration details and source terms; use pharmacist/dentist review. These sources are not currently integrated as runtime APIs. |
 | WHO Egypt National Essential Medicine List 2025 | [Official publication](https://www.who.int/publications/m/item/egypt--national-essential-medicine-list-2025-%28english%29) | Local formulary/policy context | Not a patient-specific prescribing guideline, interaction checker or proof of current availability. Rights for commercial ingestion remain unconfirmed; link-only until reviewed. |
 
+## One-command source download
+
+After checking out the branch and installing the project locally:
+
+```bash
+python -m pip install -e .
+dr-mia-download-sources --list
+dr-mia-download-sources --source-id openrn-nursing-pharmacology-2e --confirm-rights-review
+```
+
+The downloader saves the Open RN PDF under `~/.mia-dental-os/source-files/` and writes a `.source.json` sidecar with source URL, license, attribution, retrieval timestamp, size, and SHA-256. The file is downloaded outside the repository. It is not automatically indexed or promoted to clinical evidence. The book contains third-party-content caveats, so only chapter/content portions that have been reviewed for reuse should be imported into the commercial educational index. The downloader refuses sources without explicit commercial permission, a known CC BY 4.0 license, and the expected education-only status.
+
+Restricted or unresolved ADA/CDC derivative materials, the Egypt register and formulary files, and commercial interaction-provider databases are not automatically downloaded by this script. Their official links remain accessible in the workbench; resolve exact license/API/provider terms first.
+
 ## Recommended download/import sequence
 
 1. Keep the CDC PDFs and ADA pages as click-through references while the dentist validates the exact current content. Do not ingest the ADA chairside PDF into the commercial corpus without appropriate permission.
