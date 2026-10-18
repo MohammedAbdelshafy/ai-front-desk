@@ -347,3 +347,29 @@ def test_reference_center_shows_official_downloads_and_reuse_limits():
     assert "dental-fact-sheet-508.pdf" in page
     assert "Nursing Pharmacology, 2nd edition (2023)" in page
     assert "noncommercial license requires separate permission for commercial use" in page
+
+
+
+def test_workbench_offers_egypt_reference_only_jurisdiction():
+    page = render_page({"jurisdiction": "EG"})
+    assert "Egypt (EG)" in page
+    assert 'value="EG" selected' in page or "value='EG' selected" in page
+    assert "Egyptian Drug Authority" in page
+    assert "no Egyptian medication candidate cards" in page
+
+
+def test_egypt_case_does_not_receive_us_draft_medicine_candidates():
+    form = {
+        "case_id": "synthetic-case-021",
+        "proposed_assessment": "acute dental pain after tooth extraction",
+        "symptoms": "synthetic post-extraction pain",
+        "jurisdiction": "EG",
+    }
+    review, case = run_review(form)
+    page = render_page(form, review)
+    assert case.jurisdiction == "EG"
+    assert review["status"] == "no_verified_evidence"
+    assert "No verified evidence found" in page
+    assert "No review-only evidence card matched these words for the selected jurisdiction" in page
+    assert "Egyptian Drug Register" in page
+    assert "ibuprofen" not in page.lower()
