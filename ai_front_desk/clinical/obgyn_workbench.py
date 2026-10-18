@@ -18,6 +18,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional
 from urllib.parse import parse_qs
 from .avatar_customizer import AVATAR_ASSETS, render_avatar_customizer
+from .public_drug_data import lookup_public_drug_metadata
+from .medication_workbench import _render_public_lookup as render_public_lookup_section
 
 BASE = Path(__file__).resolve().parent
 DEFAULT_CATALOG_PATH = BASE / "obgyn_reference_centers.json"
@@ -161,6 +163,31 @@ def source_matches(
     return selected
 
 
+
+def optional_drug_lookup(form: Mapping[str, Any], jurisdiction: str) -> Optional[Dict[str, Any]]:
+    """Perform explicitly opted-in US label metadata lookup using a standalone medicine name only."""
+    requested = _checked(form, "lookup_public_sources") or _checked(form, "lookup_label_sections")
+    if not requested:
+        return None
+    if (jurisdiction or "").upper() != "US":
+        raise ValueError(
+            "Public RxNorm/openFDA medicine lookup is currently US-only. "
+            "For Egypt, UK or Global mode, use the jurisdiction-matched reference links instead."
+        )
+    medicine_name = _one(form, "medication_context")
+    if not medicine_name:
+        raise ValueError(
+            "Enter only one standalone medicine name in the medicine/topic field before enabling the public lookup."
+        )
+    include_sections = _checked(form, "lookup_label_sections")
+    # The only argument sent to external sources is the standalone medicine name.
+    # Clinical question, care stage, gestational week and other form values stay local.
+    return lookup_public_drug_metadata(
+        medicine_name,
+        include_label_sections=include_sections,
+    )
+
+
 def urgent_prompts(form: Mapping[str, Any]) -> List[Dict[str, str]]:
     return [
         {"key": key, "label": label, "action": action}
@@ -208,7 +235,7 @@ def _sources_html(sources: List[Dict[str, Any]]) -> str:
     return "".join(out)
 
 
-def render_page(form: Optional[Mapping[str, Any]] = None, review: Optional[Dict[str, Any]] = None, *, catalog_path: str | Path = DEFAULT_CATALOG_PATH) -> str:
+def render_page(form: Optional[Mapping[str, Any]] = None, review: Optional[Dict[str, Any]] = None, *, catalog_path: str | Path = DEFAULT_CATALOG_PATH, public_lookup: Optional[Dict[str, Any]] = None) -> str:
     form = form or {}
     jurisdiction = _one(form, "jurisdiction", "EG").upper()
     if jurisdiction not in ALLOWED_JURISDICTIONS:
@@ -261,6 +288,8 @@ def render_page(form: Optional[Mapping[str, Any]] = None, review: Optional[Dict[
                 "<p>Query: <strong>%s</strong> · Jurisdiction: <strong>%s</strong> · Care stage: <strong>%s</strong></p>%s</section>"
                 % (esc(query or "general reference search"), esc(jurisdiction), esc(CARE_STAGES[care_stage]), _sources_html(sources))
             )
+    if public_lookup is not None:
+        result_html += render_public_lookup_section(public_lookup)
 
     page = """<!doctype html>
 <html lang="en">
@@ -281,6 +310,7 @@ textarea{min-height:112px;resize:vertical}button{background:var(--teal);color:#f
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.checks{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-top:9px}.checks label,.urgent-option{display:flex;gap:8px;align-items:flex-start;font-weight:550;margin:4px 0;font-size:13px}.checks input,.urgent-option input{margin-top:4px;flex-shrink:0}
 .critical{border:2px solid #d66a61;background:#fff0ef;border-radius:12px;padding:14px;margin-bottom:15px}.critical h2{color:#8c211c}.critical li{margin:7px 0}.note{border:1px solid #d5c58f;background:#fff8df;border-radius:11px;padding:12px;margin:0 0 15px}
 .source-card{border-top:1px solid var(--line);padding:13px 0}.source-card a{color:#086773;text-decoration-thickness:1.5px;overflow-wrap:anywhere}.source-card li{margin:4px 0;font-size:12px}
+.public-lookup{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}.public-lookup h2{font-size:20px;margin:5px 0 12px}.public-lookup h3{margin-top:18px}.public-lookup li{font-size:13px;margin:8px 0;overflow-wrap:anywhere}.public-lookup a,.label-reference a{color:#086e7b;font-weight:700;overflow-wrap:anywhere}.label-reference{margin-top:16px;border:1px dashed #b7cfd3;border-radius:12px;background:#f8fcfc;padding:12px}.label-reference details{padding:8px 0;border-top:1px solid #e1ebed}.label-excerpt{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;max-height:240px;overflow:auto}.evidence-card{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px}.evidence-card p{font-size:12px}
 .results{margin-top:18px}.disclaimer{margin-top:17px;font-size:12px;color:#536a6d}.small{font-size:12px;color:var(--muted)}
 @media(max-width:800px){.layout{grid-template-columns:1fr}.grid2,.checks{grid-template-columns:1fr}}
 </style></head>
@@ -300,7 +330,10 @@ __MIA_AVATAR_WIDGET__</header>
 <div class="grid2"><div><label for="care_stage">Care stage / service</label><select id="care_stage" name="care_stage">%s</select></div>
 <div><label for="gestational_week">Gestational week (if relevant)</label><input id="gestational_week" name="gestational_week" type="number" min="0" max="45" value="%s"></div></div>
 <div class="grid2"><div><label for="postpartum_day">Postpartum day (if relevant)</label><input id="postpartum_day" name="postpartum_day" type="number" min="0" max="365" value="%s"></div>
-<div><label for="medication_context">Medicine/topic name (optional, no patient details)</label><input id="medication_context" name="medication_context" type="text" maxlength="120" value="%s" placeholder="e.g. lactation medicine review"></div></div>
+<div><label for="medication_context">Medicine/topic name (optional, no patient details)</label><input id="medication_context" name="medication_context" type="text" maxlength="120" value="%s" placeholder="e.g. one standalone medicine name"></div></div>
+<label class="urgent-option"><input type="checkbox" name="lookup_public_sources" value="1"%s> Look up medicine identity and label metadata (US mode only)</label>
+<label class="urgent-option"><input type="checkbox" name="lookup_label_sections" value="1"%s> Also show key U.S. label sections for clinician reference</label>
+<p class="muted">Optional lookup only sends the standalone medicine name to NLM RxNorm/openFDA. It does not send the clinical question, care stage, gestational week or other context. This is not a pregnancy risk assessment, interaction check or medication recommendation. Egypt, UK and Global modes use reference links only.</p>
 <label for="clinical_question">Clinical question or clinician-entered assessment</label>
 <textarea id="clinical_question" name="clinical_question" maxlength="1600" required placeholder="Synthetic example: postpartum haemorrhage guideline version; medication reference during breastfeeding">%s</textarea>
 <label>Potential urgent escalation prompts</label><div class="checks">%s</div>
@@ -324,7 +357,10 @@ __MIA_AVATAR_WIDGET__</header>
 </main></body></html>""" % (
         esc(case_id), jurisdiction_options, stage_options,
         esc(_one(form, "gestational_week", "")), esc(_one(form, "postpartum_day", "")),
-        esc(_one(form, "medication_context", "")), esc(query), urgent_checks, result_html
+        esc(_one(form, "medication_context", "")),
+        " checked" if _checked(form, "lookup_public_sources") else "",
+        " checked" if _checked(form, "lookup_label_sections") else "",
+        esc(query), urgent_checks, result_html
     )
     return page.replace("__MIA_AVATAR_WIDGET__", render_avatar_customizer("Personalize your OB-GYN Mia"))
 
@@ -408,10 +444,12 @@ class ObgynWorkbenchHandler(BaseHTTPRequestHandler):
                 raise ValueError("Postpartum day must be between 0 and 365.")
             query = _one(form, "clinical_question")[:1600]
             medication_context = _one(form, "medication_context")[:120]
+            selected_jurisdiction = _one(form, "jurisdiction", "EG").upper()
             combined = " ".join([query, medication_context]).strip()
-            sources = source_matches(combined, stage, _one(form, "jurisdiction", "EG").upper())
+            sources = source_matches(combined, stage, selected_jurisdiction)
             review = {"sources": sources, "error": None}
-            page = render_page(form, review)
+            public_lookup = optional_drug_lookup(form, selected_jurisdiction)
+            page = render_page(form, review, public_lookup=public_lookup)
         except (ValueError, OSError, json.JSONDecodeError) as exc:
             page = render_page(form, {"sources": [], "error": str(exc)})
             self._send(400, page.encode("utf-8"))
