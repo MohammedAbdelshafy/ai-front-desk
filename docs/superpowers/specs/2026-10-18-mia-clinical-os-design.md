@@ -118,7 +118,7 @@ Required policy/document templates:
 
 ### Non-negotiable security rules
 - Separate each clinic/specialty deployment's app configuration, database, storage, auth configuration, secrets and backups. No shared patient database across clinic apps by default. When later supporting shared infrastructure, enforce tenant scoping and authorization server-side for every request and object.
-- Deny by default; verify role, tenant, record and action on every request. Never trust a client-provided clinic ID as proof of access.
+- Deny by default; phase one has one app instance and fictional records only. Future production requests must validate authenticated role, app/clinic scope, record ownership and action server-side. Never trust a client-provided clinic ID as proof of access.
 - Use least-privilege roles and MFA for staff where supported. Protect service secrets; never send privileged backend keys to the browser.
 - Audit sensitive read/write, export, deletion, consent changes, clinical approval, and evidence-card releases. Audit logs must not indiscriminately duplicate entire clinical records or secrets.
 - No patient record, chat content or upload may be used for model training by default.
