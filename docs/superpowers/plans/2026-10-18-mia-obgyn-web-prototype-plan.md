@@ -85,7 +85,7 @@
 - Navigation routes: `/dashboard`, `/patients`, `/appointments/[id]`, `/questionnaires`, `/mia`, `/evidence`, `/governance`.
 - Shell owns accessible nav, status badge, page content, avatar-customization trigger and mobile nav.
 
-- [ ] **Step 1: Write failing tests** for navigation destinations, synthetic-only badge, reduced-motion fallback and mobile menu keyboard behavior.
+- [ ] **Step 1: Write failing tests** for navigation destinations, synthetic-only badge, reduced-motion fallback, mobile menu keyboard behavior, Arabic UI toggle and RTL direction.
 - [ ] **Step 2: Run** focused shell tests; expected FAIL.
 - [ ] **Step 3: Implement** deep-navy/cyan visual system, subtle gradients/glass cards, ambient decorative motion, a responsive layout and actionable dashboard cards for appointments, pending questionnaires and review tasks.
 - [ ] **Step 4: Run** focused tests and build; expected PASS.
