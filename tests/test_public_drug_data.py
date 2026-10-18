@@ -133,3 +133,74 @@ def test_open_knowledge_catalogs_declare_reuse_rights_and_limits():
     assert providers["rxnorm-api"]["access_cost"] == "free_of_charge"
     assert "normalization" in " ".join(providers["rxnorm-api"]["roles"])
     assert providers["rxnav-discontinued-ddi"]["ingestion_status"] == "retired_do_not_integrate"
+
+
+
+def test_openfda_label_sections_returns_bounded_source_excerpts_only():
+    def fake_fetch(url, timeout=4):
+        parsed = urlparse(url)
+        params = parse_qs(parsed.query)
+        assert "fields" in params
+        assert "contraindications" in params["fields"][0]
+        assert params["limit"] == ["5"]
+        return {
+            "results": [{
+                "set_id": "abcdef12-1234-1234-1234-123456789abc",
+                "effective_time": "20261001",
+                "openfda": {
+                    "brand_name": ["Synthetic brand"],
+                    "generic_name": ["synthetic ingredient"],
+                    "manufacturer_name": ["Synthetic maker"],
+                    "route": ["ORAL"],
+                    "dosage_form": ["TABLET"]
+                },
+                "indications_and_usage": ["I" * 2400],
+                "contraindications": ["Do not use in a synthetic contraindication scenario."],
+                "drug_interactions": ["Check for interactions in the full current source label."]
+            }]
+        }
+
+    result = drugdata.search_openfda_label_sections("synthetic ingredient", fetch_json=fake_fetch)
+    assert result["status"] == "found"
+    assert result["reference_only"] is True
+    assert result["patient_context_sent"] is False
+    assert result["interaction_check_performed"] is False
+    item = result["items"][0]
+    assert item["full_label_link"].endswith("abcdef12-1234-1234-1234-123456789abc")
+    sections = {section["field"]: section for section in item["sections"]}
+    assert len(sections["indications_and_usage"]["excerpt"]) == drugdata.MAX_LABEL_SECTION_CHARS
+    assert sections["indications_and_usage"]["truncated"] is True
+    assert "synthetic contraindication" in sections["contraindications"]["excerpt"]
+    assert "This does not recommend" not in str(result)
+
+
+def test_lookup_can_opt_in_to_label_reference_without_sending_case_context():
+    seen = []
+    def fake_fetch(url, timeout=4):
+        seen.append(url)
+        if url.startswith(drugdata.RXNORM_BASE):
+            return {"drugGroup": {"conceptGroup": []}}
+        params = parse_qs(urlparse(url).query)
+        fields = params.get("fields", [""])[0]
+        if "contraindications" in fields:
+            return {"results": [{
+                "set_id": "abcdef12-1234-1234-1234-123456789abc",
+                "effective_time": "20261001",
+                "openfda": {"generic_name": ["synthetic ingredient"]},
+                "contraindications": ["Synthetic test label warning."]
+            }]}
+        return {"results": [{
+            "set_id": "abcdef12-1234-1234-1234-123456789abc",
+            "effective_time": "20261001",
+            "openfda": {"generic_name": ["synthetic ingredient"]}
+        }]}
+
+    result = drugdata.lookup_public_drug_metadata(
+        "synthetic ingredient", fetch_json=fake_fetch, include_label_sections=True
+    )
+    assert result["patient_context_sent"] is False
+    assert result["clinical_recommendation_provided"] is False
+    assert result["interaction_check_performed"] is False
+    assert result["label_reference"]["status"] == "found"
+    assert all("synthetic" in url.lower() or url.startswith(drugdata.RXNORM_BASE) for url in seen)
+    assert all("allergies" not in url and "medical_history" not in url for url in seen)
