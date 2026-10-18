@@ -1,0 +1,449 @@
+{
+  "schema_version": "1.0",
+  "specialty": "Obstetrics and Gynaecology",
+  "source_catalog_status": "reference_directory_only",
+  "sources": [
+    {
+      "id": "who-pph-guideline-2025",
+      "title": "WHO Consolidated Guidelines for the Prevention, Diagnosis and Treatment of Postpartum Haemorrhage",
+      "publisher": "WHO, FIGO and ICM",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "postpartum haemorrhage",
+        "pph",
+        "bleeding after birth",
+        "maternal emergency",
+        "uterotonic"
+      ],
+      "url": "https://www.who.int/publications/i/item/9789240115637",
+      "version": "2025 first consolidated edition",
+      "license_status": "link_only_commercial_rights_restricted",
+      "clinical_status": "reference_only"
+    },
+    {
+      "id": "who-pph-implementation-guide-2026",
+      "title": "WHO Consolidated Guidelines for Postpartum Haemorrhage: Implementation Guide",
+      "publisher": "World Health Organization",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "postpartum haemorrhage",
+        "maternal emergency",
+        "obstetric emergency",
+        "quality improvement"
+      ],
+      "url": "https://www.who.int/publications/i/item/9789240116115",
+      "version": "2026 implementation guide",
+      "license_status": "link_only_pending_rights_review",
+      "clinical_status": "reference_only"
+    },
+    {
+      "id": "who-maternal-health-recommendations-2025",
+      "title": "WHO Recommendations on Maternal Health, 2nd edition",
+      "publisher": "World Health Organization",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "antenatal care",
+        "pregnancy",
+        "childbirth",
+        "postnatal care",
+        "maternal complications"
+      ],
+      "url": "https://www.who.int/publications/b/59332",
+      "version": "2nd edition, 2025",
+      "license_status": "link_only_commercial_rights_restricted",
+      "clinical_status": "reference_only"
+    },
+    {
+      "id": "who-labour-care-guide-2025",
+      "title": "WHO Labour Care Guide: Implementation Resource Package",
+      "publisher": "World Health Organization",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "labour",
+        "intrapartum",
+        "fetal monitoring",
+        "labour monitoring",
+        "birth"
+      ],
+      "url": "https://www.who.int/publications/i/item/9789240109346",
+      "version": "2025 implementation package",
+      "license_status": "link_only_pending_rights_review",
+      "clinical_status": "reference_only"
+    },
+    {
+      "id": "who-contraceptive-mec-sixth-2025",
+      "title": "WHO Medical Eligibility Criteria for Contraceptive Use, 6th edition",
+      "publisher": "World Health Organization",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "contraception",
+        "family planning",
+        "contraceptive eligibility",
+        "postpartum contraception"
+      ],
+      "url": "https://www.who.int/publications/i/item/9789240115583/",
+      "version": "6th edition",
+      "license_status": "link_only_pending_rights_review",
+      "clinical_status": "reference_only"
+    },
+    {
+      "id": "who-abortion-care-guideline-2025",
+      "title": "WHO Abortion Care Guideline, 2nd edition",
+      "publisher": "World Health Organization",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "early pregnancy",
+        "abortion care",
+        "post-abortion care",
+        "reproductive health"
+      ],
+      "url": "https://www.who.int/publications/i/item/9789240104204",
+      "version": "2nd edition",
+      "license_status": "link_only_pending_rights_review",
+      "clinical_status": "reference_only_jurisdiction_review_required"
+    },
+    {
+      "id": "acog-preeclampsia-practice-bulletin",
+      "title": "ACOG Practice Bulletin: Gestational Hypertension and Preeclampsia",
+      "publisher": "American College of Obstetricians and Gynecologists",
+      "jurisdiction": [
+        "US"
+      ],
+      "topics": [
+        "preeclampsia",
+        "hypertension pregnancy",
+        "eclampsia",
+        "hypertensive disorders"
+      ],
+      "url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia",
+      "version": "2020 bulletin; check subsequent updates",
+      "license_status": "link_only_copyrighted",
+      "clinical_status": "reference_only"
+    },
+    {
+      "id": "acog-postpartum-haemorrhage",
+      "title": "ACOG Practice Bulletin: Postpartum Hemorrhage",
+      "publisher": "American College of Obstetricians and Gynecologists",
+      "jurisdiction": [
+        "US"
+      ],
+      "topics": [
+        "postpartum haemorrhage",
+        "postpartum hemorrhage",
+        "obstetric bleeding"
+      ],
+      "url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2017/10/postpartum-hemorrhage",
+      "version": "2017 bulletin; check subsequent updates",
+      "license_status": "link_only_copyrighted",
+      "clinical_status": "reference_only"
+    },
+    {
+      "id": "rcog-green-top-guidelines",
+      "title": "RCOG Green-top Guidelines",
+      "publisher": "Royal College of Obstetricians and Gynaecologists",
+      "jurisdiction": [
+        "UK",
+        "GLOBAL_REFERENCE"
+      ],
+      "topics": [
+        "obstetrics",
+        "gynaecology",
+        "ectopic pregnancy",
+        "miscarriage",
+        "maternal sepsis",
+        "shoulder dystocia",
+        "placenta accreta",
+        "postpartum haemorrhage",
+        "hyperemesis"
+      ],
+      "url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/",
+      "version": "Living index; individual version/status varies",
+      "license_status": "link_only_rights_review",
+      "clinical_status": "reference_index_only"
+    },
+    {
+      "id": "cdc-us-mec-2024",
+      "title": "CDC U.S. Medical Eligibility Criteria for Contraceptive Use, 2024",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "jurisdiction": [
+        "US"
+      ],
+      "topics": [
+        "contraception",
+        "contraceptive safety",
+        "medical eligibility",
+        "family planning"
+      ],
+      "url": "https://www.cdc.gov/contraception/hcp/usmec/introduction.html",
+      "version": "2024 U.S. MEC",
+      "license_status": "official_link_asset_notice_review",
+      "clinical_status": "reference_only"
+    },
+    {
+      "id": "ncbi-lactmed",
+      "title": "LactMed: Drugs and Lactation Database",
+      "publisher": "National Library of Medicine / NIH",
+      "jurisdiction": [
+        "GLOBAL_REFERENCE",
+        "US"
+      ],
+      "topics": [
+        "breastfeeding",
+        "lactation",
+        "medication in lactation",
+        "postpartum medication",
+        "drug transfer into breast milk"
+      ],
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK501922/",
+      "version": "Living database; individual record revision date matters",
+      "license_status": "verify current dataset/record terms",
+      "clinical_status": "reference_only_lactation_not_pregnancy"
+    },
+    {
+      "id": "mother-to-baby",
+      "title": "MotherToBaby Fact Sheets and Pregnancy Studies",
+      "publisher": "Organization of Teratology Information Specialists / MotherToBaby",
+      "jurisdiction": [
+        "US",
+        "GLOBAL_REFERENCE"
+      ],
+      "topics": [
+        "medications in pregnancy",
+        "exposure in pregnancy",
+        "birth defects",
+        "pregnancy medication counseling",
+        "teratology",
+        "drug safety in pregnancy"
+      ],
+      "url": "https://mothertobaby.org/fact-sheets-parent/",
+      "version": "Individual fact-sheet revision date",
+      "license_status": "link_only_copyright_terms_review",
+      "clinical_status": "reference_only"
+    },
+    {
+      "id": "uktis-bumps",
+      "title": "UKTIS / BUMPS: Medicines in Pregnancy",
+      "publisher": "UK Teratology Information Service",
+      "jurisdiction": [
+        "UK",
+        "GLOBAL_REFERENCE"
+      ],
+      "topics": [
+        "medications in pregnancy",
+        "teratology",
+        "pregnancy exposures"
+      ],
+      "url": "https://www.medicinesinpregnancy.org/",
+      "version": "Individual information sheet revision date",
+      "license_status": "link_only_copyright_terms_review",
+      "clinical_status": "reference_only"
+    },
+    {
+      "id": "dailymed-spl",
+      "title": "DailyMed Structured Product Labels",
+      "publisher": "National Library of Medicine",
+      "jurisdiction": [
+        "US"
+      ],
+      "topics": [
+        "medicine label",
+        "contraindications",
+        "pregnancy",
+        "lactation",
+        "drug interactions",
+        "product warnings"
+      ],
+      "url": "https://dailymed.nlm.nih.gov/dailymed/app-support-web-services.cfm",
+      "version": "Product-specific label revision required",
+      "license_status": "record_level_rights_review",
+      "clinical_status": "label_reference_not_individual_risk_assessment"
+    },
+    {
+      "id": "openfda-labels",
+      "title": "openFDA Drug Label API",
+      "publisher": "US Food and Drug Administration",
+      "jurisdiction": [
+        "US"
+      ],
+      "topics": [
+        "drug label",
+        "warnings",
+        "pregnancy",
+        "lactation",
+        "contraindications",
+        "drug interactions"
+      ],
+      "url": "https://open.fda.gov/apis/drug/label/",
+      "version": "Record/effective time required",
+      "license_status": "metadata_reference_only_third_party_rights_check",
+      "clinical_status": "reference_only"
+    },
+    {
+      "id": "eda-drug-register",
+      "title": "Egyptian Drug Authority: Egyptian Drug Register",
+      "publisher": "Egyptian Drug Authority",
+      "jurisdiction": [
+        "EG"
+      ],
+      "topics": [
+        "Egypt product registration",
+        "registered medicine",
+        "national product label",
+        "medicine identity"
+      ],
+      "url": "https://www.edaegypt.gov.eg/ar/%D8%A7%D9%84%D9%85%D8%B1%D8%AC%D8%B9-%D8%A7%D9%84%D8%AA%D9%86%D8%B8%D9%8A%D9%85%D9%8A-%D9%84%D9%87%D9%8A%D8%A6%D8%A9-%D8%A7%D9%84%D8%AF%D9%88%D8%A7%D8%A1-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%8A%D8%A9/%D8%B3%D8%AC%D9%84-%D8%A7%D9%84%D8%AF%D9%88%D8%A7%D8%A1-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%8A/",
+      "version": "Living register; exact record needed",
+      "license_status": "official_link_manual_review",
+      "clinical_status": "registration_context_only"
+    },
+    {
+      "id": "eda-periodic-lists",
+      "title": "Egyptian Drug Authority: Periodic Lists",
+      "publisher": "Egyptian Drug Authority",
+      "jurisdiction": [
+        "EG"
+      ],
+      "topics": [
+        "Egypt essential medicines",
+        "high-alert medicines",
+        "do not crush",
+        "emergency medication lists",
+        "OTC classification"
+      ],
+      "url": "https://edaegypt.gov.eg/en/publications-reports-and-eda-in-numbers/eda-publications/periodic-lists/",
+      "version": "Individual list/year required",
+      "license_status": "review_exact_file_terms",
+      "clinical_status": "reference_only"
+    },
+    {
+      "id": "eda-safety-alerts",
+      "title": "Egyptian Drug Authority: Pharmacovigilance Safety Alerts",
+      "publisher": "Egyptian Drug Authority",
+      "jurisdiction": [
+        "EG"
+      ],
+      "topics": [
+        "pregnancy",
+        "lactation",
+        "medicine label changes",
+        "drug safety alerts",
+        "pharmacovigilance"
+      ],
+      "url": "https://www.edaegypt.gov.eg/en/awareness/ca-of-pharmaceutical-care-publications/pharmacovigilance-publications/third-safety-alerts/",
+      "version": "Individual alert date/product required",
+      "license_status": "review_alert_terms",
+      "clinical_status": "safety_signal_re-review"
+    },
+    {
+      "id": "eda-pharmaceutical-information-center",
+      "title": "Egyptian Pharmaceutical Information Center: Reliable Drug Information Service",
+      "publisher": "Egyptian Drug Authority",
+      "jurisdiction": [
+        "EG"
+      ],
+      "topics": [
+        "complex medicine question",
+        "pregnancy medication query",
+        "lactation medicine query",
+        "drug information escalation"
+      ],
+      "url": "https://edaegypt.gov.eg/en/about-us/home-page-services/home-page-services/inquire-about-reliable-drug-information/",
+      "version": "Human expert service",
+      "license_status": "not_a_bulk_ingestion_source",
+      "clinical_status": "expert_escalation"
+    },
+    {
+      "id": "pubmed-pmc",
+      "title": "PubMed and PubMed Central",
+      "publisher": "National Library of Medicine / NIH",
+      "jurisdiction": [
+        "GLOBAL_REFERENCE"
+      ],
+      "topics": [
+        "systematic review",
+        "clinical trials",
+        "obstetrics",
+        "gynaecology",
+        "maternal medicine",
+        "fertility",
+        "gynecologic oncology"
+      ],
+      "url": "https://pubmed.ncbi.nlm.nih.gov/",
+      "version": "Live index; article/retraction/version required",
+      "license_status": "article_specific_rights",
+      "clinical_status": "evidence_discovery_only"
+    },
+    {
+      "id": "smfm-clinical-guidance",
+      "title": "Society for Maternal-Fetal Medicine: Clinical Guidance",
+      "publisher": "Society for Maternal-Fetal Medicine",
+      "jurisdiction": [
+        "US",
+        "GLOBAL_REFERENCE"
+      ],
+      "topics": [
+        "maternal-fetal medicine",
+        "high-risk pregnancy",
+        "fetal growth restriction",
+        "preterm birth",
+        "pregnancy complications"
+      ],
+      "url": "https://www.smfm.org/publications",
+      "version": "Individual consult version/date",
+      "license_status": "link_only_copyrighted",
+      "clinical_status": "reference_only"
+    },
+    {
+      "id": "mohp-eg-safe-maternity-services",
+      "title": "Egyptian Ministry of Health and Population — Safe Maternity and Obstetric Services",
+      "publisher": "Egyptian Ministry of Health and Population",
+      "jurisdiction": [
+        "EG"
+      ],
+      "topics": [
+        "obstetrics",
+        "gynaecology",
+        "safe delivery",
+        "delivery protocols",
+        "maternity emergency",
+        "maternal mortality review",
+        "obstetric referral",
+        "labour",
+        "postpartum care"
+      ],
+      "url": "https://www.mohp.gov.eg/SectorServices.aspx?Deptcode=28&SectorCode=5",
+      "version": "Official service page; linked protocol version required",
+      "license_status": "link_only_pending_rights_review",
+      "clinical_status": "service_index_not_treatment_protocol"
+    },
+    {
+      "id": "who-maternal-health-2025",
+      "title": "WHO maternal-health recommendations: official index",
+      "publisher": "World Health Organization",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "maternal care",
+        "antenatal care",
+        "postnatal care"
+      ],
+      "url": "https://www.who.int/publications/b/59332",
+      "version": "Check individual topic and version",
+      "license_status": "link_only_pending_rights_review",
+      "clinical_status": "reference_index_only"
+    }
+  ]
+}
