@@ -339,7 +339,13 @@
         "medications in pregnancy",
         "exposure in pregnancy",
         "birth defects",
-        "pregnancy medication counseling"
+        "pregnancy medication counseling",
+        "breastfeeding",
+        "lactation",
+        "medication in pregnancy",
+        "pregnancy exposure",
+        "teratology",
+        "drug safety in pregnancy"
       ],
       "url": "https://mothertobaby.org/fact-sheets-parent/",
       "version": "Individual fact-sheet revision date",
@@ -350,7 +356,8 @@
       "clinical_role": "pregnancy exposure information and patient-counseling context",
       "update_cadence": "capture fact-sheet revision date per substance",
       "notes": [
-        "Not a replacement for obstetric/pharmacology consultation or national product labeling."
+        "Not a replacement for obstetric/pharmacology consultation or national product labeling.",
+        "Topic match only: consult the individual fact sheet version and clinical context; this is not an automatic treatment recommendation."
       ]
     },
     {
