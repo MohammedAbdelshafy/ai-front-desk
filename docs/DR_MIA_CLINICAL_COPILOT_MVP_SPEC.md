@@ -30,10 +30,16 @@ This replaces the earlier front-desk-first commercial recommendation recorded in
 - Strict source eligibility checks (approval state, rights status, jurisdiction, reviewer metadata, and review due date).
 - Exact-phrase evidence-card retrieval with source provenance.
 - Baseline allergy/current-medication review prompts and a deterministic completeness checklist.
-- A local workbench at `http://127.0.0.1:8767` that accepts synthetic cases and stores no submissions. By default it makes no external calls; its optional public lookup sends only a standalone medicine name to NLM RxNorm/openFDA for metadata and never sends case context.
+- A local workbench at `http://127.0.0.1:8767` that accepts synthetic cases and stores no submissions. By default it makes no external calls. Optional lookups send only a standalone medicine name to NLM RxNorm/openFDA, never the case context; a second opt-in can show truncated official label sections for clinician reference.
+- A source-cited draft evidence panel for three synthetic testing pathways: adult/adolescent acute dental pain, pulpal/periapical antibiotic stewardship, and reported penicillin allergy. It uses phrase matching only and shows options named in cited sources for dentist review; the cards are explicitly unapproved, rights-pending, dose-free and not patient-specific recommendations.
+- An in-app reference-center panel with direct links/downloads to official sources where available, and a documented source download/reuse manifest.
 - Automated tests covering the no-evidence path, source expiry/approval/rights/jurisdiction checks, form escaping, and local HTTP behavior.
 
 **There are zero approved medication evidence cards.** The source links are candidates, not clinical approval. The workbench correctly returns “No verified evidence found” until evidence has been reviewed and approved.
+
+## Evidence and source readiness today
+
+The experimental draft cards are loaded separately from the approved clinical registry. They are shown only as a source-cited review preview after keyword matching; they have not been approved by a qualified dentist, their source reuse rights still require review, and matching text is not diagnosis or medicine selection. The live approved registry still contains zero approved cards. The current workbench only supports the US jurisdiction. Direct source links are available in the UI; the full Open RN textbook and source PDFs are not bundled into the repository. Optional openFDA label excerpts are non-persistent reference text, not verified product matching or a drug-interaction check.
 
 ## Explicit non-goals for the current prototype
 
