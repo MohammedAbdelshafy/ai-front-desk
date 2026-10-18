@@ -156,8 +156,9 @@ def test_opt_in_public_lookup_sends_only_name(workbench_url, monkeypatch):
     from ai_front_desk.clinical import medication_workbench as workbench
 
     seen = []
-    def fake_lookup(term):
+    def fake_lookup(term, include_label_sections=False):
         seen.append(term)
+        assert include_label_sections is False
         return {
             "status": "found",
             "lookup_term": term,
