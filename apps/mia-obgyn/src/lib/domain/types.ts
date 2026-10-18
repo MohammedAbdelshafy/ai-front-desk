@@ -1,0 +1,11 @@
+export type AllergyStatus = "confirmed-none" | "known-allergies" | "unknown" | "not-reviewed";
+export type FieldProvenance = "patient-reported" | "clinician-entered" | "synthetic-demo";
+export type AllergyRecord = { substance: string; reaction: string | null; severity: "unknown" | "mild" | "moderate" | "severe"; provenance: FieldProvenance; lastConfirmed: string | null };
+export type MedicationStatement = { name: string; ingredient: string | null; strength: string | null; route: string | null; status: "current" | "stopped" | "unverified"; provenance: FieldProvenance; lastVerified: string | null };
+export type ObstetricHistory = { gravidity: number | null; parity: number | null; lastMenstrualPeriod: string | null; gestationalWeeks: number | null; breastfeeding: "yes" | "no" | "unknown"; notes: string[] };
+export type Patient = { id: string; isSynthetic: true; demoName: string; displayId: string; ageYears: number; phone: string; email: string; allergyStatus: AllergyStatus; allergies: AllergyRecord[]; medicines: MedicationStatement[]; conditions: string[]; obstetricHistory: ObstetricHistory; encounters: {date:string; label:string; note:string; provenance:FieldProvenance}[]; questionnaireIds: string[]; };
+export type AppointmentStatus = "scheduled" | "intake-received" | "needs-review" | "completed";
+export type Appointment = { id: string; patientId: string; dateTime: string; service: "Antenatal" | "Postpartum" | "Gynaecology" | "Family planning"; reason: string; status: AppointmentStatus; questionnaireId: string | null; clinician: string; isSynthetic: true };
+export type QuestionnaireQuestion = { id: string; label: string; type: "text" | "yesno" | "select" | "date" | "number"; required: boolean; options?: string[]; showIf?: { questionId: string; equals: string } };
+export type QuestionnaireTemplate = { id: string; version: number; title: string; specialty: "OB-GYN"; status: "draft" | "published"; questions: QuestionnaireQuestion[] };
+export type QuestionnaireResponse = { id: string; templateId: string; templateVersion: number; patientId: string; appointmentId: string; answers: Record<string,string>; status: "draft" | "submitted" | "reviewed"; submittedAt: string | null; isSynthetic: true };
