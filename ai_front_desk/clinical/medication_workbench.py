@@ -27,7 +27,7 @@ BASE = Path(__file__).resolve().parent
 REGISTRY_PATH = BASE / "medication_evidence_registry.json"
 INFORMATION_CENTERS_PATH = BASE / "clinical_information_centers.json"
 MAX_BODY = 16 * 1024
-ALLOWED_JURISDICTIONS = {"US"}
+ALLOWED_JURISDICTIONS = {"US", "EG"}
 FACTOR_LABELS = {
     "age": "Age and age-relevant factors reviewed",
     "allergies": "Reported allergies and reactions reviewed",
@@ -558,6 +558,19 @@ def render_page(
         % (esc(key), checked(key), esc(label))
         for key, label in FACTOR_LABELS.items()
     )
+    selected_jurisdiction = _one(form, "jurisdiction", "US")
+    jurisdiction_options = "".join(
+        "<option value='%s'%s>%s</option>"
+        % (
+            esc(code),
+            " selected" if selected_jurisdiction == code else "",
+            esc(label),
+        )
+        for code, label in (
+            ("US", "United States (US)"),
+            ("EG", "Egypt (EG)"),
+        )
+    )
     result_html = ""
     if review is not None:
         evidence_state = review.get("status", "needs_clinician_input")
@@ -649,7 +662,7 @@ footer{margin:25px 0 10px;color:var(--muted);font-size:12px}
 <p class="hint">This lookup is local-only and makes no external calls. It searches the short study notes and, when you import rights-cleared textbook text, the local full-text library. Results are educational, not patient-specific prescribing advice.</p>
 </div>
 <label>Patient factors confirmed/reviewed in this synthetic case</label><div class="factor-grid">%s</div>
-<label for="jurisdiction">Reference jurisdiction</label><select id="jurisdiction" name="jurisdiction"><option value="US" selected>United States (US)</option></select>
+<label for="jurisdiction">Reference jurisdiction</label><select id="jurisdiction" name="jurisdiction">%s</select><p class="hint">Egypt is currently source-reference-only: no Egyptian medication candidate cards or approved evidence cards are active. Mia must not reuse US draft guidance for Egypt.</p>
 <div class="note" style="margin-top:16px"><strong>What this tool does not do</strong>
 It does not diagnose, prescribe, calculate doses, or perform comprehensive drug-interaction checks. A source match is not a safety conclusion. Always consult approved current references and a supervising clinician.</div>
 <button type="submit">Retrieve approved evidence</button>
@@ -677,6 +690,7 @@ It does not diagnose, prescribe, calculate doses, or perform comprehensive drug-
         value("learning_topic"),
         _checked(_one(form, "search_learning_library").lower() in {"1", "true", "on", "yes"}),
         factors,
+        jurisdiction_options,
         _render_information_centers(_one(form, "jurisdiction", "US")),
         result_html,
     )
