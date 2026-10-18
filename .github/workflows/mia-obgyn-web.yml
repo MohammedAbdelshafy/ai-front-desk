@@ -1,0 +1,28 @@
+name: Mia OB-GYN web build
+
+on:
+  push:
+    branches:
+      - "feat/mia-clinical-os"
+      - "main"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies and build
+        working-directory: apps/mia-obgyn
+        run: |
+          npm install
+          npm run build
