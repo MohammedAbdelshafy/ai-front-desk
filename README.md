@@ -6,7 +6,11 @@ Dr. Mia is a character-led clinical support product direction for dental practic
 
 **The core product is clinical quality and prescribing support.** The AI front desk, retention automation, and Lead Engine are optional expansions, not the product's identity.
 
-> **Current status:** this repository contains reference communication workflows, testable administrative logic, a local clinical-intake demo, and an initial local medication evidence workbench using synthetic data. The workbench can retrieve only approved, current, jurisdiction-matched evidence cards; the registry currently contains candidate source links only and **zero approved medication evidence cards**, so no medication recommendations are available. It does not diagnose, prescribe, calculate doses, or perform comprehensive interaction checks. Live phone answering, production messaging, appointment scheduling, and production clinical decision support are not shipped.
+> **Current status:** this repository contains a local medication evidence workbench using synthetic data, a source directory with official reference/download links, three draft source-cited dental medication review pathways for a dentist to evaluate, and optional RxNorm/openFDA name-only lookup. Draft options are clearly marked **not approved**, **rights review pending**, and **keyword-match only**; they are not patient-specific recommendations. The approved evidence registry still has **zero approved medication evidence cards**. Optional FDA label-section excerpts are for clinician reference only, not an interaction check. The app does not diagnose, prescribe, calculate or validate doses, or perform comprehensive drug-interaction screening. It remains a local prototype and is not approved for real-patient use.
+
+## Clinical data and test references
+
+See [Clinical Information Centers](docs/CLINICAL_INFORMATION_CENTERS.md), [Clinical Knowledge Downloads](docs/CLINICAL_KNOWLEDGE_DOWNLOADS.md), and the machine-readable directories `ai_front_desk/clinical/clinical_information_centers.json` and `ai_front_desk/clinical/clinical_evidence_drafts.json`. Official pages and PDFs are linked in the workbench; large source books and restricted clinical guidance are not bulk-copied into the app.
 
 ## Core product: Clinical Quality & Prescribing Copilot
 
