@@ -20,7 +20,19 @@ OPENFDA_BASE = "https://api.fda.gov/drug/label.json"
 DAILYMED_SEARCH = "https://dailymed.nlm.nih.gov/dailymed/search.cfm"
 TIMEOUT_SECONDS = 4
 MAX_RESULTS = 5
+MAX_LABEL_REFERENCE_RESULTS = 3
+MAX_LABEL_SECTION_CHARS = 1800
 MAX_QUERY_LENGTH = 120
+LABEL_REFERENCE_SECTIONS = {
+    "indications_and_usage": "Indications and usage",
+    "dosage_and_administration": "Dosage and administration",
+    "contraindications": "Contraindications",
+    "boxed_warning": "Boxed warning",
+    "warnings_and_cautions": "Warnings and cautions",
+    "drug_interactions": "Drug interactions",
+    "use_in_specific_populations": "Use in specific populations",
+    "adverse_reactions": "Adverse reactions",
+}
 MEDICINE_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 +().,'/-]{0,119}$")
 # Block common clinical narrative terms so obvious case descriptions are not
 # sent as a "medicine name". This cannot reliably detect every person's name;
@@ -260,18 +272,127 @@ def search_openfda_label_metadata(
     }
 
 
-def lookup_public_drug_metadata(
+
+
+def search_openfda_label_sections(
     medicine_name: str,
     *,
     fetch_json: Callable[..., dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    """Lookup drug name metadata only. Do not pass patient-specific case data."""
+    """Retrieve short source-linked label sections for human reference only.
+
+    Only a standalone medicine name is sent. This is not an indication match,
+    interaction check, safety conclusion, or recommendation engine.
+    """
+    term = validate_medicine_name(medicine_name)
+    fetch = fetch_json or _fetch_json
+    fields = ["set_id", "effective_time", "openfda", *LABEL_REFERENCE_SECTIONS.keys()]
+    records: list[dict[str, Any]] = []
+    source_url = ""
+
+    for field in ("openfda.generic_name", "openfda.brand_name"):
+        search = '%s:"%s"' % (field, term.replace("\\", "\\\\").replace('"', '\\"'))
+        params = {
+            "search": search,
+            "limit": str(MAX_RESULTS),
+            "fields": ",".join(fields),
+        }
+        url = OPENFDA_BASE + "?" + urlencode(params)
+        source_url = url
+        try:
+            data = _invoke_fetch(fetch, url)
+        except PublicDrugDataNotFound:
+            continue
+        except PublicDrugDataError:
+            if not records:
+                return {
+                    "status": "unavailable",
+                    "query": term,
+                    "items": [],
+                    "source_url": url,
+                    "reference_only": True,
+                }
+            break
+
+        results = data.get("results", [])
+        if not isinstance(results, list):
+            continue
+        for record in results:
+            if not isinstance(record, dict):
+                continue
+            metadata = _label_metadata(record, term)
+            if not metadata:
+                continue
+            sections = []
+            for field_name, heading in LABEL_REFERENCE_SECTIONS.items():
+                raw = record.get(field_name, [])
+                if isinstance(raw, list):
+                    raw = raw[0] if raw else ""
+                text = str(raw).strip() if raw is not None else ""
+                if not text:
+                    continue
+                sections.append({
+                    "field": field_name,
+                    "heading": heading,
+                    "excerpt": text[:MAX_LABEL_SECTION_CHARS],
+                    "truncated": len(text) > MAX_LABEL_SECTION_CHARS,
+                })
+            records.append({
+                **metadata,
+                "sections": sections,
+                "reference_only": True,
+                "full_label_link": metadata.get("dailymed_url"),
+            })
+            if len(records) >= MAX_LABEL_REFERENCE_RESULTS:
+                break
+        if records:
+            break
+
+    deduped: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for item in records:
+        key = str(item.get("label_set_id", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(item)
+        if len(deduped) >= MAX_LABEL_REFERENCE_RESULTS:
+            break
+
+    return {
+        "status": "found" if deduped else "not_found",
+        "query": term,
+        "items": deduped,
+        "source_url": source_url or (DAILYMED_SEARCH + "?" + urlencode({"query": term})),
+        "reference_only": True,
+        "patient_context_sent": False,
+        "interaction_check_performed": False,
+        "note": (
+            "Short excerpts from FDA-submitted label records for clinician reference only. "
+            "openFDA says not to rely on its data alone for medical-care decisions. "
+            "The excerpt may be incomplete, the product may not match the locally available product, "
+            "and no patient-specific indication, contraindication, dose or interaction assessment was performed."
+        ),
+    }
+
+
+def lookup_public_drug_metadata(
+    medicine_name: str,
+    *,
+    fetch_json: Callable[..., dict[str, Any]] | None = None,
+    include_label_sections: bool = False,
+) -> dict[str, Any]:
+    """Lookup medicine-name metadata; optionally add label excerpts for human reference.
+
+    Do not pass patient-specific case data. Label excerpts are not a clinical
+    recommendation or an interaction check.
+    """
     term = validate_medicine_name(medicine_name)
     fetch = fetch_json or _fetch_json
     rxnorm = search_rxnorm(term, fetch_json=fetch)
     labels = search_openfda_label_metadata(term, fetch_json=fetch)
     now = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-    return {
+    result = {
         "status": "found" if rxnorm["status"] == "found" or labels["status"] == "found" else (
             "unavailable" if rxnorm["status"] == "unavailable" or labels["status"] == "unavailable" else "not_found"
         ),
@@ -290,3 +411,6 @@ def lookup_public_drug_metadata(
         "rxnorm": rxnorm,
         "openfda_labels": labels,
     }
+    if include_label_sections:
+        result["label_reference"] = search_openfda_label_sections(term, fetch_json=fetch)
+    return result
