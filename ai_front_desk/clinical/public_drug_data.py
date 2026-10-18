@@ -21,6 +21,7 @@ DAILYMED_SEARCH = "https://dailymed.nlm.nih.gov/dailymed/search.cfm"
 TIMEOUT_SECONDS = 4
 MAX_RESULTS = 5
 MAX_LABEL_REFERENCE_RESULTS = 3
+LABEL_REFERENCE_QUERY_LIMIT = 3
 MAX_LABEL_SECTION_CHARS = 1800
 MAX_QUERY_LENGTH = 120
 LABEL_REFERENCE_SECTIONS = {
@@ -292,10 +293,12 @@ def search_openfda_label_sections(
 
     for field in ("openfda.generic_name", "openfda.brand_name"):
         search = '%s:"%s"' % (field, term.replace("\\", "\\\\").replace('"', '\\"'))
+        # openFDA label searches support search/limit. Do not rely on an
+        # undocumented field-selection parameter; the documented API returns
+        # whole label records, which are bounded here by a small result limit.
         params = {
             "search": search,
-            "limit": str(MAX_RESULTS),
-            "fields": ",".join(fields),
+            "limit": str(LABEL_REFERENCE_QUERY_LIMIT),
         }
         url = OPENFDA_BASE + "?" + urlencode(params)
         source_url = url
