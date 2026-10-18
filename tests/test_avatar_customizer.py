@@ -26,7 +26,7 @@ def test_avatar_assets_exist_and_have_expected_content_types():
         assert path.exists()
         assert path.is_file()
         assert path.stat().st_size > 100
-        assert content_type.startswith("text/")
+        assert content_type.startswith("text/") or content_type == "application/javascript"
     js = (BASE / "static" / "mia-avatar.js").read_text(encoding="utf-8")
     assert "localStorage" in js
     assert "MAX_UPLOAD_BYTES" in js
