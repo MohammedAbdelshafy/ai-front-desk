@@ -30,14 +30,6 @@
     },
     {
       "id": "GOV-04",
-      "path": "docs/clinical-governance/04-vendor-and-cross-border-review.md",
-      "title": "Vendor and cross-border review",
-      "status": "not_started",
-      "owner": "Security + privacy lead",
-      "blocks_live_use": true
-    },
-    {
-      "id": "GOV-05",
       "path": "docs/clinical-governance/05-security-threat-model-and-incident-response.md",
       "title": "Security threat model and incident response",
       "status": "not_started",
@@ -45,7 +37,7 @@
       "blocks_live_use": true
     },
     {
-      "id": "GOV-06",
+      "id": "GOV-05",
       "path": "docs/clinical-governance/06-clinical-risk-and-validation-plan.md",
       "title": "Clinical risk and validation plan",
       "status": "not_started",
@@ -53,7 +45,7 @@
       "blocks_live_use": true
     },
     {
-      "id": "GOV-07",
+      "id": "GOV-06",
       "path": "docs/clinical-governance/07-source-rights-and-evidence-card-template.md",
       "title": "Source rights and evidence card template",
       "status": "review_required",
@@ -61,11 +53,19 @@
       "blocks_live_use": true
     },
     {
-      "id": "GOV-08",
+      "id": "GOV-07",
       "path": "docs/clinical-governance/08-regulatory-classification-and-launch-gates.md",
       "title": "Regulatory classification and launch gates",
       "status": "review_required",
       "owner": "Regulatory counsel",
+      "blocks_live_use": true
+    },
+    {
+      "id": "GOV-08",
+      "path": "docs/clinical-governance/04-vendor-and-cross-border-review.md",
+      "title": "Vendor and cross-border review",
+      "status": "not_started",
+      "owner": "Security + privacy lead",
       "blocks_live_use": true
     }
   ]
