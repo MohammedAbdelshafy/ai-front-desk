@@ -1,0 +1,594 @@
+{
+  "schema_version": "1.0",
+  "specialty": "Obstetrics and Gynaecology",
+  "last_reviewed": "2026-10-18",
+  "status": "information_directory_only_no_approved_clinical_protocol_cards",
+  "purpose": "Source directory and routing metadata for the separate Dr. Mia OB-GYN hospital workbench. URLs are reference links; there is no live extraction, recommendation engine, or protocol approval.",
+  "default_policy": {
+    "default_rights": "link_only_until_record_specific_reuse_review",
+    "source_discovery_not_clinical_approval": true,
+    "jurisdiction_required": true,
+    "current_version_required": true,
+    "clinician_approval_required_for_any_derived_protocol": true,
+    "no_medicine_or_dose_recommendations_in_v1": true,
+    "emergency_red_flags_trigger_local_protocol_escalation": true
+  },
+  "sources": [
+    {
+      "id": "who-pph-guideline-2025",
+      "title": "WHO Consolidated Guidelines for the Prevention, Diagnosis and Treatment of Postpartum Haemorrhage",
+      "publisher": "WHO, FIGO and ICM",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "postpartum haemorrhage",
+        "pph",
+        "bleeding after birth",
+        "maternal emergency",
+        "uterotonic"
+      ],
+      "url": "https://www.who.int/publications/i/item/9789240115637",
+      "download_url": "https://www.who.int/publications/i/item/9789240115637",
+      "version": "2025 first consolidated edition",
+      "published_on": "2025-10-05",
+      "access": "official guideline page with PDF download",
+      "reuse_rights": "CC BY-NC-SA 3.0 IGO; noncommercial reuse only unless WHO grants permission",
+      "ingest_status": "link_only_commercial_rights_restricted",
+      "clinical_role": "authoritative guideline reference; card requires version and local protocol review",
+      "update_cadence": "manual version check plus source change signal",
+      "notes": [
+        "Not automatically ingested into a commercial product under the noncommercial license.",
+        "Hospital response must follow local obstetric haemorrhage protocol and escalation pathway."
+      ]
+    },
+    {
+      "id": "who-pph-implementation-guide-2026",
+      "title": "WHO Consolidated Guidelines for Postpartum Haemorrhage: Implementation Guide",
+      "publisher": "World Health Organization",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "postpartum haemorrhage",
+        "maternal emergency",
+        "obstetric emergency",
+        "quality improvement"
+      ],
+      "url": "https://www.who.int/publications/i/item/9789240116115",
+      "version": "2026 implementation guide",
+      "published_on": "2026-02-22",
+      "access": "official publication page and PDF download",
+      "reuse_rights": "check WHO record-specific terms; commercial reuse not cleared",
+      "ingest_status": "link_only_pending_rights_review",
+      "clinical_role": "implementation and hospital protocol development",
+      "update_cadence": "manual version check",
+      "notes": [
+        "Supports implementation planning; does not replace a locally approved emergency protocol."
+      ]
+    },
+    {
+      "id": "who-maternal-health-recommendations-2025",
+      "title": "WHO Recommendations on Maternal Health, 2nd edition",
+      "publisher": "World Health Organization",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "antenatal care",
+        "pregnancy",
+        "childbirth",
+        "postnatal care",
+        "maternal complications"
+      ],
+      "url": "https://www.who.int/publications/b/59332",
+      "version": "2nd edition, 2025",
+      "published_on": "2025",
+      "access": "official publication page",
+      "reuse_rights": "CC BY-NC-SA 3.0 IGO; noncommercial reuse only unless permission granted",
+      "ingest_status": "link_only_commercial_rights_restricted",
+      "clinical_role": "index of WHO maternal-health recommendations",
+      "update_cadence": "check relevant topic guideline separately",
+      "notes": [
+        "Summary/index rather than a substitute for the exact topic guideline."
+      ]
+    },
+    {
+      "id": "who-labour-care-guide-2025",
+      "title": "WHO Labour Care Guide: Implementation Resource Package",
+      "publisher": "World Health Organization",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "labour",
+        "intrapartum",
+        "fetal monitoring",
+        "labour monitoring",
+        "birth"
+      ],
+      "url": "https://www.who.int/publications/i/item/9789240109346",
+      "version": "2025 implementation package",
+      "published_on": "2025-09-07",
+      "access": "official publication page and PDF download",
+      "reuse_rights": "review record-specific license; commercial ingestion not cleared",
+      "ingest_status": "link_only_pending_rights_review",
+      "clinical_role": "labour monitoring and respectful intrapartum care reference",
+      "update_cadence": "manual version check",
+      "notes": [
+        "Use the hospital-approved labour monitoring protocol and local escalation rules."
+      ]
+    },
+    {
+      "id": "who-contraceptive-mec-sixth-2025",
+      "title": "WHO Medical Eligibility Criteria for Contraceptive Use, 6th edition",
+      "publisher": "World Health Organization",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "contraception",
+        "family planning",
+        "contraceptive eligibility",
+        "postpartum contraception"
+      ],
+      "url": "https://www.who.int/publications/i/item/9789240115583/",
+      "version": "6th edition",
+      "published_on": "2025-11-03",
+      "access": "official publication page and PDF download",
+      "reuse_rights": "confirm record-specific reuse terms; commercial ingestion not cleared",
+      "ingest_status": "link_only_pending_rights_review",
+      "clinical_role": "contraceptive method eligibility by condition and personal characteristics",
+      "update_cadence": "check for newer edition and local national policy",
+      "notes": [
+        "Guidance must be applied within jurisdiction and patient-context scope."
+      ]
+    },
+    {
+      "id": "who-abortion-care-guideline-2025",
+      "title": "WHO Abortion Care Guideline, 2nd edition",
+      "publisher": "World Health Organization",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "early pregnancy",
+        "abortion care",
+        "post-abortion care",
+        "reproductive health"
+      ],
+      "url": "https://www.who.int/publications/i/item/9789240104204",
+      "version": "2nd edition",
+      "published_on": "2025-08-24",
+      "access": "official publication page and PDF download",
+      "reuse_rights": "verify record-specific license; commercial ingestion not cleared",
+      "ingest_status": "link_only_pending_rights_review",
+      "clinical_role": "global evidence reference, subject to national law and local policy",
+      "update_cadence": "manual version and national-policy check",
+      "notes": [
+        "Must not be used without jurisdiction-specific legal and hospital-policy review."
+      ]
+    },
+    {
+      "id": "who-intrapartum-care-2018",
+      "title": "WHO Recommendations: Intrapartum Care for a Positive Childbirth Experience",
+      "publisher": "World Health Organization",
+      "jurisdiction": [
+        "GLOBAL"
+      ],
+      "topics": [
+        "labour",
+        "intrapartum",
+        "childbirth",
+        "respectful maternity care"
+      ],
+      "url": "https://www.who.int/publications/i/item/9789241550215",
+      "version": "2018 guideline; check linked implementation tools and subsequent updates",
+      "published_on": "2018-02-07",
+      "access": "official publication page",
+      "reuse_rights": "review rights on exact record; no commercial text ingestion approved",
+      "ingest_status": "reference_only_check_supersession",
+      "clinical_role": "general intrapartum care",
+      "update_cadence": "supersession check required",
+      "notes": [
+        "Older guidance; don't assume every recommendation is still current without checking WHO updates."
+      ]
+    },
+    {
+      "id": "acog-preeclampsia-practice-bulletin",
+      "title": "ACOG Practice Bulletin: Gestational Hypertension and Preeclampsia",
+      "publisher": "American College of Obstetricians and Gynecologists",
+      "jurisdiction": [
+        "US"
+      ],
+      "topics": [
+        "preeclampsia",
+        "hypertension pregnancy",
+        "eclampsia",
+        "hypertensive disorders"
+      ],
+      "url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia",
+      "version": "2020 bulletin; page reports reaffirmed 2026 and lists later updates",
+      "published_on": "2020",
+      "access": "official guideline page; some content member/subscriber restricted",
+      "reuse_rights": "copyrighted clinical content; link-only unless permission granted",
+      "ingest_status": "link_only_copyrighted",
+      "clinical_role": "US clinical reference; exact version/update must be checked",
+      "update_cadence": "manual update and supersession review",
+      "notes": [
+        "Never use as an Egypt national protocol without local review."
+      ]
+    },
+    {
+      "id": "acog-postpartum-haemorrhage",
+      "title": "ACOG Practice Bulletin: Postpartum Hemorrhage",
+      "publisher": "American College of Obstetricians and Gynecologists",
+      "jurisdiction": [
+        "US"
+      ],
+      "topics": [
+        "postpartum haemorrhage",
+        "postpartum hemorrhage",
+        "obstetric bleeding"
+      ],
+      "url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2017/10/postpartum-hemorrhage",
+      "version": "2017 bulletin; reaffirmed 2024; July 2025 clinical practice update listed",
+      "published_on": "2017",
+      "access": "official guideline page; supplemental updates linked",
+      "reuse_rights": "copyrighted clinical content; link-only unless permission granted",
+      "ingest_status": "link_only_copyrighted",
+      "clinical_role": "US clinical reference; review updates and local protocol before use",
+      "update_cadence": "manual update and supersession review",
+      "notes": [
+        "This older bulletin must be read with its subsequent update and current institutional protocol."
+      ]
+    },
+    {
+      "id": "rcog-green-top-guidelines",
+      "title": "RCOG Green-top Guidelines",
+      "publisher": "Royal College of Obstetricians and Gynaecologists",
+      "jurisdiction": [
+        "UK",
+        "GLOBAL_REFERENCE"
+      ],
+      "topics": [
+        "obstetrics",
+        "gynaecology",
+        "ectopic pregnancy",
+        "miscarriage",
+        "maternal sepsis",
+        "shoulder dystocia",
+        "placenta accreta",
+        "postpartum haemorrhage",
+        "hyperemesis"
+      ],
+      "url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/",
+      "version": "Living index; individual guideline version/status must be captured",
+      "published_on": "living catalogue",
+      "access": "official guideline index; some full text and reuse rights vary by item",
+      "reuse_rights": "check individual guideline copyright; do not bulk ingest by default",
+      "ingest_status": "reference_index_link_only",
+      "clinical_role": "guideline discovery; version and archived status are item-specific",
+      "update_cadence": "check quarterly update and individual page status",
+      "notes": [
+        "RCOG identifies some guidelines as archived or in development; do not treat the index as one unified current protocol."
+      ]
+    },
+    {
+      "id": "cdc-us-mec-2024",
+      "title": "CDC U.S. Medical Eligibility Criteria for Contraceptive Use, 2024",
+      "publisher": "US Centers for Disease Control and Prevention",
+      "jurisdiction": [
+        "US"
+      ],
+      "topics": [
+        "contraception",
+        "contraceptive safety",
+        "medical eligibility",
+        "family planning"
+      ],
+      "url": "https://www.cdc.gov/contraception/hcp/usmec/introduction.html",
+      "version": "2024 U.S. MEC",
+      "published_on": "2024-11-19",
+      "access": "official professional guidance",
+      "reuse_rights": "US government source; check asset-specific third-party notices",
+      "ingest_status": "candidate_for_clinician_review",
+      "clinical_role": "US-specific contraceptive eligibility only",
+      "update_cadence": "watch CDC updates",
+      "notes": [
+        "Not automatically applicable to Egypt."
+      ]
+    },
+    {
+      "id": "ncbi-lactmed",
+      "title": "LactMed: Drugs and Lactation Database",
+      "publisher": "National Library of Medicine / NIH",
+      "jurisdiction": [
+        "GLOBAL_REFERENCE",
+        "US"
+      ],
+      "topics": [
+        "breastfeeding",
+        "lactation",
+        "medication in lactation",
+        "postpartum medication",
+        "drug transfer into breast milk"
+      ],
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK501922/",
+      "download_url": "https://ftp.ncbi.nlm.nih.gov/pub/litarch/alan/",
+      "version": "Continuously reviewed individual drug records; record-level revision date matters",
+      "published_on": "living database",
+      "access": "free NCBI Bookshelf database; official LitArch OA download route described by NLM",
+      "reuse_rights": "free dataset subject to NLM Terms and Conditions and attribution; verify current archive/license conditions before redistribution",
+      "ingest_status": "candidate_for_rights_review_and_versioned_import",
+      "clinical_role": "breastfeeding medication evidence with citations; not a pregnancy database",
+      "update_cadence": "per-record revision tracking plus dataset release/version check",
+      "notes": [
+        "LactMed focuses on lactation and must not be used as pregnancy-safety evidence."
+      ]
+    },
+    {
+      "id": "mother-to-baby",
+      "title": "MotherToBaby Fact Sheets and Pregnancy Studies",
+      "publisher": "Organization of Teratology Information Specialists / MotherToBaby",
+      "jurisdiction": [
+        "US",
+        "GLOBAL_REFERENCE"
+      ],
+      "topics": [
+        "medications in pregnancy",
+        "exposure in pregnancy",
+        "birth defects",
+        "pregnancy medication counseling"
+      ],
+      "url": "https://mothertobaby.org/fact-sheets-parent/",
+      "version": "Individual fact-sheet revision date",
+      "published_on": "living catalogue",
+      "access": "public topic pages",
+      "reuse_rights": "copyright/use terms need confirmation; link-only by default",
+      "ingest_status": "reference_link_only",
+      "clinical_role": "pregnancy exposure information and patient-counseling context",
+      "update_cadence": "capture fact-sheet revision date per substance",
+      "notes": [
+        "Not a replacement for obstetric/pharmacology consultation or national product labeling."
+      ]
+    },
+    {
+      "id": "uktis-bumps",
+      "title": "UKTIS / BUMPS: Medicines in Pregnancy",
+      "publisher": "UK Teratology Information Service",
+      "jurisdiction": [
+        "UK",
+        "GLOBAL_REFERENCE"
+      ],
+      "topics": [
+        "medications in pregnancy",
+        "teratology",
+        "pregnancy exposures"
+      ],
+      "url": "https://www.medicinesinpregnancy.org/",
+      "version": "Individual information sheet revision date",
+      "published_on": "living catalogue",
+      "access": "public information sheets",
+      "reuse_rights": "copyright/use terms require confirmation; link-only by default",
+      "ingest_status": "reference_link_only",
+      "clinical_role": "pregnancy medicine exposure reference",
+      "update_cadence": "capture sheet date and recheck before use",
+      "notes": [
+        "UK context; verify local product and guideline context for Egypt or the US."
+      ]
+    },
+    {
+      "id": "dailymed-spl",
+      "title": "DailyMed Structured Product Labels (SPL)",
+      "publisher": "National Library of Medicine",
+      "jurisdiction": [
+        "US"
+      ],
+      "topics": [
+        "medicine label",
+        "contraindications",
+        "pregnancy",
+        "lactation",
+        "drug interactions",
+        "product warnings"
+      ],
+      "url": "https://dailymed.nlm.nih.gov/dailymed/app-support-web-services.cfm",
+      "version": "Product-specific SPL set ID, effective time, and version history",
+      "published_on": "living data",
+      "access": "official API and label pages",
+      "reuse_rights": "record-level rights review required",
+      "ingest_status": "product_label_reference_only",
+      "clinical_role": "exact US product label reference; not an individualized risk assessment",
+      "update_cadence": "poll permitted version metadata and re-review dependent cards",
+      "notes": [
+        "Do not infer medication suitability in pregnancy from a label keyword alone."
+      ]
+    },
+    {
+      "id": "openfda-labels",
+      "title": "openFDA Drug Label API",
+      "publisher": "US Food and Drug Administration",
+      "jurisdiction": [
+        "US"
+      ],
+      "topics": [
+        "drug label",
+        "warnings",
+        "pregnancy",
+        "lactation",
+        "contraindications",
+        "drug interactions"
+      ],
+      "url": "https://open.fda.gov/apis/drug/label/",
+      "version": "FDA data feed; record/effective time must be checked",
+      "published_on": "weekly data refresh reported by API documentation",
+      "access": "public API subject to terms and limits",
+      "reuse_rights": "CC0/public-domain data except records carrying third-party rights warnings",
+      "ingest_status": "metadata_and_reference_only",
+      "clinical_role": "label discovery, not sole basis for care",
+      "update_cadence": "source cadence plus record effective-date comparison",
+      "notes": [
+        "FDA warns data have limitations; a returned record may not match the locally marketed product."
+      ]
+    },
+    {
+      "id": "eda-drug-register",
+      "title": "Egyptian Drug Authority: Egyptian Drug Register",
+      "publisher": "Egyptian Drug Authority",
+      "jurisdiction": [
+        "EG"
+      ],
+      "topics": [
+        "Egypt product registration",
+        "registered medicine",
+        "national product label",
+        "medicine identity"
+      ],
+      "url": "https://www.edaegypt.gov.eg/ar/%D8%A7%D9%84%D9%85%D8%B1%D8%AC%D8%B9-%D8%A7%D9%84%D8%AA%D9%86%D8%B8%D9%8A%D9%85%D9%8A-%D9%84%D9%87%D9%8A%D8%A6%D8%A9-%D8%A7%D9%84%D8%AF%D9%88%D8%A7%D8%A1-%D8%A7%D9%84%D9%84%D9%85%D8%B5%D8%B1%D9%8A%D8%A9/%D8%B3%D8%AC%D9%84-%D8%A7%D9%84%D8%AF%D9%88%D8%A7%D8%A1-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%8A/",
+      "version": "Individual register sections published by class/year; exact current record needed",
+      "published_on": "living register",
+      "access": "official web register; no supported public API contract confirmed",
+      "reuse_rights": "public access does not establish bulk-reuse permission",
+      "ingest_status": "official_link_manual_review",
+      "clinical_role": "Egypt-specific registration context only",
+      "update_cadence": "monitor new EDA release notices and confirm exact medicine record",
+      "notes": [
+        "Do not scrape at scale or infer current registration from another jurisdiction's source."
+      ]
+    },
+    {
+      "id": "eda-periodic-lists",
+      "title": "Egyptian Drug Authority: Periodic Lists",
+      "publisher": "Egyptian Drug Authority",
+      "jurisdiction": [
+        "EG"
+      ],
+      "topics": [
+        "Egypt essential medicines",
+        "high-alert medicines",
+        "do not crush",
+        "emergency medication lists",
+        "OTC classification"
+      ],
+      "url": "https://edaegypt.gov.eg/en/publications-reports-and-eda-in-numbers/eda-publications/periodic-lists/",
+      "version": "Index includes Egyptian Essential Medicines List 2025, high-alert list 2025, and Do Not Crush List 2026",
+      "published_on": "living index",
+      "access": "official page with linked lists",
+      "reuse_rights": "review exact file/use terms",
+      "ingest_status": "official_link_manual_review",
+      "clinical_role": "Egypt-specific formulary and safety context",
+      "update_cadence": "daily page change signal; review new artifacts before use",
+      "notes": [
+        "Lists support context and safeguards; not patient-specific prescribing protocols."
+      ]
+    },
+    {
+      "id": "eda-safety-alerts",
+      "title": "Egyptian Drug Authority: Pharmacovigilance Safety Alerts",
+      "publisher": "Egyptian Drug Authority",
+      "jurisdiction": [
+        "EG"
+      ],
+      "topics": [
+        "pregnancy",
+        "lactation",
+        "medicine label changes",
+        "drug safety alerts",
+        "pharmacovigilance"
+      ],
+      "url": "https://www.edaegypt.gov.eg/en/awareness/ca-of-pharmaceutical-care-publications/pharmacovigilance-publications/third-safety-alerts/",
+      "version": "Rolling alert list; capture individual alert date/product",
+      "published_on": "living index",
+      "access": "official safety-alert page",
+      "reuse_rights": "review individual alert terms before reproduction",
+      "ingest_status": "candidate_for_daily_change_watch",
+      "clinical_role": "Egypt-specific signal detection and safety-label change discovery",
+      "update_cadence": "daily discovery; pharmacist review and source confirmation required",
+      "notes": [
+        "A safety-alert appearance is a re-review trigger, not an autonomous medication contraindication decision."
+      ]
+    },
+    {
+      "id": "eda-pharmaceutical-information-center",
+      "title": "Egyptian Pharmaceutical Information Center: Reliable Drug Information Service",
+      "publisher": "Egyptian Drug Authority",
+      "jurisdiction": [
+        "EG"
+      ],
+      "topics": [
+        "complex medicine question",
+        "pregnancy medication query",
+        "lactation medicine query",
+        "drug information escalation"
+      ],
+      "url": "https://edaegypt.gov.eg/en/about-us/home-page-services/home-page-services/inquire-about-reliable-drug-information/",
+      "version": "Human information service",
+      "published_on": "service page",
+      "access": "official human-expert service, described as free",
+      "reuse_rights": "not a corpus or bulk-ingestion source",
+      "ingest_status": "human_expert_escalation_only",
+      "clinical_role": "pharmacist/authority escalation for unresolved Egyptian drug questions",
+      "update_cadence": "contact service for current answer",
+      "notes": [
+        "Do not send patient-identifying information without the hospital's approved process."
+      ]
+    },
+    {
+      "id": "pubmed-pmc",
+      "title": "PubMed and PubMed Central",
+      "publisher": "National Library of Medicine / NIH",
+      "jurisdiction": [
+        "GLOBAL_REFERENCE"
+      ],
+      "topics": [
+        "systematic review",
+        "clinical trials",
+        "obstetrics",
+        "gynaecology",
+        "maternal medicine",
+        "fertility",
+        "gynecologic oncology"
+      ],
+      "url": "https://pubmed.ncbi.nlm.nih.gov/",
+      "secondary_url": "https://pmc.ncbi.nlm.nih.gov/",
+      "version": "Live literature index; record publication date, retraction/correction, and article-level license",
+      "published_on": "living index",
+      "access": "literature search, abstracts and free full text where available",
+      "reuse_rights": "article-specific reuse; PMC presence does not itself establish reuse rights",
+      "ingest_status": "evidence_discovery_only",
+      "clinical_role": "evidence discovery; appraisal required before clinical summarization",
+      "update_cadence": "scheduled searches plus retraction/correction checks",
+      "notes": [
+        "Search result ranking is not evidence quality. Check study design, bias, population, applicability, and corrections."
+      ]
+    },
+    {
+      "id": "smfm-clinical-guidance",
+      "title": "Society for Maternal-Fetal Medicine: Clinical Guidance",
+      "publisher": "Society for Maternal-Fetal Medicine",
+      "jurisdiction": [
+        "US",
+        "GLOBAL_REFERENCE"
+      ],
+      "topics": [
+        "maternal-fetal medicine",
+        "high-risk pregnancy",
+        "fetal growth restriction",
+        "preterm birth",
+        "pregnancy complications"
+      ],
+      "url": "https://www.smfm.org/publications",
+      "version": "Individual consult series revision date",
+      "published_on": "living index",
+      "access": "official clinical publication index",
+      "reuse_rights": "copyrighted publications; link-only unless permission granted",
+      "ingest_status": "reference_index_link_only",
+      "clinical_role": "specialist reference for maternal-fetal medicine",
+      "update_cadence": "check individual publication and supersession status",
+      "notes": [
+        "Guidance may be US-specific; no automatic cross-jurisdiction transfer."
+      ]
+    }
+  ]
+}
