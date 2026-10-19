@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity,
   AlertTriangle,
-  ArrowDownRight,
   ArrowUpRight,
   Bell,
   BookOpen,
@@ -16,7 +15,6 @@ import {
   CircleHelp,
   ClipboardCheck,
   ClipboardList,
-  Clock,
   FileText,
   Filter,
   HeartPulse,
@@ -25,8 +23,6 @@ import {
   Menu,
   MessageCircle,
   MoreHorizontal,
-  Paperclip,
-  Pill,
   Plus,
   Search,
   Send,
@@ -34,7 +30,6 @@ import {
   ShieldCheck,
   Sparkles,
   Stethoscope,
-  UserRound,
   UsersRound,
   X,
   type LucideIcon,
@@ -502,6 +497,11 @@ function statusClass(status: string) {
   return 'status';
 }
 
+// Bundled official Mia portrait (public/mia-avatar.jpg). Shown by default
+// everywhere the avatar appears; the settings popover can switch to an
+// icon preset or a user-uploaded photo instead.
+const MIA_PHOTO_URL = 'mia-avatar.jpg';
+
 function Avatar({
   image,
   preset = 'ai',
@@ -514,7 +514,7 @@ function Avatar({
   if (image)
     return (
       <span className={'avatar avatar-' + size + ' avatar-photo'}>
-        <img src={image} alt="Custom Mia avatar" />
+        <img src={image} alt="Mia" />
       </span>
     );
   return (
@@ -540,7 +540,7 @@ function MiaApp() {
   const [locale, setLocale] = useState<'en' | 'ar'>('en');
   const [jurisdiction, setJurisdiction] = useState<Jurisdiction>('EG');
   const [avatarPreset, setAvatarPreset] = useState('ai');
-  const [avatarImage, setAvatarImage] = useState<string | null>(null);
+  const [avatarImage, setAvatarImage] = useState<string | null>(MIA_PHOTO_URL);
   const [showAvatarSettings, setShowAvatarSettings] = useState(false);
   const [toast, setToast] = useState('');
   const [answers, setAnswers] = useState<Record<string, string>>({
@@ -690,7 +690,6 @@ function MiaApp() {
     (sum, s) => sum + s.items.length,
     0
   );
-  const navItem = NAV.find(item => item.id === section);
 
   function renderHeader(
     title: string,
@@ -2006,6 +2005,23 @@ function MiaApp() {
           </button>
         </div>
         <div className="preset-list">
+          <button
+            className={
+              avatarImage === MIA_PHOTO_URL
+                ? 'preset-option preset-selected'
+                : 'preset-option'
+            }
+            onClick={() => {
+              setAvatarImage(MIA_PHOTO_URL);
+            }}
+          >
+            <Avatar image={MIA_PHOTO_URL} preset="ai" />
+            <span>
+              <strong>Mia</strong>
+              <small>Official portrait</small>
+            </span>
+            <Check size={15} />
+          </button>
           <button
             className={
               avatarPreset === 'ai' && !avatarImage
