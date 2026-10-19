@@ -416,6 +416,7 @@ const QUESTION_SECTIONS = [
 const GOVERNANCE_DOCS = [
   {
     id: 'GOV-01',
+    file: '01-intended-use-and-data-classes.md',
     title: 'Intended use & prohibited use',
     owner: 'Product + clinical lead',
     state: 'Draft required',
@@ -423,6 +424,7 @@ const GOVERNANCE_DOCS = [
   },
   {
     id: 'GOV-02',
+    file: '02-data-inventory-and-data-flow.md',
     title: 'Data inventory & flow map',
     owner: 'Privacy lead',
     state: 'Not started',
@@ -431,6 +433,7 @@ const GOVERNANCE_DOCS = [
   },
   {
     id: 'GOV-03',
+    file: '03-privacy-notice-and-consent-template.md',
     title: 'Patient and staff privacy notices',
     owner: 'Local counsel',
     state: 'Review required',
@@ -439,6 +442,7 @@ const GOVERNANCE_DOCS = [
   },
   {
     id: 'GOV-04',
+    file: '05-security-threat-model-and-incident-response.md',
     title: 'Security risk assessment',
     owner: 'Security lead',
     state: 'Not started',
@@ -447,6 +451,7 @@ const GOVERNANCE_DOCS = [
   },
   {
     id: 'GOV-05',
+    file: '06-clinical-risk-and-validation-plan.md',
     title: 'Clinical hazard & validation plan',
     owner: 'OB-GYN lead + pharmacist',
     state: 'Not started',
@@ -455,6 +460,7 @@ const GOVERNANCE_DOCS = [
   },
   {
     id: 'GOV-06',
+    file: '07-source-rights-and-evidence-card-template.md',
     title: 'Source rights register',
     owner: 'Content + legal review',
     state: 'Draft required',
@@ -463,6 +469,7 @@ const GOVERNANCE_DOCS = [
   },
   {
     id: 'GOV-07',
+    file: '08-regulatory-classification-and-launch-gates.md',
     title: 'Regulatory classification memo',
     owner: 'Local regulatory counsel',
     state: 'Review required',
@@ -471,6 +478,7 @@ const GOVERNANCE_DOCS = [
   },
   {
     id: 'GOV-08',
+    file: '04-vendor-and-cross-border-review.md',
     title: 'Vendor & AI-provider review',
     owner: 'Security + privacy lead',
     state: 'Blocked',
@@ -1690,6 +1698,7 @@ function MiaApp() {
                 <input
                   aria-label="Ask Mia a question"
                   value={chatQuery}
+                  maxLength={600}
                   onChange={event => setChatQuery(event.target.value)}
                   placeholder="Ask about a guideline, drug reference, pregnancy or lactation…"
                 />
@@ -1945,16 +1954,7 @@ function MiaApp() {
                 <span className={statusClass(doc.state)}>{doc.state}</span>
                 <a
                   className="icon-btn"
-                  href={'https://github.com/MohammedAbdelshafy/ai-front-desk/blob/feat/mia-clinical-os/docs/clinical-governance/' + ({
-                    'GOV-01': '01-intended-use-and-data-classes.md',
-                    'GOV-02': '02-data-inventory-and-data-flow.md',
-                    'GOV-03': '03-privacy-notice-and-consent-template.md',
-                    'GOV-04': '05-security-threat-model-and-incident-response.md',
-                    'GOV-05': '06-clinical-risk-and-validation-plan.md',
-                    'GOV-06': '07-source-rights-and-evidence-card-template.md',
-                    'GOV-07': '08-regulatory-classification-and-launch-gates.md',
-                    'GOV-08': '04-vendor-and-cross-border-review.md'
-                  } as Record<string, string>)[doc.id]}
+                  href={'https://github.com/MohammedAbdelshafy/ai-front-desk/blob/feat/mia-clinical-os/docs/clinical-governance/' + doc.file}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={'Open draft document ' + doc.title}

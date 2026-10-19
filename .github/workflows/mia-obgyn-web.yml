@@ -21,8 +21,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Install dependencies and build
+      - name: Install dependencies, typecheck and build
         working-directory: apps/mia-obgyn
         run: |
-          npm install
+          npm ci
+          npm run typecheck
           npm run build

@@ -43,6 +43,7 @@ For each arrow below, identify data fields, purpose, transport, processing locat
 - App → AI/model provider: **disabled; no provider selected**
 - App → medicine identity/product-label source: **disabled in this prototype**
 - App → analytics/error monitoring: [not configured; review before enabling]
+- App → font provider (Google Fonts): the web prototype loads its display font from fonts.googleapis.com on every page load; the browser therefore exposes the visitor's IP address and user-agent to Google. No patient or clinical data is sent. Review before production: self-host the font files or document this transfer in the privacy notice.
 - Backup/archive → recovery environment: [not configured]
 - Clinic A app ↔ Clinic B app: **prohibited by default; no patient sharing**
 
