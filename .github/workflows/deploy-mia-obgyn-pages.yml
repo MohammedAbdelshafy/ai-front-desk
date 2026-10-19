@@ -1,4 +1,4 @@
-name: Deploy Mia OB-GYN to GitHub Pages
+name: Deploy Mia apps to GitHub Pages
 
 on:
   push:
@@ -33,6 +33,11 @@ jobs:
           npm ci
           npm run typecheck
           npm run build
+      - name: Add Dr. Mia dental demo to the Pages bundle
+        run: |
+          mkdir -p apps/mia-obgyn/dist/dental
+          cp -r apps/dr-mia-dental/. apps/mia-obgyn/dist/dental/
+          test -f apps/mia-obgyn/dist/dental/index.html
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
