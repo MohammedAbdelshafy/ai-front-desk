@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Mapping, Optional
 from urllib.parse import parse_qs
 from .avatar_customizer import AVATAR_ASSETS, render_avatar_customizer
 from .public_drug_data import lookup_public_drug_metadata
-from .medication_workbench import _render_public_lookup as render_public_lookup_section
+from .medication_workbench import render_public_lookup as render_public_lookup_section
 
 BASE = Path(__file__).resolve().parent
 DEFAULT_CATALOG_PATH = BASE / "obgyn_reference_centers.json"

@@ -67,7 +67,7 @@ def test_workbench_refuses_non_us_scope():
     try:
         case_from_form({"case_id": "synthetic-case-004", "proposed_assessment": "Synthetic", "jurisdiction": "UK"})
     except ValueError as exc:
-        assert "US jurisdiction" in str(exc)
+        assert "US and Egypt (EG) jurisdictions" in str(exc)
     else:
         raise AssertionError("out-of-scope jurisdiction should be rejected")
 
