@@ -15,6 +15,8 @@ import {
   CircleHelp,
   ClipboardCheck,
   ClipboardList,
+  Clock,
+  Copy,
   FileText,
   Filter,
   HeartPulse,
@@ -614,7 +616,42 @@ function MiaApp() {
     allergyList: string[];
     medicine: string;
     urgent: boolean;
+    retrievedAt: string;
   }>(null);
+  const [medCopied, setMedCopied] = useState(false);
+
+  function copyMedicationPack() {
+    if (!medResult) return;
+    const lines: string[] = [
+      'Mia OB-GYN — medication reference pack (REFERENCE ONLY, not a prescription)',
+      `Retrieved: ${medResult.retrievedAt}`,
+    ];
+    if (medDiagnosis.trim()) lines.push(`Diagnosis: ${medDiagnosis.trim()}`);
+    if (medSymptoms.trim()) lines.push(`Symptoms: ${medSymptoms.trim()}`);
+    if (medPregnancy) lines.push(`Pregnancy state: ${medPregnancy}`);
+    lines.push('', 'Guideline references:');
+    medResult.sources.forEach(s =>
+      lines.push(`- ${s.title} (${s.publisher}${s.year ? ', ' + s.year : ''}) — ${s.url}`)
+    );
+    if (medResult.medicine) {
+      lines.push('', `Label & safety sources for ${medResult.medicine}:`);
+      medicineReferenceLinks(medResult.medicine).forEach(l =>
+        lines.push(`- ${l.label} — ${l.url}`)
+      );
+    }
+    lines.push(
+      '',
+      `Pre-prescribing checklist: ${Object.values(medChecks).filter(Boolean).length}/${MED_CHECKS.length} confirmed`,
+      'Mia does not choose, rank, dose or recommend any medicine. The prescribing decision stays with the doctor.'
+    );
+    navigator.clipboard
+      .writeText(lines.join('\n'))
+      .then(() => {
+        setMedCopied(true);
+        window.setTimeout(() => setMedCopied(false), 2000);
+      })
+      .catch(() => setMedCopied(false));
+  }
 
   const selectedPatient =
     patients.find(p => p.id === selectedPatientId) || patients[0];
@@ -1913,6 +1950,10 @@ function MiaApp() {
       allergyList,
       medicine: medMedicine.trim(),
       urgent,
+      retrievedAt: new Date().toLocaleString(
+        locale === 'ar' ? 'ar-EG' : 'en-GB',
+        { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }
+      ),
     });
   }
 
@@ -2069,6 +2110,29 @@ function MiaApp() {
             <h3>
               <BookOpen size={17} /> {t('Instant reference pack', 'حزمة المراجع الفورية')}
             </h3>
+            {medResult ? (
+              <div className="medref-pack-meta">
+                <span className="medref-timestamp">
+                  <Clock size={13} />{' '}
+                  {t('Retrieved', 'تم الاسترداد')} {medResult.retrievedAt}
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={copyMedicationPack}
+                >
+                  {medCopied ? (
+                    <>
+                      <Check size={14} /> {t('Copied', 'تم النسخ')}
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={14} /> {t('Copy pack', 'نسخ الحزمة')}
+                    </>
+                  )}
+                </button>
+              </div>
+            ) : null}
             {!medResult ? (
               <p className="medref-empty">
                 {t(
@@ -2516,13 +2580,18 @@ function MiaApp() {
                 sendFloatQuestion();
               }}
             >
-              <input
-                aria-label="Ask Mia"
-                value={floatQuery}
-                maxLength={600}
-                onChange={event => setFloatQuery(event.target.value)}
-                placeholder="Ask Mia anything…"
-              />
+              <div className="mia-float-input-wrap">
+                <input
+                  aria-label="Ask Mia"
+                  value={floatQuery}
+                  maxLength={600}
+                  onChange={event => setFloatQuery(event.target.value)}
+                  placeholder="Ask Mia anything…"
+                />
+                {floatQuery.length > 480 ? (
+                  <span className="mia-float-count">{floatQuery.length}/600</span>
+                ) : null}
+              </div>
               <button
                 type="submit"
                 className="send-button"

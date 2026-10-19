@@ -890,3 +890,67 @@ a:not([class*="btn"]):not([class*="button"]) {
     page-break-after: avoid;
   }
 }
+
+/* ---------- Detail polish: reference pack meta + copy, float counter ---------- */
+.medref-pack-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: -2px 0 14px;
+  padding: 8px 12px;
+  background: rgba(12, 124, 112, 0.07);
+  border: 1px solid rgba(12, 124, 112, 0.16);
+  border-radius: 10px;
+}
+.medref-timestamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--cyan);
+  font-weight: 700;
+}
+.btn-ghost:hover {
+  background: rgba(12, 124, 112, 0.08);
+  border-color: rgba(12, 124, 112, 0.35);
+}
+.btn-sm {
+  padding: 7px 12px;
+  font-size: 12.5px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.mia-float-input-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+.mia-float-input-wrap input {
+  flex: 1;
+  width: 100%;
+}
+.mia-float-count {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  pointer-events: none;
+}
+@media print {
+  .medref-pack-meta .btn-ghost {
+    display: none;
+  }
+}
