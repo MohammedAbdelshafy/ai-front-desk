@@ -1855,23 +1855,38 @@ function MiaApp() {
   const MED_CHECKS = [
     {
       key: 'allergies',
-      label: 'Allergies confirmed directly with the patient — never assumed from the chart',
+      label:
+        locale === 'ar'
+          ? 'تم تأكيد الحساسية مع المريضة مباشرة — لا يُفترض من الملف'
+          : 'Allergies confirmed directly with the patient — never assumed from the chart',
     },
     {
       key: 'meds',
-      label: 'Current medicines reconciled — the patient brought the list or it was verified',
+      label:
+        locale === 'ar'
+          ? 'تمت مراجعة الأدوية الحالية — أحضرت المريضة القائمة أو تم التحقق منها'
+          : 'Current medicines reconciled — the patient brought the list or it was verified',
     },
     {
       key: 'pregnancy',
-      label: 'Pregnancy / postpartum / lactation state confirmed and dated',
+      label:
+        locale === 'ar'
+          ? 'تم تأكيد حالة الحمل / ما بعد الولادة / الرضاعة وتحديد تاريخها'
+          : 'Pregnancy / postpartum / lactation state confirmed and dated',
     },
     {
       key: 'protocol',
-      label: 'Local hospital protocol for this indication checked',
+      label:
+        locale === 'ar'
+          ? 'تمت مراجعة بروتوكول المستشفى المحلي لهذه الدواعي'
+          : 'Local hospital protocol for this indication checked',
     },
     {
       key: 'pharmacist',
-      label: 'Pharmacist review requested for high-risk, complex or uncertain cases',
+      label:
+        locale === 'ar'
+          ? 'تم طلب مراجعة الصيدلي للحالات عالية الخطورة أو المعقدة أو غير المؤكدة'
+          : 'Pharmacist review requested for high-risk, complex or uncertain cases',
     },
   ] as const;
 
@@ -1935,83 +1950,103 @@ function MiaApp() {
 
   function renderMedicationPage() {
     const checksDone = Object.values(medChecks).filter(Boolean).length;
+    const t = (en: string, ar: string) => (locale === 'ar' ? ar : en);
     return (
       <>
         {renderHeader(
-          'Medication reference',
-          'Enter the clinical picture. Mia retrieves guidelines, label sources and safety checks — instantly.',
+          t('Medication reference', 'مرجع الأدوية'),
+          t(
+            'Enter the clinical picture. Mia retrieves guidelines, label sources and safety checks — instantly.',
+            'أدخل الصورة السريرية. تسترد ميا الإرشادات ومصادر النشرات وفحوصات السلامة — فورًا.'
+          ),
           <span className="source-mode-pill">
-            <span className="pulse-dot" /> REFERENCE ONLY
+            <span className="pulse-dot" /> {t('REFERENCE ONLY', 'للمرجعية فقط')}
           </span>
         )}
         <div className="medref-boundary" role="note">
           <ShieldCheck size={17} />
           <div>
-            <strong>Clinical boundary.</strong> Mia does not choose, rank,
-            dose or recommend any medicine. The prescribing decision — and its
-            responsibility — stays with the doctor. Everything below is a
-            reference to verify, not an instruction to follow.
+            <strong>{t('Clinical boundary.', 'حد سريري.')}</strong>{' '}
+            {t(
+              'Mia does not choose, rank, dose or recommend any medicine. The prescribing decision — and its responsibility — stays with the doctor. Everything below is a reference to verify, not an instruction to follow.',
+              'لا تختار ميا أي دواء ولا ترتبه ولا تحدد جرعته ولا توصي به. قرار وصف الدواء — ومسؤوليته — يبقى مع الطبيب. كل ما يلي مرجع للتحقق، وليس تعليمات للاتباع.'
+            )}
           </div>
         </div>
         <div className="medref-grid">
           <section className="panel medref-form-panel">
             <h3>
-              <Stethoscope size={17} /> Clinical picture
+              <Stethoscope size={17} /> {t('Clinical picture', 'الصورة السريرية')}
             </h3>
             <label className="medref-field">
-              <span>Diagnosis / indication</span>
+              <span>{t('Diagnosis / indication', 'التشخيص / دواعي الاستعمال')}</span>
               <input
                 value={medDiagnosis}
                 onChange={e => setMedDiagnosis(e.target.value)}
-                placeholder="e.g. Postpartum haemorrhage, preeclampsia…"
+                placeholder={t(
+                  'e.g. Postpartum haemorrhage, preeclampsia…',
+                  'مثال: نزيف ما بعد الولادة، تسمم الحمل…'
+                )}
               />
             </label>
             <label className="medref-field">
-              <span>Symptoms and observations</span>
+              <span>{t('Symptoms and observations', 'الأعراض والملاحظات')}</span>
               <textarea
                 value={medSymptoms}
                 onChange={e => setMedSymptoms(e.target.value)}
-                placeholder="e.g. Heavy vaginal bleeding 30 min after delivery, BP 150/100…"
+                placeholder={t(
+                  'e.g. Heavy vaginal bleeding 30 min after delivery, BP 150/100…',
+                  'مثال: نزيف مهبلي غزير بعد 30 دقيقة من الولادة، ضغط الدم 150/100…'
+                )}
                 rows={3}
               />
             </label>
             <div className="medref-row">
               <label className="medref-field">
-                <span>Pregnancy state</span>
+                <span>{t('Pregnancy state', 'حالة الحمل')}</span>
                 <select
                   value={medPregnancy}
                   onChange={e => setMedPregnancy(e.target.value)}
                 >
-                  <option value="pregnant">Pregnant</option>
-                  <option value="postpartum">Postpartum</option>
-                  <option value="breastfeeding">Breastfeeding</option>
-                  <option value="not-pregnant">Not pregnant</option>
-                  <option value="unknown">Unknown — confirm</option>
+                  <option value="pregnant">{t('Pregnant', 'حامل')}</option>
+                  <option value="postpartum">{t('Postpartum', 'بعد الولادة')}</option>
+                  <option value="breastfeeding">{t('Breastfeeding', 'مرضعة')}</option>
+                  <option value="not-pregnant">{t('Not pregnant', 'غير حامل')}</option>
+                  <option value="unknown">{t('Unknown — confirm', 'غير معروف — يجب التأكيد')}</option>
                 </select>
               </label>
               <label className="medref-field">
-                <span>Medicine you are considering (optional)</span>
+                <span>{t('Medicine you are considering (optional)', 'الدواء الذي تفكر فيه (اختياري)')}</span>
                 <input
                   value={medMedicine}
                   onChange={e => setMedMedicine(e.target.value)}
-                  placeholder="Type the exact product or generic name"
+                  placeholder={t(
+                    'Type the exact product or generic name',
+                    'اكتب الاسم التجاري أو العلمي بدقة'
+                  )}
                 />
               </label>
             </div>
             <label className="medref-field">
-              <span>Known allergies (comma-separated)</span>
+              <span>{t('Known allergies (comma-separated)', 'الحساسية المعروفة (افصل بفاصلة)')}</span>
               <input
                 value={medAllergies}
                 onChange={e => setMedAllergies(e.target.value)}
-                placeholder="e.g. Penicillin — rash, Sulfa — anaphylaxis"
+                placeholder={t(
+                  'e.g. Penicillin — rash, Sulfa — anaphylaxis',
+                  'مثال: بنسلين — طفح جلدي، سلفا — صدمة تحسسية'
+                )}
               />
             </label>
             <label className="medref-field">
-              <span>Current medicines</span>
+              <span>{t('Current medicines', 'الأدوية الحالية')}</span>
               <input
                 value={medCurrent}
                 onChange={e => setMedCurrent(e.target.value)}
-                placeholder="e.g. Ferrous sulfate, methyldopa…"
+                placeholder={t(
+                  'e.g. Ferrous sulfate, methyldopa…',
+                  'مثال: كبريتات الحديدوز، ميثيل دوبا…'
+                )}
               />
             </label>
             <button
@@ -2020,24 +2055,26 @@ function MiaApp() {
               onClick={runMedicationReference}
               disabled={!medDiagnosis.trim() && !medSymptoms.trim()}
             >
-              <Search size={16} /> Retrieve references
+              <Search size={16} /> {t('Retrieve references', 'استرداد المراجع')}
             </button>
             <small className="medref-hint">
-              Nothing is sent anywhere — matching runs locally against the
-              curated source directory.
+              {t(
+                'Nothing is sent anywhere — matching runs locally against the curated source directory.',
+                'لا يُرسل أي شيء إلى أي مكان — تتم المطابقة محليًا ضمن دليل المصادر المنسق.'
+              )}
             </small>
           </section>
 
           <section className="panel medref-results-panel">
             <h3>
-              <BookOpen size={17} /> Instant reference pack
+              <BookOpen size={17} /> {t('Instant reference pack', 'حزمة المراجع الفورية')}
             </h3>
             {!medResult ? (
               <p className="medref-empty">
-                Enter a diagnosis or symptoms and press{' '}
-                <strong>Retrieve references</strong>. Mia will assemble the
-                guideline links, label sources and safety checks for this
-                case here.
+                {t(
+                  'Enter a diagnosis or symptoms and press Retrieve references. Mia will assemble the guideline links, label sources and safety checks for this case here.',
+                  'أدخل التشخيص أو الأعراض واضغط استرداد المراجع. ستجمع ميا روابط الإرشادات ومصادر النشرات وفحوصات السلامة لهذه الحالة هنا.'
+                )}
               </p>
             ) : (
               <>
@@ -2045,15 +2082,16 @@ function MiaApp() {
                   <div className="medref-urgent" role="alert">
                     <AlertTriangle size={16} />
                     <span>
-                      Urgent pattern detected in what you entered. If this is a
-                      real deteriorating patient, activate your hospital&apos;s
-                      emergency pathway now — do not wait for this prototype.
+                      {t(
+                        'Urgent pattern detected in what you entered. If this is a real deteriorating patient, activate your hospital’s emergency pathway now — do not wait for this prototype.',
+                        'تم رصد نمط عاجل فيما أدخلته. إذا كانت هذه مريضة حقيقية تتدهور حالتها، فعّل مسار الطوارئ في مستشفاك الآن — لا تنتظر هذا النموذج الأولي.'
+                      )}
                     </span>
                   </div>
                 ) : null}
                 <div className="medref-block">
                   <strong className="medref-block-title">
-                    Guideline references ({medResult.sources.length})
+                    {t('Guideline references', 'مراجع الإرشادات')} ({medResult.sources.length})
                   </strong>
                   {medResult.sources.length ? (
                     medResult.sources.map(source => (
@@ -2077,22 +2115,24 @@ function MiaApp() {
                     ))
                   ) : (
                     <p className="medref-empty">
-                      No strong match in the directory. Broaden the terms or
-                      try the Evidence library.
+                      {t(
+                        'No strong match in the directory. Broaden the terms or try the Evidence library.',
+                        'لا توجد مطابقة قوية في الدليل. وسّع المصطلحات أو جرّب مكتبة المراجع.'
+                      )}
                     </p>
                   )}
                 </div>
                 {medResult.medicine ? (
                   <div className="medref-block">
                     <strong className="medref-block-title">
-                      Label &amp; safety references —{' '}
+                      {t('Label & safety references —', 'مراجع النشرات والسلامة —')}{' '}
                       {medResult.medicine}
                     </strong>
                     <p className="medref-note">
-                      You named this medicine; Mia only fetched where to verify
-                      it. Open the label and read <em>Contraindications</em>,{' '}
-                      <em>Warnings</em> and <em>Use in Specific Populations</em>{' '}
-                      before prescribing.
+                      {t(
+                        'You named this medicine; Mia only fetched where to verify it. Open the label and read Contraindications, Warnings and Use in Specific Populations before prescribing.',
+                        'أنت من سمّى هذا الدواء؛ ميا جلبت فقط مصادر التحقق منه. افتح النشرة واقرأ موانع الاستعمال والتحذيرات والاستعمال في فئات معينة قبل الوصف.'
+                      )}
                     </p>
                     {medicineReferenceLinks(medResult.medicine).map(link => (
                       <a
@@ -2113,18 +2153,19 @@ function MiaApp() {
                 ) : (
                   <div className="medref-block">
                     <strong className="medref-block-title">
-                      Considering a specific medicine?
+                      {t('Considering a specific medicine?', 'تفكر في دواء معين؟')}
                     </strong>
                     <p className="medref-note">
-                      Type its exact name in the form and retrieve again — Mia
-                      will pull the label and safety references for it. Mia
-                      will not suggest which medicine to use.
+                      {t(
+                        'Type its exact name in the form and retrieve again — Mia will pull the label and safety references for it. Mia will not suggest which medicine to use.',
+                        'اكتب اسمه بدقة في النموذج واسترد المراجع مجددًا — ستجلب ميا مراجع النشرة والسلامة الخاصة به. لن تقترح ميا أي دواء للاستعمال.'
+                      )}
                     </p>
                   </div>
                 )}
                 <div className="medref-block">
                   <strong className="medref-block-title">
-                    Allergy cross-check
+                    {t('Allergy cross-check', 'فحص الحساسية المتقاطع')}
                   </strong>
                   {medResult.allergyList.length ? (
                     <>
@@ -2136,26 +2177,28 @@ function MiaApp() {
                         ))}
                       </div>
                       <p className="medref-note">
-                        Verify each of these against the product label&apos;s{' '}
-                        <em>Contraindications</em> and <em>Warnings</em>{' '}
-                        sections before prescribing. When in doubt, escalate
-                        to pharmacy — do not rely on this list alone.
+                        {t(
+                          'Verify each of these against the product label’s Contraindications and Warnings sections before prescribing. When in doubt, escalate to pharmacy — do not rely on this list alone.',
+                          'تحقق من كل واحد منها مقابل قسمي موانع الاستعمال والتحذيرات في نشرة المنتج قبل الوصف. عند الشك، ارجع إلى الصيدلية — لا تعتمد على هذه القائمة وحدها.'
+                        )}
                       </p>
                     </>
                   ) : (
                     <p className="medref-note">
-                      No allergies entered.{' '}
+                      {t('No allergies entered.', 'لم تُدخل أي حساسية.')}{' '}
                       <strong>
-                        Confirm allergies directly with the patient before any
-                        prescription
+                        {t(
+                          'Confirm allergies directly with the patient before any prescription',
+                          'أكّد الحساسية مع المريضة مباشرة قبل أي وصفة'
+                        )}
                       </strong>{' '}
-                      — &quot;unknown&quot; is not &quot;none&quot;.
+                      — {t('"unknown" is not "none".', '"غير معروف" ليس "لا يوجد".')}
                     </p>
                   )}
                 </div>
                 <div className="medref-block">
                   <strong className="medref-block-title">
-                    Pre-prescribing safety checklist ({checksDone}/
+                    {t('Pre-prescribing safety checklist', 'قائمة فحص السلامة قبل الوصف')} ({checksDone}/
                     {MED_CHECKS.length})
                   </strong>
                   {MED_CHECKS.map(check => (
@@ -2181,30 +2224,38 @@ function MiaApp() {
         <section className="panel medref-pathways-panel">
           <div className="medref-pathways-head">
             <h3>
-              <ShieldCheck size={17} /> Approved medication pathways
+              <ShieldCheck size={17} /> {t('Approved medication pathways', 'مسارات الأدوية المعتمدة')}
             </h3>
             <span className="medref-pathway-count">
-              {APPROVED_PATHWAYS.length} approved
+              {APPROVED_PATHWAYS.length} {t('approved', 'معتمد')}
             </span>
           </div>          {APPROVED_PATHWAYS.length === 0 ? (
             <>
               <p className="medref-note">
-                No pathway has cleared the approval gate yet, so Mia suggests{' '}
-                <strong>no medicines</strong>. A suggestion appears here only
-                after all five of these are recorded:
+                {t(
+                  'No pathway has cleared the approval gate yet, so Mia suggests no medicines. A suggestion appears here only after all five of these are recorded:',
+                  'لم يجتز أي مسار بوابة الاعتماد بعد، لذا لا تقترح ميا أي أدوية. لا يظهر أي اقتراح هنا إلا بعد تسجيل هذه الشروط الخمسة:'
+                )}
               </p>
               <ol className="medref-approval-list">
-                {PATHWAY_APPROVAL_REQUIREMENTS.map(requirement => (
+                {(locale === 'ar'
+                  ? [
+                      'مراجع طبي مسمّى مع المؤهل وتاريخ المراجعة',
+                      'مراجع صيدلي مسمّى مع المؤهل وتاريخ المراجعة',
+                      'الإرشادات المستشهد بها بدقة: العنوان، الناشر، الإصدار، القسم، الرابط',
+                      'الولايات القضائية التي ينطبق عليها المسار',
+                      'تاريخ مراجعة مجدول — المسارات منتهية الصلاحية تختفي تلقائيًا',
+                    ]
+                  : PATHWAY_APPROVAL_REQUIREMENTS
+                ).map(requirement => (
                   <li key={requirement}>{requirement}</li>
                 ))}
               </ol>
               <p className="medref-note">
-                This is the quality-control contract: &ldquo;most
-                accurate&rdquo; is earned by named clinician and pharmacist
-                review against a cited guideline — never asserted by the
-                software. To approve the first pathway, a clinician reviews a
-                diagnosis against its guideline, a pharmacist countersigns,
-                and both names go on the record above.
+                {t(
+                  'This is the quality-control contract: “most accurate” is earned by named clinician and pharmacist review against a cited guideline — never asserted by the software. To approve the first pathway, a clinician reviews a diagnosis against its guideline, a pharmacist countersigns, and both names go on the record above.',
+                  'هذا هو عقد ضبط الجودة: "الأكثر دقة" يُكتسب بمراجعة طبيب وصيدلي مسمّيين مقابل إرشادات موثقة — ولا تدّعيه البرمجية أبدًا. لاعتماد المسار الأول، يراجع طبيب التشخيص مقابل الإرشادات، ويوقّع الصيدلي، ويُسجَّل الاسمان أعلاه.'
+                )}
               </p>
             </>
           ) : (
@@ -2262,17 +2313,17 @@ function MiaApp() {
         <section className="panel medref-pathways-panel">
           <div className="medref-pathways-head">
             <h3>
-              <BookOpen size={17} /> Candidate evidence for clinician review
+              <BookOpen size={17} /> {t('Candidate evidence for clinician review', 'أدلة مرشحة لمراجعة الطبيب')}
             </h3>
             <span className="medref-pathway-count">
-              {CANDIDATE_PATHWAY_EVIDENCE.length} candidates
+              {CANDIDATE_PATHWAY_EVIDENCE.length} {t('candidates', 'مرشح')}
             </span>
           </div>
           <p className="medref-note">
-            Research candidates only — <strong>not approved pathways</strong>.
-            Each entry records what a named public guideline states, with its
-            citation. A reviewing clinician must verify every item against the
-            primary source before anything becomes an approved pathway.
+            {t(
+              'Research candidates only — not approved pathways. Each entry records what a named public guideline states, with its citation. A reviewing clinician must verify every item against the primary source before anything becomes an approved pathway.',
+              'مرشحات بحثية فقط — ليست مسارات معتمدة. يسجل كل عنصر ما تنص عليه إرشادات عامة مسماة، مع توثيقها. يجب على الطبيب المراجع التحقق من كل عنصر مقابل المصدر الأصلي قبل اعتماد أي مسار.'
+            )}
           </p>
           {CANDIDATE_PATHWAY_EVIDENCE.map(candidate => (
             <article key={candidate.id} className="medref-pathway">
@@ -2314,7 +2365,7 @@ function MiaApp() {
             </article>
           ))}
           <div className="medref-case-links">
-            <h4>Open-access case studies</h4>
+            <h4>{t('Open-access case studies', 'دراسات حالة مفتوحة')}</h4>
             <ul>
               {CANDIDATE_CASE_URLS.map(entry => (
                 <li key={entry.url}>
@@ -2325,8 +2376,10 @@ function MiaApp() {
               ))}
             </ul>
             <p className="medref-note">
-              Single-case and small-series evidence is hypothesis-generating
-              only — illustrative, low-certainty.
+              {t(
+                'Single-case and small-series evidence is hypothesis-generating only — illustrative, low-certainty.',
+                'أدلة الحالة الواحدة والسلاسل الصغيرة لتوليد الفرضيات فقط — توضيحية ومنخفضة اليقين.'
+              )}
             </p>
           </div>
         </section>

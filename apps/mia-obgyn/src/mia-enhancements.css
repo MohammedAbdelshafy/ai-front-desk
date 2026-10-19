@@ -643,3 +643,250 @@ a:not([class*="btn"]):not([class*="button"]) {
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
+
+/* ============================================================
+   MOBILE — phone-first layer (founder's primary device)
+   Complements index.css's 760px drawer nav; never fights it.
+   ============================================================ */
+
+@media (max-width: 768px) {
+  /* ---- No horizontal overflow, ever ---- */
+  html, body {
+    overflow-x: hidden;
+  }
+  .mia-app {
+    overflow-x: clip;
+  }
+  img, svg, video, iframe {
+    max-width: 100%;
+  }
+
+  /* ---- Readable type floor ---- */
+  body {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ---- Panels: comfortable phone padding ---- */
+  .panel {
+    padding: 16px 14px;
+    border-radius: 14px;
+  }
+
+  /* ---- Grids stack (medref-grid already 1fr at 1080px; belt + braces) ---- */
+  .medref-grid,
+  .medref-row,
+  [class*="grid-2"], [class*="grid-3"], [class*="cols-"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ---- Tables scroll instead of breaking layout ---- */
+  .panel table,
+  .medref-results-panel table,
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ---- Nav drawer: proper touch targets ---- */
+  .nav-item {
+    min-height: 48px;
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+  .sidebar {
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  /* ---- Forms: full-width, thumb-friendly ---- */
+  .medref-field input,
+  .medref-field textarea,
+  .medref-field select,
+  .chat-composer input,
+  .chat-composer textarea,
+  input, select, textarea {
+    min-height: 44px;
+    font-size: 16px; /* stops iOS auto-zoom on focus */
+    width: 100%;
+  }
+  .medref-submit,
+  .chat-composer button,
+  button[type="submit"] {
+    min-height: 48px;
+    width: 100%;
+    font-size: 15px;
+  }
+
+  /* ---- Chat stacks ---- */
+  .chat-layout {
+    flex-direction: column;
+  }
+  .chat-sidebar {
+    display: none;
+  }
+  .chat-panel {
+    width: 100%;
+  }
+  .composer-inner {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* ---- Hero / overview stacks ---- */
+  [class*="hero"] {
+    padding: 24px 16px;
+  }
+  [class*="hero"] h1 {
+    font-size: 24px;
+  }
+
+  /* ---- Floating Mia: smaller, reachable, clear of chrome ---- */
+  .mia-fab,
+  .mia-float-btn {
+    width: 52px;
+    height: 52px;
+    right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  .mia-float-panel {
+    right: 10px;
+    left: 10px;
+    width: auto;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 160px);
+  }
+  .mia-float-chips {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ---- Pathway / evidence cards: readable on phone ---- */
+  .medref-pathways-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .medref-pathway header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  /* ---- Page chrome ---- */
+  .page-body {
+    padding: 16px 12px max(24px, env(safe-area-inset-bottom));
+  }
+}
+
+/* ---- 480px refinement pass: small phones ---- */
+@media (max-width: 480px) {
+  .panel {
+    padding: 14px 12px;
+    border-radius: 12px;
+  }
+  [class*="hero"] {
+    padding: 20px 12px;
+  }
+  [class*="hero"] h1 {
+    font-size: 21px;
+  }
+  h2 { font-size: 18px; }
+  h3 { font-size: 15px; }
+
+  .mia-fab,
+  .mia-float-btn {
+    width: 48px;
+    height: 48px;
+  }
+  .mia-float-panel {
+    bottom: calc(70px + env(safe-area-inset-bottom));
+    border-radius: 14px;
+  }
+
+  .medref-pathway,
+  .medref-block {
+    padding: 12px;
+  }
+  .topbar {
+    padding: 0 10px;
+  }
+}
+
+/* ============================================================
+   PRINT — clean clinical reference output
+   ============================================================ */
+
+@media print {
+  /* ---- Hide all chrome and interactivity ---- */
+  .sidebar,
+  .topbar,
+  .mobile-menu,
+  .nav-backdrop,
+  .mia-float-btn,
+  .mia-float-panel,
+  .chat-composer,
+  .chat-controls,
+  .chat-sidebar,
+  form,
+  button,
+  input,
+  select,
+  textarea,
+  footer,
+  [class*="footer"] {
+    display: none !important;
+  }
+
+  /* ---- Printed header line ---- */
+  body::before {
+    content: "Mia OB-GYN \2014 clinical reference (not a prescription)";
+    display: block;
+    font-size: 11pt;
+    font-weight: 700;
+    color: #000;
+    border-bottom: 2px solid #000;
+    padding-bottom: 6pt;
+    margin-bottom: 14pt;
+  }
+
+  /* ---- Black on white, no decoration ---- */
+  html, body, .mia-app {
+    background: #fff !important;
+    color: #000 !important;
+    overflow: visible;
+  }
+  .panel,
+  .medref-pathway,
+  .medref-block,
+  .medref-urgent,
+  .medref-flag {
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    border: 1pt solid #999 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, p, li, span, a {
+    color: #000 !important;
+    text-shadow: none !important;
+  }
+  a {
+    text-decoration: none;
+  }
+  /* Show link targets for references */
+  .medref-results-panel a[href^="http"]::after,
+  .medref-case-links a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    word-break: break-all;
+  }
+
+  /* ---- Keep headings with their content ---- */
+  h1, h2, h3, h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}
