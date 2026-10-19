@@ -45,6 +45,10 @@ import {
   APPROVED_PATHWAYS,
   PATHWAY_APPROVAL_REQUIREMENTS,
 } from './medication-pathways';
+import {
+  CANDIDATE_PATHWAY_EVIDENCE,
+  CANDIDATE_CASE_URLS,
+} from './candidate-pathway-evidence';
 
 type Section =
   | 'overview'
@@ -2182,8 +2186,7 @@ function MiaApp() {
             <span className="medref-pathway-count">
               {APPROVED_PATHWAYS.length} approved
             </span>
-          </div>
-          {APPROVED_PATHWAYS.length === 0 ? (
+          </div>          {APPROVED_PATHWAYS.length === 0 ? (
             <>
               <p className="medref-note">
                 No pathway has cleared the approval gate yet, so Mia suggests{' '}
@@ -2255,6 +2258,77 @@ function MiaApp() {
               </article>
             ))
           )}
+        </section>
+        <section className="panel medref-pathways-panel">
+          <div className="medref-pathways-head">
+            <h3>
+              <BookOpen size={17} /> Candidate evidence for clinician review
+            </h3>
+            <span className="medref-pathway-count">
+              {CANDIDATE_PATHWAY_EVIDENCE.length} candidates
+            </span>
+          </div>
+          <p className="medref-note">
+            Research candidates only — <strong>not approved pathways</strong>.
+            Each entry records what a named public guideline states, with its
+            citation. A reviewing clinician must verify every item against the
+            primary source before anything becomes an approved pathway.
+          </p>
+          {CANDIDATE_PATHWAY_EVIDENCE.map(candidate => (
+            <article key={candidate.id} className="medref-pathway">
+              <header>
+                <strong>{candidate.condition}</strong>
+                <span className="medref-pathway-jurisdiction">
+                  {candidate.aspect}
+                </span>
+              </header>
+              <ul>
+                {candidate.statements.map((statement, index) => (
+                  <li key={index}>
+                    <span>{statement.text}</span>
+                  </li>
+                ))}
+              </ul>
+              {candidate.flags.length > 0 ? (
+                <div className="medref-flags">
+                  {candidate.flags.map((flag, index) => (
+                    <p key={index} className="medref-flag">
+                      ⚠ {flag}
+                    </p>
+                  ))}
+                </div>
+              ) : null}
+              <footer>
+                <span>
+                  {candidate.citation.title} — {candidate.citation.publisher},{' '}
+                  {candidate.citation.edition} ({candidate.citation.section})
+                </span>
+                <a
+                  href={candidate.citation.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open the cited source <ArrowUpRight size={12} />
+                </a>
+              </footer>
+            </article>
+          ))}
+          <div className="medref-case-links">
+            <h4>Open-access case studies</h4>
+            <ul>
+              {CANDIDATE_CASE_URLS.map(entry => (
+                <li key={entry.url}>
+                  <a href={entry.url} target="_blank" rel="noopener noreferrer">
+                    {entry.label} <ArrowUpRight size={12} />
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <p className="medref-note">
+              Single-case and small-series evidence is hypothesis-generating
+              only — illustrative, low-certainty.
+            </p>
+          </div>
         </section>
       </>
     );
