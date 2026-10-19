@@ -23,6 +23,7 @@ import {
   Menu,
   MessageCircle,
   MoreHorizontal,
+  Pill,
   Plus,
   Search,
   Send,
@@ -40,6 +41,10 @@ import {
   type EvidenceSource,
   type Jurisdiction,
 } from './obgyn-data';
+import {
+  APPROVED_PATHWAYS,
+  PATHWAY_APPROVAL_REQUIREMENTS,
+} from './medication-pathways';
 
 type Section =
   | 'overview'
@@ -47,6 +52,7 @@ type Section =
   | 'appointments'
   | 'questionnaires'
   | 'mia'
+  | 'medication'
   | 'evidence'
   | 'governance';
 type Patient = {
@@ -125,6 +131,13 @@ const NAV: {
     label: 'Mia chat',
     ar: 'محادثة ميا',
     icon: MessageCircle,
+    group: 'INTELLIGENCE',
+  },
+  {
+    id: 'medication',
+    label: 'Medication reference',
+    ar: 'مرجع الأدوية',
+    icon: Pill,
     group: 'INTELLIGENCE',
   },
   {
@@ -570,6 +583,34 @@ function MiaApp() {
   ]);
   const [mobileNav, setMobileNav] = useState(false);
   const chatBottom = useRef<HTMLDivElement | null>(null);
+  const floatBottom = useRef<HTMLDivElement | null>(null);
+
+  // Floating Mia assistant — follows the doctor across every section.
+  const [miaFloatOpen, setMiaFloatOpen] = useState(false);
+  const [floatQuery, setFloatQuery] = useState('');
+
+  // Medication reference workspace — doctor enters the clinical picture,
+  // Mia retrieves references and safety checks. Mia never selects,
+  // ranks, doses or recommends a medicine.
+  const [medDiagnosis, setMedDiagnosis] = useState('');
+  const [medSymptoms, setMedSymptoms] = useState('');
+  const [medAllergies, setMedAllergies] = useState('');
+  const [medCurrent, setMedCurrent] = useState('');
+  const [medPregnancy, setMedPregnancy] = useState('pregnant');
+  const [medMedicine, setMedMedicine] = useState('');
+  const [medChecks, setMedChecks] = useState({
+    allergies: false,
+    meds: false,
+    pregnancy: false,
+    protocol: false,
+    pharmacist: false,
+  });
+  const [medResult, setMedResult] = useState<null | {
+    sources: EvidenceSource[];
+    allergyList: string[];
+    medicine: string;
+    urgent: boolean;
+  }>(null);
 
   const selectedPatient =
     patients.find(p => p.id === selectedPatientId) || patients[0];
@@ -585,6 +626,7 @@ function MiaApp() {
       appointments: locale === 'ar' ? 'المواعيد' : 'Appointments',
       questionnaires: locale === 'ar' ? 'الاستبيانات' : 'Questionnaires',
       mia: locale === 'ar' ? 'محادثة ميا' : 'Mia chat',
+      medication: locale === 'ar' ? 'مرجع الأدوية' : 'Medication reference',
       evidence: locale === 'ar' ? 'مكتبة المراجع' : 'Evidence library',
       governance: locale === 'ar' ? 'السلامة والجاهزية' : 'Safety & readiness',
     }),
@@ -605,6 +647,11 @@ function MiaApp() {
   useEffect(() => {
     chatBottom.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
   }, [messages, section]);
+
+  useEffect(() => {
+    if (miaFloatOpen)
+      floatBottom.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+  }, [messages, miaFloatOpen]);
 
   function goPatient(id: string) {
     setSelectedPatientId(id);
@@ -663,7 +710,7 @@ function MiaApp() {
     };
   }
 
-  function sendQuestion(question?: string) {
+  function sendQuestion(question?: string, navigate = true) {
     const value = (question ?? chatQuery).trim();
     if (!value) return;
     const patientId = chatContext === 'none' ? '' : chatContext;
@@ -674,7 +721,7 @@ function MiaApp() {
       answer,
     ]);
     setChatQuery('');
-    setSection('mia');
+    if (navigate) setSection('mia');
   }
 
   const filteredPatients = patients.filter(patient =>
@@ -1790,6 +1837,590 @@ function MiaApp() {
     );
   }
 
+
+  // ------------------------------------------------------------------
+  // Medication reference workspace.
+  // The doctor enters the clinical picture; Mia retrieves guideline
+  // references, medicine label sources and safety checks. Mia never
+  // selects, ranks, doses or recommends a medicine — that decision and
+  // its responsibility stay with the doctor.
+  // ------------------------------------------------------------------
+  const EMERGENCY_RE =
+    /(heavy bleeding|severe bleeding|haemorrhage|hemorrhage|seizure|collapse|unconscious|severe breathlessness|difficulty breathing|fainting|fits|convulsion)/i;
+
+  const MED_CHECKS = [
+    {
+      key: 'allergies',
+      label: 'Allergies confirmed directly with the patient — never assumed from the chart',
+    },
+    {
+      key: 'meds',
+      label: 'Current medicines reconciled — the patient brought the list or it was verified',
+    },
+    {
+      key: 'pregnancy',
+      label: 'Pregnancy / postpartum / lactation state confirmed and dated',
+    },
+    {
+      key: 'protocol',
+      label: 'Local hospital protocol for this indication checked',
+    },
+    {
+      key: 'pharmacist',
+      label: 'Pharmacist review requested for high-risk, complex or uncertain cases',
+    },
+  ] as const;
+
+  function runMedicationReference() {
+    const stateTerms =
+      medPregnancy === 'pregnant'
+        ? 'pregnancy'
+        : medPregnancy === 'breastfeeding'
+          ? 'breastfeeding lactation'
+          : medPregnancy === 'postpartum'
+            ? 'postpartum'
+            : '';
+    const query = [medDiagnosis, medSymptoms, stateTerms]
+      .filter(part => part.trim())
+      .join(' ');
+    const sources = searchObgynSources(query || 'obstetrics', jurisdiction, 6);
+    const allergyList = medAllergies
+      .split(/[,\n;]+/)
+      .map(part => part.trim())
+      .filter(Boolean);
+    const urgent = EMERGENCY_RE.test(medSymptoms + ' ' + medDiagnosis);
+    setMedResult({
+      sources,
+      allergyList,
+      medicine: medMedicine.trim(),
+      urgent,
+    });
+  }
+
+  function medicineReferenceLinks(medicine: string) {
+    const enc = encodeURIComponent(medicine);
+    const eda = EVIDENCE_SOURCES.find(source => source.id === 'eda-drug-register');
+    return [
+      {
+        label: 'DailyMed — product label',
+        hint: 'Contraindications · warnings · pregnancy & lactation sections',
+        url: 'https://dailymed.nlm.nih.gov/dailymed/search.cfm?query=' + enc,
+      },
+      {
+        label: 'EMC — UK product information',
+        hint: 'Summary of Product Characteristics · patient leaflet',
+        url: 'https://www.medicines.org.uk/emc/search?q=' + enc,
+      },
+      {
+        label: 'LactMed — drugs and lactation',
+        hint: 'Peer-reviewed monographs; check the individual entry',
+        url: 'https://www.ncbi.nlm.nih.gov/books/NBK501922/',
+      },
+      {
+        label: 'MotherToBaby — pregnancy exposures',
+        hint: 'Fact sheets and pregnancy studies',
+        url: 'https://mothertobaby.org/',
+      },
+      {
+        label: 'Egyptian Drug Register',
+        hint: 'National registration and product identity',
+        url: eda ? eda.url : 'https://www.edaegypt.gov.eg/',
+      },
+    ];
+  }
+
+  function renderMedicationPage() {
+    const checksDone = Object.values(medChecks).filter(Boolean).length;
+    return (
+      <>
+        {renderHeader(
+          'Medication reference',
+          'Enter the clinical picture. Mia retrieves guidelines, label sources and safety checks — instantly.',
+          <span className="source-mode-pill">
+            <span className="pulse-dot" /> REFERENCE ONLY
+          </span>
+        )}
+        <div className="medref-boundary" role="note">
+          <ShieldCheck size={17} />
+          <div>
+            <strong>Clinical boundary.</strong> Mia does not choose, rank,
+            dose or recommend any medicine. The prescribing decision — and its
+            responsibility — stays with the doctor. Everything below is a
+            reference to verify, not an instruction to follow.
+          </div>
+        </div>
+        <div className="medref-grid">
+          <section className="panel medref-form-panel">
+            <h3>
+              <Stethoscope size={17} /> Clinical picture
+            </h3>
+            <label className="medref-field">
+              <span>Diagnosis / indication</span>
+              <input
+                value={medDiagnosis}
+                onChange={e => setMedDiagnosis(e.target.value)}
+                placeholder="e.g. Postpartum haemorrhage, preeclampsia…"
+              />
+            </label>
+            <label className="medref-field">
+              <span>Symptoms and observations</span>
+              <textarea
+                value={medSymptoms}
+                onChange={e => setMedSymptoms(e.target.value)}
+                placeholder="e.g. Heavy vaginal bleeding 30 min after delivery, BP 150/100…"
+                rows={3}
+              />
+            </label>
+            <div className="medref-row">
+              <label className="medref-field">
+                <span>Pregnancy state</span>
+                <select
+                  value={medPregnancy}
+                  onChange={e => setMedPregnancy(e.target.value)}
+                >
+                  <option value="pregnant">Pregnant</option>
+                  <option value="postpartum">Postpartum</option>
+                  <option value="breastfeeding">Breastfeeding</option>
+                  <option value="not-pregnant">Not pregnant</option>
+                  <option value="unknown">Unknown — confirm</option>
+                </select>
+              </label>
+              <label className="medref-field">
+                <span>Medicine you are considering (optional)</span>
+                <input
+                  value={medMedicine}
+                  onChange={e => setMedMedicine(e.target.value)}
+                  placeholder="Type the exact product or generic name"
+                />
+              </label>
+            </div>
+            <label className="medref-field">
+              <span>Known allergies (comma-separated)</span>
+              <input
+                value={medAllergies}
+                onChange={e => setMedAllergies(e.target.value)}
+                placeholder="e.g. Penicillin — rash, Sulfa — anaphylaxis"
+              />
+            </label>
+            <label className="medref-field">
+              <span>Current medicines</span>
+              <input
+                value={medCurrent}
+                onChange={e => setMedCurrent(e.target.value)}
+                placeholder="e.g. Ferrous sulfate, methyldopa…"
+              />
+            </label>
+            <button
+              type="button"
+              className="btn btn-primary medref-submit"
+              onClick={runMedicationReference}
+              disabled={!medDiagnosis.trim() && !medSymptoms.trim()}
+            >
+              <Search size={16} /> Retrieve references
+            </button>
+            <small className="medref-hint">
+              Nothing is sent anywhere — matching runs locally against the
+              curated source directory.
+            </small>
+          </section>
+
+          <section className="panel medref-results-panel">
+            <h3>
+              <BookOpen size={17} /> Instant reference pack
+            </h3>
+            {!medResult ? (
+              <p className="medref-empty">
+                Enter a diagnosis or symptoms and press{' '}
+                <strong>Retrieve references</strong>. Mia will assemble the
+                guideline links, label sources and safety checks for this
+                case here.
+              </p>
+            ) : (
+              <>
+                {medResult.urgent ? (
+                  <div className="medref-urgent" role="alert">
+                    <AlertTriangle size={16} />
+                    <span>
+                      Urgent pattern detected in what you entered. If this is a
+                      real deteriorating patient, activate your hospital&apos;s
+                      emergency pathway now — do not wait for this prototype.
+                    </span>
+                  </div>
+                ) : null}
+                <div className="medref-block">
+                  <strong className="medref-block-title">
+                    Guideline references ({medResult.sources.length})
+                  </strong>
+                  {medResult.sources.length ? (
+                    medResult.sources.map(source => (
+                      <a
+                        key={source.id}
+                        className="medref-source"
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <div>
+                          <strong>{source.title}</strong>
+                          <small>
+                            {source.publisher}
+                            {source.year ? ' · ' + source.year : ''} ·{' '}
+                            {source.type}
+                          </small>
+                        </div>
+                        <ArrowUpRight size={15} />
+                      </a>
+                    ))
+                  ) : (
+                    <p className="medref-empty">
+                      No strong match in the directory. Broaden the terms or
+                      try the Evidence library.
+                    </p>
+                  )}
+                </div>
+                {medResult.medicine ? (
+                  <div className="medref-block">
+                    <strong className="medref-block-title">
+                      Label &amp; safety references —{' '}
+                      {medResult.medicine}
+                    </strong>
+                    <p className="medref-note">
+                      You named this medicine; Mia only fetched where to verify
+                      it. Open the label and read <em>Contraindications</em>,{' '}
+                      <em>Warnings</em> and <em>Use in Specific Populations</em>{' '}
+                      before prescribing.
+                    </p>
+                    {medicineReferenceLinks(medResult.medicine).map(link => (
+                      <a
+                        key={link.label}
+                        className="medref-source"
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <div>
+                          <strong>{link.label}</strong>
+                          <small>{link.hint}</small>
+                        </div>
+                        <ArrowUpRight size={15} />
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="medref-block">
+                    <strong className="medref-block-title">
+                      Considering a specific medicine?
+                    </strong>
+                    <p className="medref-note">
+                      Type its exact name in the form and retrieve again — Mia
+                      will pull the label and safety references for it. Mia
+                      will not suggest which medicine to use.
+                    </p>
+                  </div>
+                )}
+                <div className="medref-block">
+                  <strong className="medref-block-title">
+                    Allergy cross-check
+                  </strong>
+                  {medResult.allergyList.length ? (
+                    <>
+                      <div className="medref-allergies">
+                        {medResult.allergyList.map(allergy => (
+                          <span key={allergy} className="medref-allergy-chip">
+                            <AlertTriangle size={13} /> {allergy}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="medref-note">
+                        Verify each of these against the product label&apos;s{' '}
+                        <em>Contraindications</em> and <em>Warnings</em>{' '}
+                        sections before prescribing. When in doubt, escalate
+                        to pharmacy — do not rely on this list alone.
+                      </p>
+                    </>
+                  ) : (
+                    <p className="medref-note">
+                      No allergies entered.{' '}
+                      <strong>
+                        Confirm allergies directly with the patient before any
+                        prescription
+                      </strong>{' '}
+                      — &quot;unknown&quot; is not &quot;none&quot;.
+                    </p>
+                  )}
+                </div>
+                <div className="medref-block">
+                  <strong className="medref-block-title">
+                    Pre-prescribing safety checklist ({checksDone}/
+                    {MED_CHECKS.length})
+                  </strong>
+                  {MED_CHECKS.map(check => (
+                    <label key={check.key} className="medref-check">
+                      <input
+                        type="checkbox"
+                        checked={medChecks[check.key]}
+                        onChange={() =>
+                          setMedChecks(prev => ({
+                            ...prev,
+                            [check.key]: !prev[check.key],
+                          }))
+                        }
+                      />
+                      <span>{check.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+          </section>
+        </div>
+        <section className="panel medref-pathways-panel">
+          <div className="medref-pathways-head">
+            <h3>
+              <ShieldCheck size={17} /> Approved medication pathways
+            </h3>
+            <span className="medref-pathway-count">
+              {APPROVED_PATHWAYS.length} approved
+            </span>
+          </div>
+          {APPROVED_PATHWAYS.length === 0 ? (
+            <>
+              <p className="medref-note">
+                No pathway has cleared the approval gate yet, so Mia suggests{' '}
+                <strong>no medicines</strong>. A suggestion appears here only
+                after all five of these are recorded:
+              </p>
+              <ol className="medref-approval-list">
+                {PATHWAY_APPROVAL_REQUIREMENTS.map(requirement => (
+                  <li key={requirement}>{requirement}</li>
+                ))}
+              </ol>
+              <p className="medref-note">
+                This is the quality-control contract: &ldquo;most
+                accurate&rdquo; is earned by named clinician and pharmacist
+                review against a cited guideline — never asserted by the
+                software. To approve the first pathway, a clinician reviews a
+                diagnosis against its guideline, a pharmacist countersigns,
+                and both names go on the record above.
+              </p>
+            </>
+          ) : (
+            APPROVED_PATHWAYS.map(pathway => (
+              <article key={pathway.id} className="medref-pathway">
+                <header>
+                  <strong>{pathway.diagnosis}</strong>
+                  <span className="medref-pathway-jurisdiction">
+                    {pathway.jurisdictions.join(' · ')}
+                  </span>
+                </header>
+                <ul>
+                  {pathway.medicines.map(medicine => (
+                    <li key={medicine.name}>
+                      <span
+                        className={
+                          'medref-role medref-role-' + medicine.role
+                        }
+                      >
+                        {medicine.role.replace(/-/g, ' ')}
+                      </span>
+                      <strong>{medicine.name}</strong>
+                      <span>{medicine.note}</span>
+                    </li>
+                  ))}
+                </ul>
+                <footer>
+                  <span>
+                    Guideline: {pathway.guideline.title} (
+                    {pathway.guideline.publisher},{' '}
+                    {pathway.guideline.edition}) —{' '}
+                    {pathway.guideline.section}
+                  </span>
+                  <span>
+                    Reviewed by {pathway.clinicianReviewer.name} (
+                    {pathway.clinicianReviewer.credential},{' '}
+                    {pathway.clinicianReviewer.date}) and{' '}
+                    {pathway.pharmacistReviewer.name} (
+                    {pathway.pharmacistReviewer.credential},{' '}
+                    {pathway.pharmacistReviewer.date}). Re-review due{' '}
+                    {pathway.reviewDue}.
+                  </span>
+                  <a
+                    href={pathway.guideline.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Open the cited guideline <ArrowUpRight size={12} />
+                  </a>
+                </footer>
+              </article>
+            ))
+          )}
+        </section>
+      </>
+    );
+  }
+
+  // ------------------------------------------------------------------
+  // Floating Mia — she moves with the doctor across every section.
+  // ------------------------------------------------------------------
+  const FLOAT_CHIPS: Record<Section, string[]> = {
+    overview: ['What can this prototype do?', 'Show me the safety gates'],
+    patients: [
+      'What must I confirm before prescribing?',
+      'Find lactation references',
+    ],
+    appointments: ['Find postpartum haemorrhage guidance'],
+    questionnaires: ['What does the intake check for?'],
+    mia: ['Find preeclampsia guidance'],
+    medication: [
+      'What does the allergy cross-check cover?',
+      'Find magnesium sulfate references',
+    ],
+    evidence: ['Show WHO maternal health guidelines'],
+    governance: ['What is still blocked before live use?'],
+  };
+
+  function sendFloatQuestion(question?: string) {
+    const value = (question ?? floatQuery).trim();
+    if (!value) return;
+    const patientId = chatContext === 'none' ? '' : chatContext;
+    const answer = makeAnswer(value, patientId);
+    setMessages(previous => [
+      ...previous,
+      { role: 'user', text: value },
+      answer,
+    ]);
+    setFloatQuery('');
+  }
+
+  function renderMiaFloat() {
+    const recent = messages.slice(-8);
+    return (
+      <>
+        <button
+          type="button"
+          className={'mia-fab' + (miaFloatOpen ? ' mia-fab-open' : '')}
+          onClick={() => setMiaFloatOpen(open => !open)}
+          aria-label={miaFloatOpen ? 'Close Mia assistant' : 'Open Mia assistant'}
+        >
+          <Avatar image={avatarImage} preset={avatarPreset} size="md" />
+          <span className="mia-fab-ping" />
+        </button>
+        {miaFloatOpen ? (
+          <div className="mia-float-panel" role="dialog" aria-label="Mia assistant">
+            <div className="mia-float-header">
+              <Avatar image={avatarImage} preset={avatarPreset} size="md" />
+              <div>
+                <strong>Mia · with you here</strong>
+                <small>
+                  <span className="online-dot" /> Reference mode ·{' '}
+                  {labels[section]}
+                </small>
+              </div>
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => setMiaFloatOpen(false)}
+                aria-label="Close Mia assistant"
+              >
+                <X size={15} />
+              </button>
+            </div>
+            <div className="mia-float-messages">
+              {recent.map((message, index) => (
+                <div
+                  className={'message-row message-' + message.role}
+                  key={index}
+                >
+                  <div className="message-body">
+                    <div className="message-author">
+                      {message.role === 'assistant' ? 'Mia' : 'Doctor'}
+                    </div>
+                    <div className="message-bubble">
+                      {message.text
+                        .split('\n')
+                        .map((line, lineIndex) =>
+                          line ? (
+                            <p key={lineIndex}>{line}</p>
+                          ) : (
+                            <div className="message-space" key={lineIndex} />
+                          )
+                        )}
+                    </div>
+                    {message.sources && message.sources.length ? (
+                      <div className="mia-float-sources">
+                        {message.sources.slice(0, 3).map(source => (
+                          <a
+                            key={source.id}
+                            href={source.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {source.title} <ArrowUpRight size={12} />
+                          </a>
+                        ))}
+                        {message.sources.length > 3 ? (
+                          <span>
+                            +{message.sources.length - 3} more in Mia chat
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+              <div ref={floatBottom} />
+            </div>
+            <div className="mia-float-chips">
+              {FLOAT_CHIPS[section].map(chip => (
+                <button
+                  type="button"
+                  key={chip}
+                  onClick={() => sendFloatQuestion(chip)}
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+            <form
+              className="mia-float-form"
+              onSubmit={event => {
+                event.preventDefault();
+                sendFloatQuestion();
+              }}
+            >
+              <input
+                aria-label="Ask Mia"
+                value={floatQuery}
+                maxLength={600}
+                onChange={event => setFloatQuery(event.target.value)}
+                placeholder="Ask Mia anything…"
+              />
+              <button
+                type="submit"
+                className="send-button"
+                aria-label="Send to Mia"
+                disabled={!floatQuery.trim()}
+              >
+                <Send size={15} />
+              </button>
+            </form>
+            <button
+              type="button"
+              className="mia-float-full"
+              onClick={() => {
+                setMiaFloatOpen(false);
+                setSection('mia');
+              }}
+            >
+              Open full Mia chat <ArrowUpRight size={13} />
+            </button>
+          </div>
+        ) : null}
+      </>
+    );
+  }
+
   function renderEvidencePage() {
     return (
       <>
@@ -2256,6 +2887,7 @@ function MiaApp() {
           {section === 'appointments' ? renderAppointmentsPage() : null}
           {section === 'questionnaires' ? renderQuestionnairesPage() : null}
           {section === 'mia' ? renderChatPage() : null}
+          {section === 'medication' ? renderMedicationPage() : null}
           {section === 'evidence' ? renderEvidencePage() : null}
           {section === 'governance' ? renderGovernancePage() : null}
           <footer className="app-footer">
@@ -2280,6 +2912,7 @@ function MiaApp() {
           </button>
         </div>
       ) : null}
+      {renderMiaFloat()}
     </div>
   );
 }
