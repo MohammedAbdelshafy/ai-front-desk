@@ -522,12 +522,16 @@ def main() -> int:
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0
     if args.search:
-        result = search_knowledge_library(
-            args.search,
-            corpus_path=args.corpus_path,
-            limit=args.limit,
-            mode=args.mode,
-        )
+        try:
+            result = search_knowledge_library(
+                args.search,
+                corpus_path=args.corpus_path,
+                limit=args.limit,
+                mode=args.mode,
+            )
+        except (OSError, ValueError) as exc:
+            parser.error(str(exc))
+            return 2
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0
     if not args.source_id or not args.file:

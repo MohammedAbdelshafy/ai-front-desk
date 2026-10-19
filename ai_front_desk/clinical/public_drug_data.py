@@ -287,7 +287,6 @@ def search_openfda_label_sections(
     """
     term = validate_medicine_name(medicine_name)
     fetch = fetch_json or _fetch_json
-    fields = ["set_id", "effective_time", "openfda", *LABEL_REFERENCE_SECTIONS.keys()]
     records: list[dict[str, Any]] = []
     source_url = ""
 

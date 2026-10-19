@@ -71,7 +71,7 @@ def case_from_form(form: Mapping[str, Any]) -> ClinicianCase:
     symptoms = _split_values(_one(form, "symptoms"), limit=10)
     jurisdiction = _one(form, "jurisdiction", "US")
     if jurisdiction not in ALLOWED_JURISDICTIONS:
-        raise ValueError("This demo is limited to the US jurisdiction.")
+        raise ValueError("This demo is limited to the US and Egypt (EG) jurisdictions.")
     reported_allergies = _one(form, "reported_allergies")[:1200]
     current_medications = _one(form, "current_medications")[:1200]
     relevant_medical_history = _one(form, "relevant_medical_history")[:1200]
@@ -150,7 +150,7 @@ def _render_quality_checklist(review: dict[str, Any]) -> str:
     return "".join(out)
 
 
-def _render_public_lookup(lookup: dict[str, Any] | None) -> str:
+def render_public_lookup(lookup: dict[str, Any] | None) -> str:
     if lookup is None:
         return ""
     rxnorm = lookup.get("rxnorm", {})
@@ -451,7 +451,7 @@ def _render_draft_evidence(assessment: str, symptoms: str = "", jurisdiction: st
             out.append("<h3>Sources</h3><ul>")
             for source in sources:
                 url = str(source.get("url", ""))
-                if not url.startswith(("https://", "http://")):
+                if not url.startswith("https://"):
                     continue
                 out.append(
                     "<li><a href='%s' target='_blank' rel='noopener noreferrer'>%s</a> <span class='muted'>· %s</span></li>"
@@ -484,7 +484,7 @@ def _render_information_centers(jurisdiction: str = "US") -> str:
         if jurisdiction not in jurisdictions and not ({"global_evidence_discovery", "global_education"} & set(jurisdictions)):
             continue
         url = str(source.get("url", ""))
-        if not url.startswith(("https://", "http://")):
+        if not url.startswith("https://"):
             continue
         matched.append(source)
     out = [
@@ -511,7 +511,7 @@ def _render_information_centers(jurisdiction: str = "US") -> str:
             )
         )
         download_url = str(source.get("download_url", ""))
-        if download_url.startswith(("https://", "http://")):
+        if download_url.startswith("https://"):
             download_status = str(source.get("download_status", source.get("content_rights", "check source terms")))
             out.append(
                 "<p class='source-download'><a href='%s' target='_blank' rel='noopener noreferrer'>Open / download source file</a>"
@@ -522,7 +522,7 @@ def _render_information_centers(jurisdiction: str = "US") -> str:
             if not isinstance(download, dict):
                 continue
             extra_url = str(download.get("url", ""))
-            if not extra_url.startswith(("https://", "http://")):
+            if not extra_url.startswith("https://"):
                 continue
             out.append(
                 "<p class='source-download'><a href='%s' target='_blank' rel='noopener noreferrer'>Open / download: %s</a>"
@@ -595,7 +595,7 @@ def render_page(
                 _render_flags(review),
                 _render_evidence(review),
                 _render_draft_evidence(_one(form, "proposed_assessment"), _one(form, "symptoms"), _one(form, "jurisdiction", "US")),
-                _render_public_lookup(public_lookup),
+                render_public_lookup(public_lookup),
                 _render_education_search(education_result),
                 _render_knowledge_library(knowledge_result),
             )
