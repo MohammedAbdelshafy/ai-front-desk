@@ -141,8 +141,8 @@ const NAV: {
   },
   {
     id: 'medication',
-    label: 'Medication reference',
-    ar: 'مرجع الأدوية',
+    label: 'Mia Academy',
+    ar: 'أكاديمية ميا',
     icon: Pill,
     group: 'INTELLIGENCE',
   },
@@ -667,7 +667,7 @@ function MiaApp() {
       appointments: locale === 'ar' ? 'المواعيد' : 'Appointments',
       questionnaires: locale === 'ar' ? 'الاستبيانات' : 'Questionnaires',
       mia: locale === 'ar' ? 'محادثة ميا' : 'Mia chat',
-      medication: locale === 'ar' ? 'مرجع الأدوية' : 'Medication reference',
+      medication: locale === 'ar' ? 'أكاديمية ميا' : 'Mia Academy',
       evidence: locale === 'ar' ? 'مكتبة المراجع' : 'Evidence library',
       governance: locale === 'ar' ? 'السلامة والجاهزية' : 'Safety & readiness',
     }),
@@ -1995,10 +1995,10 @@ function MiaApp() {
     return (
       <>
         {renderHeader(
-          t('Medication reference', 'مرجع الأدوية'),
+          t('Mia Academy', 'أكاديمية ميا'),
           t(
-            'Enter the clinical picture. Mia retrieves guidelines, label sources and safety checks — instantly.',
-            'أدخل الصورة السريرية. تسترد ميا الإرشادات ومصادر النشرات وفحوصات السلامة — فورًا.'
+            'The medication teaching workspace — learn to prescribe with the why. Enter the clinical picture; Mia retrieves the guidelines, label sources and safety checks — instantly.',
+            'مساحة تعليم الأدوية — تعلّم وصف الدواء مع السبب. أدخل الصورة السريرية؛ تسترد ميا الإرشادات ومصادر النشرات وفحوصات السلامة — فورًا.'
           ),
           <span className="source-mode-pill">
             <span className="pulse-dot" /> {t('REFERENCE ONLY', 'للمرجعية فقط')}
@@ -3017,7 +3017,7 @@ function MiaApp() {
             <MoreHorizontal size={17} />
           </button>
           <div className="sidebar-build">
-            MIA OB-GYN <span>BUILD 0.1.0</span>
+            MIA OB-GYN <span>BUILD 1.0.0</span>
           </div>
         </div>
         {showAvatarSettings ? renderAvatarSettings() : null}
