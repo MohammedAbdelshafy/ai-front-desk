@@ -592,10 +592,15 @@ function MiaApp() {
   const [mobileNav, setMobileNav] = useState(false);
   const chatBottom = useRef<HTMLDivElement | null>(null);
   const floatBottom = useRef<HTMLDivElement | null>(null);
+  const medBottom = useRef<HTMLDivElement | null>(null);
 
   // Floating Mia assistant — follows the doctor across every section.
   const [miaFloatOpen, setMiaFloatOpen] = useState(false);
   const [floatQuery, setFloatQuery] = useState('');
+
+  // Medication assist chatbox (Academy page) — same shared conversation.
+  const [medQuery, setMedQuery] = useState('');
+  const [medClip, setMedClip] = useState(0);
 
   // Medication reference workspace — doctor enters the clinical picture,
   // Mia retrieves references and safety checks. Mia never selects,
@@ -699,6 +704,11 @@ function MiaApp() {
     if (miaFloatOpen)
       floatBottom.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
   }, [messages, miaFloatOpen]);
+
+  useEffect(() => {
+    if (section === 'medication')
+      medBottom.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [messages, section]);
 
   function goPatient(id: string) {
     setSelectedPatientId(id);
@@ -2020,6 +2030,115 @@ function MiaApp() {
             )}
           </div>
         </div>
+        <section className="panel medassist-panel" aria-label={t('Medication assist chat', 'محادثة مساعدة الأدوية')}>
+          <div className="medassist-video" aria-hidden="true">
+            <video
+              key={medClip}
+              src={MED_ASSIST_CLIPS[medClip]}
+              poster="mia-avatar.jpg"
+              autoPlay
+              muted
+              playsInline
+              onEnded={() => setMedClip(clip => (clip + 1) % MED_ASSIST_CLIPS.length)}
+            />
+            <span className="medassist-live">
+              <span className="online-dot" /> Dr. Mia
+            </span>
+          </div>
+          <div className="medassist-main">
+            <div className="medassist-head">
+              <h3>
+                {t('Medication assist — ask Dr. Mia', 'مساعدة الأدوية — اسأل د. ميا')}
+              </h3>
+              <p>
+                {t(
+                  'Guidelines, label sources and safety checks, in conversation. Reference & teaching only — Mia never prescribes; the doctor decides.',
+                  'الإرشادات ومصادر النشرات وفحوصات السلامة، في محادثة. للمرجعية والتعليم فقط — ميا لا تصف الدواء أبدًا؛ الطبيب هو من يقرر.'
+                )}
+              </p>
+            </div>
+            <div className="medassist-messages">
+              {messages.slice(-6).map((message, index) => (
+                <div
+                  className={'message-row message-' + message.role}
+                  key={index}
+                >
+                  <div className="message-body">
+                    <div className="message-author">
+                      {message.role === 'assistant' ? 'Mia' : t('Doctor', 'الطبيب')}
+                    </div>
+                    <div className="message-bubble">
+                      {message.text.split('\n').map((line, lineIndex) =>
+                        line ? (
+                          <p key={lineIndex}>{line}</p>
+                        ) : (
+                          <div className="message-space" key={lineIndex} />
+                        )
+                      )}
+                    </div>
+                    {message.sources && message.sources.length ? (
+                      <div className="mia-float-sources">
+                        {message.sources.slice(0, 3).map(source => (
+                          <a
+                            key={source.id}
+                            href={source.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {source.title} <ArrowUpRight size={12} />
+                          </a>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+              <div ref={medBottom} />
+            </div>
+            <div className="mia-float-chips">
+              {MED_ASSIST_CHIPS.map(chip => (
+                <button
+                  type="button"
+                  key={chip}
+                  onClick={() => sendMedQuestion(chip)}
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+            <form
+              className="mia-float-form"
+              onSubmit={event => {
+                event.preventDefault();
+                sendMedQuestion();
+              }}
+            >
+              <div className="mia-float-input-wrap">
+                <input
+                  aria-label={t('Ask Dr. Mia about a medicine or guideline', 'اسأل د. ميا عن دواء أو إرشاد')}
+                  value={medQuery}
+                  maxLength={600}
+                  onChange={event => setMedQuery(event.target.value)}
+                  placeholder={t(
+                    'Ask about a guideline, drug reference, pregnancy or lactation…',
+                    'اسأل عن إرشاد أو مرجع دواء أو الحمل أو الرضاعة…'
+                  )}
+                />
+                {medQuery.length > 480 ? (
+                  <span className="mia-float-count">{medQuery.length}/600</span>
+                ) : null}
+              </div>
+              <button
+                type="submit"
+                className="send-button"
+                aria-label={t('Send to Dr. Mia', 'أرسل إلى د. ميا')}
+                disabled={!medQuery.trim()}
+              >
+                <Send size={15} />
+              </button>
+            </form>
+          </div>
+        </section>
         <div className="medref-grid">
           <section className="panel medref-form-panel">
             <h3>
@@ -2629,6 +2748,28 @@ function MiaApp() {
       answer,
     ]);
     setFloatQuery('');
+  }
+
+  // Medication assist chatbox — same engine, same shared conversation.
+  const MED_ASSIST_CLIPS = ['mia-med-1.mp4', 'mia-med-2.mp4', 'mia-med-3.mp4'];
+  const MED_ASSIST_CHIPS = [
+    'Find magnesium sulfate references',
+    'What does the allergy cross-check cover?',
+    'Postpartum haemorrhage guidelines',
+    'Where do I verify a medicine in lactation?',
+  ];
+
+  function sendMedQuestion(question?: string) {
+    const value = (question ?? medQuery).trim();
+    if (!value) return;
+    const patientId = chatContext === 'none' ? '' : chatContext;
+    const answer = makeAnswer(value, patientId);
+    setMessages(previous => [
+      ...previous,
+      { role: 'user', text: value },
+      answer,
+    ]);
+    setMedQuery('');
   }
 
   function renderMiaFloat() {

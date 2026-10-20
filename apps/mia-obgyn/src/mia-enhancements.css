@@ -1040,3 +1040,70 @@ a:not([class*="btn"]):not([class*="button"]) {
 @media print {
   .academy-reveal-btn { display: none; }
 }
+
+/* ---- Medication assist chatbox (Academy page) ---- */
+.medassist-panel {
+  display: flex;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 18px;
+  align-items: flex-start;
+}
+.medassist-video {
+  position: relative;
+  flex: 0 0 168px;
+  width: 168px;
+  margin-top: -34px;
+  animation: medassist-float 6s ease-in-out infinite;
+}
+.medassist-video video {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 18px;
+  box-shadow: 0 14px 30px rgba(16, 31, 56, 0.22);
+  border: 3px solid #ffffff;
+  display: block;
+  background: #dfe7f2;
+}
+.medassist-live {
+  position: absolute;
+  bottom: 10px;
+  inset-inline-start: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 31, 56, 0.78);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+@keyframes medassist-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .medassist-video { animation: none; }
+}
+.medassist-main { flex: 1 1 auto; min-width: 0; }
+.medassist-head h3 { margin: 0; color: #101f38; font-size: 17px; }
+.medassist-head p { margin: 4px 0 12px; color: #5b6b84; font-size: 13px; line-height: 1.5; }
+.medassist-messages {
+  max-height: 330px;
+  overflow-y: auto;
+  background: #f7fafc;
+  border: 1px solid #e4ebf4;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+@media (max-width: 720px) {
+  .medassist-panel { flex-direction: column; }
+  .medassist-video { flex: none; width: 128px; margin-top: -30px; }
+  .medassist-messages { max-height: 280px; }
+}
+@media print {
+  .medassist-panel { display: none; }
+}
