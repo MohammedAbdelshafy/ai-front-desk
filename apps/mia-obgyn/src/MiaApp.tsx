@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   Bell,
   BookOpen,
+  GraduationCap,
   Bot,
   CalendarClock,
   CalendarDays,
@@ -51,6 +52,7 @@ import {
   CANDIDATE_PATHWAY_EVIDENCE,
   CANDIDATE_CASE_URLS,
 } from './candidate-pathway-evidence';
+import { ACADEMY_CASES } from './academy-cases';
 
 type Section =
   | 'overview'
@@ -599,6 +601,10 @@ function MiaApp() {
   // Mia retrieves references and safety checks. Mia never selects,
   // ranks, doses or recommends a medicine.
   const [medDiagnosis, setMedDiagnosis] = useState('');
+  const [academyOpenCase, setAcademyOpenCase] = useState<string | null>(null);
+  const [academyRevealed, setAcademyRevealed] = useState<
+    Record<string, boolean>
+  >({});
   const [medSymptoms, setMedSymptoms] = useState('');
   const [medAllergies, setMedAllergies] = useState('');
   const [medCurrent, setMedCurrent] = useState('');
@@ -2446,6 +2452,147 @@ function MiaApp() {
               )}
             </p>
           </div>
+        </section>
+        <section className="panel academy-panel">
+          <div className="medref-pathways-head">
+            <h3>
+              <GraduationCap size={17} />{' '}
+              {t('Teaching cases — learn the why', 'حالات تعليمية — تعلّم السبب')}
+            </h3>
+            <span className="medref-pathway-count">
+              {ACADEMY_CASES.length} {t('cases', 'حالات')}
+            </span>
+          </div>
+          <p className="medref-note">
+            {t(
+              'Synthetic patients, real guidelines. Work each case: read the patient, reason through the decision, then reveal what WHO, ACOG and NICE each state — including where they disagree. Teaching only: nothing here prescribes for a real patient.',
+              'مرضى افتراضيون، وإرشادات حقيقية. اعمل على كل حالة: اقرأ المريضة، وفكّر في القرار، ثم اكشف ما تقوله منظمة الصحة العالمية والكلية الأمريكية وNICE — بما في ذلك مواضع اختلافهم. للتعليم فقط: لا شيء هنا يصف دواءً لمريضة حقيقية.'
+            )}
+          </p>
+          {ACADEMY_CASES.map(academyCase => {
+            const isOpen = academyOpenCase === academyCase.id;
+            const isRevealed = !!academyRevealed[academyCase.id];
+            return (
+              <article key={academyCase.id} className="academy-case">
+                <button
+                  className="academy-case-head"
+                  onClick={() =>
+                    setAcademyOpenCase(isOpen ? null : academyCase.id)
+                  }
+                  aria-expanded={isOpen}
+                >
+                  <span>
+                    <strong>
+                      {locale === 'ar' ? academyCase.titleAr : academyCase.title}
+                    </strong>
+                    <small>{academyCase.topic}</small>
+                  </span>
+                  <ChevronDown
+                    size={16}
+                    className={isOpen ? 'chevron-open' : ''}
+                  />
+                </button>
+                {isOpen ? (
+                  <div className="academy-case-body">
+                    <p className="academy-patient">
+                      {locale === 'ar' ? academyCase.patientAr : academyCase.patient}
+                    </p>
+                    <div className="academy-decision">
+                      <strong>
+                        {t('The decision', 'القرار')}
+                      </strong>
+                      <p>
+                        {locale === 'ar'
+                          ? academyCase.decisionPointAr
+                          : academyCase.decisionPoint}
+                      </p>
+                    </div>
+                    {!isRevealed ? (
+                      <button
+                        className="academy-reveal-btn"
+                        onClick={() =>
+                          setAcademyRevealed(prev => ({
+                            ...prev,
+                            [academyCase.id]: true,
+                          }))
+                        }
+                      >
+                        {t(
+                          'Reveal the guideline teaching',
+                          'اكشف شرح الإرشادات'
+                        )}
+                      </button>
+                    ) : (
+                      <>
+                        <div className="academy-block">
+                          <strong>
+                            {t('Think first', 'فكّر أولًا')}
+                          </strong>
+                          <ul>
+                            {academyCase.thinking.map((point, i) => (
+                              <li key={i}>{point}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="academy-block">
+                          <strong>
+                            {t(
+                              'What the guidelines state — in parallel',
+                              'ما تقوله الإرشادات — بالتوازي'
+                            )}
+                          </strong>
+                          {academyCase.positions.map(position => (
+                            <div
+                              key={position.authority}
+                              className="academy-position"
+                            >
+                              <span>{position.authority}</span>
+                              <p>{position.text}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="academy-disagreement" role="note">
+                          <strong>
+                            {t(
+                              'Where they disagree — this is the lesson',
+                              'موضع الاختلاف — هذا هو الدرس'
+                            )}
+                          </strong>
+                          <p>{academyCase.disagreement}</p>
+                        </div>
+                        <div className="academy-block">
+                          <strong>
+                            {t('Safety checklist', 'قائمة السلامة')}
+                          </strong>
+                          <ul>
+                            {academyCase.safetyChecklist.map((item, i) => (
+                              <li key={i}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <footer className="academy-case-foot">
+                          <span>
+                            {t(
+                              'Teaching only. The prescribing decision — and its responsibility — stays with the doctor.',
+                              'للتعليم فقط. قرار وصف الدواء — ومسؤوليته — يبقى مع الطبيب.'
+                            )}
+                          </span>
+                          <a
+                            href={academyCase.citation.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {academyCase.citation.label}{' '}
+                            <ArrowUpRight size={12} />
+                          </a>
+                        </footer>
+                      </>
+                    )}
+                  </div>
+                ) : null}
+              </article>
+            );
+          })}
         </section>
       </>
     );
