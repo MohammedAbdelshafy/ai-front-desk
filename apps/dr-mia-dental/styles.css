@@ -165,6 +165,22 @@ a{color:var(--accent)}
   font-weight:800}
 .pilot-fine{margin-top:1rem;font-size:.85rem;color:var(--muted)}
 
+/* tiers */
+.tiers-title{text-align:center;margin:3rem 0 1.4rem;font-size:1.5rem}
+.tier-price{font-size:1.7rem;font-weight:800;color:var(--accent-dark);margin:.3rem 0 .7rem}
+.tier-price span{font-size:.9rem;font-weight:600;color:var(--muted)}
+.tier-list{text-align:left;margin:.7rem 0 0;padding-left:1.1rem;color:var(--muted);
+  font-size:.95rem}
+.tier-list li{padding:.2rem 0}
+.tier-tag{font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--accent-dark);background:var(--accent-soft);border-radius:999px;
+  padding:.15rem .55rem;vertical-align:middle;white-space:nowrap}
+.tiers-fine{text-align:center;font-size:.85rem;color:var(--muted);margin-top:1rem}
+.addon-card{margin-top:2.2rem;text-align:left}
+.addon-card h3{margin-top:0}
+.addon-card p{color:var(--muted);font-size:.98rem}
+.addon-card .tiers-fine{text-align:left}
+
 /* faq */
 .faq details{background:var(--panel);border:1px solid var(--line);
   border-radius:12px;margin-bottom:.7rem;box-shadow:var(--shadow-sm)}
