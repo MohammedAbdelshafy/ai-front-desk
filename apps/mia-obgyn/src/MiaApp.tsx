@@ -2743,6 +2743,10 @@ function MiaApp() {
       'What does the allergy cross-check cover?',
       'Find magnesium sulfate references',
     ],
+    trials: [
+      'Find registered trials for endometriosis',
+      'Search published evidence for a medicine',
+    ],
     evidence: ['Show WHO maternal health guidelines'],
     governance: ['What is still blocked before live use?'],
   };
