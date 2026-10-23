@@ -2,6 +2,8 @@
 **Date:** 2026-10-10
 **Status:** Build spec only. Do not represent unimplemented capabilities as shipped.
 
+> **Strategy update — October 17, 2026:** This document recorded an earlier front-desk-first pilot recommendation. It is now superseded for product priority and go-to-market by [Dr. Mia Clinical Copilot MVP Spec](DR_MIA_CLINICAL_COPILOT_MVP_SPEC.md): clinical quality and evidence-linked prescribing support are the core product, while AI Front Desk and Growth / Lead Engine are optional add-ons. The implementation and safety constraints below remain reference material for those optional workflows.
+
 ## Decision
 Extend `ai-front-desk`; do not start a parallel dental repository. The existing code already has a WhatsApp Cloud API + n8n + OpenAI reference flow, a Python qualification state machine, a Meta webhook harness, and automated tests. It is a generic reference implementation, not yet a dental product or managed service.
 

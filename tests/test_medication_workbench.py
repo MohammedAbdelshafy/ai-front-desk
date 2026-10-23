@@ -1,0 +1,406 @@
+from datetime import date
+
+from ai_front_desk.clinical.medication_support import ClinicianCase, build_evidence_review
+from ai_front_desk.clinical.medication_workbench import case_from_form, render_page, run_review
+
+
+def test_workbench_renders_brand_and_synthetic_warning():
+    page = render_page()
+    assert "Dr. Mia" in page
+    assert "DO NOT ENTER REAL PATIENT" in page
+    assert "Review a synthetic case" in page
+    assert "Medication suggestions" not in page
+
+
+def test_workbench_escapes_user_supplied_fields():
+    page = render_page({"case_id": "synthetic-case-001", "proposed_assessment": "<script>alert(1)</script>"})
+    assert "<script>alert(1)</script>" not in page
+    assert "&lt;script&gt;alert(1)&lt;/script&gt;" in page
+
+
+def test_form_captures_context_without_patient_identity_fields():
+    case = case_from_form({
+        "case_id": "synthetic-case-002",
+        "proposed_assessment": "Synthetic assessment",
+        "symptoms": "example symptom, another example",
+        "reported_allergies": "fictional allergy context",
+        "current_medications": "fictional medicine context",
+        "relevant_medical_history": "fictional history",
+        "reviewed_allergies": "1",
+        "reviewed_current_medications": "1",
+        "jurisdiction": "US",
+    })
+    assert case.reported_allergies == "fictional allergy context"
+    assert case.current_medications == "fictional medicine context"
+    assert case.relevant_medical_history == "fictional history"
+    assert case.reviewed_factors == ("allergies", "current_medications")
+    assert case.symptoms == ("example symptom", "another example")
+
+
+def test_workbench_empty_registry_returns_no_verified_evidence():
+    review, _case = run_review({
+        "case_id": "synthetic-case-003",
+        "proposed_assessment": "Synthetic assessment for demo",
+        "jurisdiction": "US",
+    })
+    assert review["status"] == "no_verified_evidence"
+    assert review["matched_evidence"] == []
+    assert {flag.get("factor") for flag in review["flags"] if flag["code"] == "patient_factor_needs_review"} >= {"allergies", "current_medications"}
+    page = render_page({"case_id": "synthetic-case-003", "proposed_assessment": "Synthetic assessment for demo"}, review)
+    assert "No verified evidence found" in page
+    assert "Do not infer that a medicine is appropriate or safe" in page
+    assert "Clinical quality checklist" in page
+    assert "Supervising dentist review" in page
+    assert "not a clinical quality score" in page.lower()
+
+
+def test_workbench_rejects_non_synthetic_case_reference():
+    try:
+        case_from_form({"case_id": "Jane Doe", "proposed_assessment": "Synthetic"})
+    except ValueError as exc:
+        assert "case_id" in str(exc)
+    else:
+        raise AssertionError("real-person-like case reference should not pass")
+
+
+def test_workbench_refuses_non_us_scope():
+    try:
+        case_from_form({"case_id": "synthetic-case-004", "proposed_assessment": "Synthetic", "jurisdiction": "UK"})
+    except ValueError as exc:
+        assert "US and Egypt (EG) jurisdictions" in str(exc)
+    else:
+        raise AssertionError("out-of-scope jurisdiction should be rejected")
+
+
+# HTTP smoke tests exercise the actual local handler, using loopback and an ephemeral port.
+import threading
+from http.server import HTTPServer
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError
+import pytest
+
+from ai_front_desk.clinical.medication_workbench import WorkbenchHandler
+
+
+@pytest.fixture
+def workbench_url():
+    server = HTTPServer(("127.0.0.1", 0), WorkbenchHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        yield "http://127.0.0.1:%d" % server.server_port
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)
+
+
+def test_workbench_http_smoke_and_security_headers(workbench_url):
+    with urlopen(workbench_url + "/") as response:
+        body = response.read().decode("utf-8")
+        assert response.status == 200
+        assert "Dr. Mia" in body
+        assert "DO NOT ENTER REAL PATIENT" in body
+        assert response.headers["Cache-Control"] == "no-store"
+        assert "default-src 'none'" in response.headers["Content-Security-Policy"]
+        assert response.headers["X-Content-Type-Options"] == "nosniff"
+
+
+def test_workbench_http_post_returns_no_evidence_for_candidate_only_registry(workbench_url):
+    payload = {
+        "case_id": "synthetic-case-http-01",
+        "proposed_assessment": "Synthetic smoke-test scenario",
+        "symptoms": "synthetic symptom",
+        "reported_allergies": "fictional allergy",
+        "current_medications": "fictional medication",
+        "relevant_medical_history": "fictional history",
+        "jurisdiction": "US",
+    }
+    request = Request(
+        workbench_url + "/",
+        data=urlencode(payload).encode("utf-8"),
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    with urlopen(request) as response:
+        body = response.read().decode("utf-8")
+        assert response.status == 200
+        assert "No verified evidence found" in body
+        assert "fictional allergy" in body
+        assert "do not infer that any medicine is appropriate or safe" in body.lower()
+        assert response.headers["Cache-Control"] == "no-store"
+
+
+def test_workbench_http_unknown_routes_return_404(workbench_url):
+    with pytest.raises(HTTPError) as exc:
+        urlopen(workbench_url + "/unknown")
+    assert exc.value.code == 404
+
+
+def test_checked_box_does_not_override_blank_critical_context():
+    case = case_from_form({
+        "case_id": "synthetic-case-005",
+        "proposed_assessment": "Synthetic assessment",
+        "reviewed_allergies": "1",
+        "reviewed_current_medications": "1",
+        "reported_allergies": "",
+        "current_medications": "",
+        "jurisdiction": "US",
+    })
+    assert "allergies" not in case.reviewed_factors
+    assert "current_medications" not in case.reviewed_factors
+
+
+def test_opt_in_public_lookup_sends_only_name(workbench_url, monkeypatch):
+    from ai_front_desk.clinical import medication_workbench as workbench
+
+    seen = []
+    def fake_lookup(term, include_label_sections=False):
+        seen.append(term)
+        assert include_label_sections is False
+        return {
+            "status": "found",
+            "lookup_term": term,
+            "patient_context_sent": False,
+            "rxnorm": {"status": "found", "items": [
+                {"rxcui": "99999", "name": "Synthetic example ingredient", "term_type": "IN"}
+            ]},
+            "openfda_labels": {"status": "not_found", "items": []},
+        }
+    monkeypatch.setattr(workbench, "lookup_public_drug_metadata", fake_lookup)
+    payload = {
+        "case_id": "synthetic-case-http-02",
+        "proposed_assessment": "Synthetic clinical scenario",
+        "symptoms": "fictional symptom",
+        "reported_allergies": "fictional allergy context",
+        "current_medications": "fictional medicine context",
+        "relevant_medical_history": "fictional history",
+        "drug_lookup_name": "Synthetic example ingredient",
+        "lookup_public_sources": "1",
+        "jurisdiction": "US",
+    }
+    request = Request(
+        workbench_url + "/",
+        data=urlencode(payload).encode("utf-8"),
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    with urlopen(request) as response:
+        body = response.read().decode("utf-8")
+        assert response.status == 200
+        assert "Public source lookup" in body
+        assert "Synthetic example ingredient" in body
+        assert "only the standalone medicine name is sent" in body
+    assert seen == ["Synthetic example ingredient"]
+
+
+def test_opt_in_learning_shelf_is_local_only(workbench_url, monkeypatch):
+    from ai_front_desk.clinical import medication_workbench as workbench
+
+    called = []
+    def fake_search(topic):
+        called.append(topic)
+        return {
+            "query": topic,
+            "status": "found",
+            "result_count": 1,
+            "message": "Educational retrieval only.",
+            "results": [{
+                "id": "test-learning-card",
+                "title": "Synthetic Pharmacology Learning Note",
+                "summary": "A local educational summary.",
+                "learning_points": ["Concept one", "Concept two"],
+                "source_refs": [{
+                    "title": "Open source educational book",
+                    "url": "https://example.org/open-book/chapter",
+                    "license_id": "CC-BY-4.0",
+                    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+                    "attribution": "Synthetic attribution for test."
+                }],
+                "use_scope": "education_only",
+                "cannot_support": ["diagnosis", "medicine_selection"]
+            }]
+        }
+    monkeypatch.setattr(workbench, "search_pharmacology_education", fake_search)
+    payload = {
+        "case_id": "synthetic-case-http-03",
+        "proposed_assessment": "Synthetic clinical scenario",
+        "symptoms": "fictional symptom",
+        "reported_allergies": "fictional allergy context",
+        "current_medications": "fictional medicine context",
+        "relevant_medical_history": "fictional history",
+        "learning_topic": "pharmacokinetics",
+        "search_learning_library": "1",
+        "jurisdiction": "US",
+    }
+    request = Request(
+        workbench_url + "/",
+        data=urlencode(payload).encode("utf-8"),
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    with urlopen(request) as response:
+        body = response.read().decode("utf-8")
+        assert response.status == 200
+        assert "Pharmacology foundations" in body
+        assert "Synthetic Pharmacology Learning Note" in body
+        assert "Open source educational book" in body
+        assert "CC-BY-4.0" in body
+    assert called == ["pharmacokinetics"]
+
+
+def test_learning_shelf_requires_a_topic_when_enabled(workbench_url):
+    payload = {
+        "case_id": "synthetic-case-http-04",
+        "proposed_assessment": "Synthetic clinical scenario",
+        "search_learning_library": "1",
+        "jurisdiction": "US",
+    }
+    request = Request(
+        workbench_url + "/",
+        data=urlencode(payload).encode("utf-8"),
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    from urllib.error import HTTPError
+    try:
+        urlopen(request)
+        raise AssertionError("expected missing learning topic to be rejected")
+    except HTTPError as exc:
+        body = exc.read().decode("utf-8")
+        assert exc.code == 400
+        assert "Enter a pharmacology learning topic" in body
+
+
+
+def test_workbench_displays_draft_candidates_with_sources_and_gate():
+    form = {
+        "case_id": "synthetic-case-019",
+        "proposed_assessment": "acute dental pain after tooth extraction",
+        "symptoms": "synthetic post-extraction pain",
+        "jurisdiction": "US",
+    }
+    review, _case = run_review(form)
+    page = render_page(form, review)
+    assert "PROTOTYPE DRAFT" in page
+    assert "NOT APPROVED FOR CLINICAL USE" in page
+    assert "Options named for review, not selected for this case" in page
+    assert "ibuprofen" in page
+    assert "pain-management-guideline" in page
+    assert "no interaction or patient-safety check has been performed" in page
+    assert "No verified evidence found" in page
+
+
+
+def test_workbench_exposes_opt_in_label_sections_lookup_and_source_warnings():
+    page = render_page()
+    assert 'name="lookup_label_sections"' in page
+    assert "indications, contraindications, warnings, interactions and dosage text" in page
+    assert "Label excerpts are not patient-specific guidance" in page
+
+
+def test_workbench_renders_label_sections_with_reference_only_warning():
+    form = {
+        "case_id": "synthetic-case-020",
+        "proposed_assessment": "synthetic assessment for label reference",
+        "jurisdiction": "US",
+    }
+    review, _case = run_review(form)
+    lookup = {
+        "lookup_term": "synthetic ingredient",
+        "status": "found",
+        "rxnorm": {"status": "not_found", "items": []},
+        "openfda_labels": {"status": "not_found", "items": []},
+        "patient_context_sent": False,
+        "label_reference": {
+            "status": "found",
+            "items": [{
+                "brand_name": "Synthetic brand",
+                "generic_name": "synthetic ingredient",
+                "route": "ORAL",
+                "dosage_form": "TABLET",
+                "effective_time": "20261001",
+                "full_label_link": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=abcdef12-1234-1234-1234-123456789abc",
+                "sections": [{
+                    "field": "contraindications",
+                    "heading": "Contraindications",
+                    "excerpt": "Synthetic source-reference warning.",
+                    "truncated": False,
+                }],
+            }],
+            "interaction_check_performed": False,
+        },
+    }
+    page = render_page(form, review, public_lookup=lookup)
+    assert "Source-linked label excerpts" in page
+    assert "Synthetic source-reference warning." in page
+    assert "not a drug-interaction check" in page
+    assert "Open full DailyMed label" in page
+
+
+
+def test_reference_center_shows_official_downloads_and_reuse_limits():
+    page = render_page()
+    assert "Clinical information centers" in page
+    assert "Open / download source file" in page
+    assert "dental-fact-sheet-508.pdf" in page
+    assert "Nursing Pharmacology, 2nd edition (2023)" in page
+    assert "noncommercial license requires separate permission for commercial use" in page
+
+
+
+def test_workbench_offers_egypt_reference_only_jurisdiction():
+    page = render_page({"jurisdiction": "EG"})
+    assert "Egypt (EG)" in page
+    assert 'value="EG" selected' in page or "value='EG' selected" in page
+    assert "Egyptian Drug Authority" in page
+    assert "no Egyptian medication candidate cards" in page
+
+
+def test_egypt_case_does_not_receive_us_draft_medicine_candidates():
+    form = {
+        "case_id": "synthetic-case-021",
+        "proposed_assessment": "acute dental pain after tooth extraction",
+        "symptoms": "synthetic post-extraction pain",
+        "jurisdiction": "EG",
+    }
+    review, case = run_review(form)
+    page = render_page(form, review)
+    assert case.jurisdiction == "EG"
+    assert review["status"] == "no_verified_evidence"
+    assert "No verified evidence found" in page
+    assert "No review-only evidence card matched these words for the selected jurisdiction" in page
+    assert "Egyptian Drug Register" in page
+    assert "ibuprofen" not in page.lower()
+
+
+def test_research_hub_builds_trial_literature_and_egypt_information_links(workbench_url):
+    with urlopen(
+        workbench_url + "/research?condition=synthetic+dental+pain&intervention=fictional+test&location=Egypt"
+    ) as response:
+        body = response.read().decode("utf-8")
+        assert response.status == 200
+        assert response.headers["Cache-Control"] == "no-store"
+    assert "ClinicalTrials.gov" in body
+    assert "WHO ICTRP" in body
+    assert "PubMed" in body
+    assert "DailyMed" in body
+    assert "NIH LactMed" in body
+    assert "Egyptian Drug Authority" in body
+    assert "Egyptian Health Council" in body
+    assert "locStr=Egypt" in body
+    assert "did.admin@edaegypt.gov.eg" in body
+    assert "trial registration" in body.lower()
+    assert "not a medication recommendation" in body.lower()
+    assert "fictional test" in body
+
+
+def test_research_hub_escapes_topic_and_does_not_execute_markup(workbench_url):
+    with urlopen(
+        workbench_url + "/research?condition=%3Cscript%3Ealert%281%29%3C%2Fscript%3E&location=Egypt"
+    ) as response:
+        body = response.read().decode("utf-8")
+        assert response.status == 200
+    assert "<script>alert(1)</script>" not in body
+    assert "&lt;script&gt;alert(1)&lt;/script&gt;" in body

@@ -1,0 +1,17 @@
+.mia-avatar-customizer{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0;padding:12px 14px;border:1px solid #d5e2e3;border-radius:14px;background:rgba(255,255,255,.94);color:#203238;box-shadow:0 4px 14px rgba(19,56,63,.06)}
+.mia-avatar-shell{width:58px;height:58px;flex:0 0 58px;position:relative;overflow:hidden;border-radius:16px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#dcebf9,#f4e8d4);border:1px solid #c4d7df}
+.mia-avatar-shell [data-mia-avatar-image]{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.mia-avatar-shell [data-mia-avatar-image][hidden],[data-mia-avatar-emoji][hidden]{display:none}
+.mia-avatar-shell [data-mia-avatar-emoji]{font-size:32px;line-height:1}
+.mia-avatar-copy{min-width:160px;flex:1}.mia-avatar-copy strong{display:block;font-size:13px}.mia-avatar-copy p{margin:2px 0 0;color:#617477;font-size:11px;line-height:1.35}
+.mia-avatar-open,.mia-avatar-dialog button,.mia-avatar-import{font:inherit;font-size:12px;font-weight:750;cursor:pointer;border-radius:9px;border:1px solid #b7cdcf;padding:9px 12px;background:#f7fbfb;color:#194c53;margin:0}
+.mia-avatar-open{background:#0d6972;border-color:#0d6972;color:#fff}
+.mia-avatar-dialog{width:min(620px,calc(100vw - 28px));max-height:min(86vh,760px);overflow:auto;border:1px solid #c9d9da;border-radius:18px;padding:20px;background:#fff;color:#203238;box-shadow:0 22px 80px rgba(13,45,50,.28)}
+.mia-avatar-dialog::backdrop{background:rgba(8,33,37,.58)}
+.mia-avatar-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.mia-avatar-dialog h2{font-size:21px;margin:4px 0}.mia-avatar-kicker{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#0d6972;font-weight:800}
+.mia-avatar-close{font-size:22px!important;line-height:1;padding:6px 10px!important}.mia-avatar-note,.mia-avatar-privacy{font-size:12px;color:#617477;line-height:1.45}
+.mia-avatar-presets{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:16px 0}
+.mia-avatar-presets button{display:flex;flex-direction:column;align-items:center;gap:7px;padding:11px 4px}.mia-avatar-presets button span{font-size:27px}.mia-avatar-presets button strong{font-size:10px;text-align:center}.mia-avatar-presets button.is-selected{border-color:#0d6972;background:#eaf6f5;box-shadow:inset 0 0 0 1px #0d6972}
+.mia-avatar-upload{display:flex;align-items:center;gap:12px;border:1px dashed #9ab9bd;padding:12px;border-radius:12px;cursor:pointer;font-size:13px}.mia-avatar-upload-icon{font-size:24px}.mia-avatar-upload small{display:block;font-size:11px;color:#617477;font-weight:500;margin-top:2px}.mia-avatar-upload input{display:block;max-width:190px;font-size:11px;margin-left:auto}
+.mia-avatar-status{font-size:12px;min-height:18px;color:#0b6770;margin:10px 0}.mia-avatar-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.mia-avatar-import{display:inline-flex;align-items:center}.mia-avatar-import input{width:1px;height:1px;opacity:.01;position:absolute;pointer-events:none}
+@media(max-width:560px){.mia-avatar-presets{grid-template-columns:repeat(3,minmax(0,1fr))}.mia-avatar-customizer{align-items:flex-start}.mia-avatar-open{width:100%}.mia-avatar-upload{align-items:flex-start;flex-wrap:wrap}.mia-avatar-upload input{margin-left:0;max-width:100%}}
