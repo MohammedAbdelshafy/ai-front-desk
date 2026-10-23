@@ -9,16 +9,26 @@
       "appointment detail",
       "Mia reference chat",
       "source citations",
-      "no approved medication pathway notice"
+      "no approved medication pathway notice",
+      "ClinicalTrials.gov search link with Egypt location filter",
+      "WHO ICTRP and PubMed research discovery",
+      "Egyptian Drug Authority medication information and adverse-reaction links",
+      "NIH LactMed and DailyMed references",
+      "trial records clearly separated from prescribing approval"
     ],
     "description": "Exercises the primary doctor journey from dashboard through a synthetic patient appointment to source-cited chat, without prescribing.",
     "steps": [
       "Open the dashboard and verify the 'SYNTHETIC DATA ONLY' badge.",
       "Open Appointments and select 'Antenatal follow-up' for Demo Patient A.",
       "Open Mia chat, ask 'Find guidance for postpartum haemorrhage', and submit.",
-      "Review the returned links and the safety note."
+      "Review the returned links and the safety note.",
+      "Open Trials & info from the navigation.",
+      "Enter 'endometriosis' as the research topic and 'synthetic test intervention' as the optional intervention; keep Egypt selected.",
+      "Click Build source searches and verify links appear for ClinicalTrials.gov, WHO ICTRP, PubMed, NIH LactMed, DailyMed and the Egyptian Drug Authority.",
+      "Verify ClinicalTrials.gov search is Egypt-focused and the page requests research terms only, not patient case details.",
+      "Verify the EDA Drug Information Center contact details and the trial-versus-treatment boundary are visible."
     ],
-    "expected": "The appointment shows synthetic history; Mia displays relevant clickable source links and explicitly says no approved medication pathway is configured. No dental navigation appears."
+    "expected": "The appointment shows synthetic history; Mia displays relevant clickable source links and explicitly says no approved medication pathway is configured. No dental navigation appears. Trials & info builds public research queries and surfaces Egypt-specific medicine-information/safety sources without turning a registry record or search result into a medication recommendation; no patient data is submitted or stored."
   },
   {
     "name": "Questionnaire supports conditional intake and local demo submission",
