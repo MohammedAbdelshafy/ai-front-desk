@@ -54,6 +54,7 @@ import {
 } from './candidate-pathway-evidence';
 import { ACADEMY_CASES } from './academy-cases';
 import TrialsInformationPage from './TrialsInformationPage';
+import MedicationPathwaysPage from './MedicationPathwaysPage';
 
 type Section =
   | 'overview'
@@ -61,6 +62,7 @@ type Section =
   | 'appointments'
   | 'questionnaires'
   | 'mia'
+  | 'medications'
   | 'medication'
   | 'trials'
   | 'evidence'
@@ -141,6 +143,13 @@ const NAV: {
     label: 'Mia chat',
     ar: 'محادثة ميا',
     icon: MessageCircle,
+    group: 'INTELLIGENCE',
+  },
+  {
+    id: 'medications',
+    label: 'Medication pathways',
+    ar: 'مسارات الأدوية',
+    icon: Pill,
     group: 'INTELLIGENCE',
   },
   {
@@ -687,6 +696,7 @@ function MiaApp() {
       appointments: locale === 'ar' ? 'المواعيد' : 'Appointments',
       questionnaires: locale === 'ar' ? 'الاستبيانات' : 'Questionnaires',
       mia: locale === 'ar' ? 'محادثة ميا' : 'Mia chat',
+      medications: locale === 'ar' ? 'مسارات الأدوية' : 'Medication pathways',
       medication: locale === 'ar' ? 'أكاديمية ميا' : 'Mia Academy',
       trials: locale === 'ar' ? 'التجارب والمعلومات' : 'Trials & info',
       evidence: locale === 'ar' ? 'مكتبة المراجع' : 'Evidence library',
@@ -2739,6 +2749,10 @@ function MiaApp() {
     appointments: ['Find postpartum haemorrhage guidance'],
     questionnaires: ['What does the intake check for?'],
     mia: ['Find preeclampsia guidance'],
+    medications: [
+      'Review approved medication pathways',
+      'Explain why an unapproved medicine is withheld',
+    ],
     medication: [
       'What does the allergy cross-check cover?',
       'Find magnesium sulfate references',
@@ -3385,6 +3399,7 @@ function MiaApp() {
           {section === 'appointments' ? renderAppointmentsPage() : null}
           {section === 'questionnaires' ? renderQuestionnairesPage() : null}
           {section === 'mia' ? renderChatPage() : null}
+          {section === 'medications' ? <MedicationPathwaysPage /> : null}
           {section === 'medication' ? renderMedicationPage() : null}
           {section === 'trials' ? <TrialsInformationPage /> : null}
           {section === 'evidence' ? renderEvidencePage() : null}
