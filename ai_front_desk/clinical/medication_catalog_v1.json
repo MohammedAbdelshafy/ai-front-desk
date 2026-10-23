@@ -1,0 +1,25 @@
+{
+  "catalog_id": "mia-medication-catalog",
+  "version": "1.0.0",
+  "status": "draft",
+  "intended_use": "Clinician-facing medication education and safety review for dentistry and gynecology.",
+  "jurisdictions": [],
+  "approved_by": [],
+  "entries": [],
+  "activation_requirements": [
+    "Qualified specialty clinician review for each entry and the whole catalogue.",
+    "Official/current source and jurisdiction verified; version and review due date recorded.",
+    "Clinical pharmacy review of interaction, contraindication, allergy, dose, pregnancy and lactation rules.",
+    "Evaluation set signed off by clinical governance and software/regulatory review completed.",
+    "Production authentication, authorization, audit, privacy, security and change-control controls deployed."
+  ],
+  "policy": {
+    "exact_diagnosis_match_only": true,
+    "show_only_approved_entries": true,
+    "require_source_and_review_dates": true,
+    "rank_single_best_medication": false,
+    "autonomous_diagnosis": false,
+    "autonomous_prescribing": false,
+    "prescription_transmission": false
+  }
+}
