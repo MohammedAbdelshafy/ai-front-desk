@@ -129,6 +129,14 @@ def review_medication_options(
         missing_context.append("age_years")
     if facts.get("allergies_reviewed") is not True:
         missing_context.append("allergies_reviewed")
+    allergies = facts.get("allergies")
+    if not isinstance(allergies, list) or any(not isinstance(x, str) for x in allergies):
+        missing_context.append("allergies")
+    if specialty == "gynecology":
+        for key in ("pregnancy_status", "lactation_status"):
+            value = facts.get(key)
+            if not isinstance(value, str) or value.strip().casefold() not in {"yes", "no", "not_applicable"}:
+                missing_context.append(key)
     if facts.get("current_medications_reviewed") is not True:
         missing_context.append("current_medications_reviewed")
     current_meds = facts.get("current_medications")
@@ -251,6 +259,21 @@ def review_medication_options(
                 "display_name": generic_name,
                 "reason_code": "contraindication",
                 "message": str(contra_match.get("reason") or "A catalogue contraindication rule matched."),
+            })
+            continue
+
+        allergy_terms = entry.get("allergy_terms", [])
+        if not isinstance(allergy_terms, list) or any(not isinstance(x, str) or not x.strip() for x in allergy_terms):
+            result["catalog_exclusions"] += 1
+            continue
+        reported_allergies = {_normalise_medication(x) for x in allergies if x.strip()}
+        matched_allergy = next((term for term in allergy_terms if _normalise_medication(term) in reported_allergies), None)
+        if matched_allergy is not None:
+            result["withheld_options"].append({
+                "id": entry_id,
+                "display_name": generic_name,
+                "reason_code": "contraindication",
+                "message": "A documented allergy matches this entry's reviewed allergy terms; clinician reconciliation is required.",
             })
             continue
 
