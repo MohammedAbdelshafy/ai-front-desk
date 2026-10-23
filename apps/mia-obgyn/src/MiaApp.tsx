@@ -53,6 +53,7 @@ import {
   CANDIDATE_CASE_URLS,
 } from './candidate-pathway-evidence';
 import { ACADEMY_CASES } from './academy-cases';
+import TrialsInformationPage from './TrialsInformationPage';
 
 type Section =
   | 'overview'
@@ -61,6 +62,7 @@ type Section =
   | 'questionnaires'
   | 'mia'
   | 'medication'
+  | 'trials'
   | 'evidence'
   | 'governance';
 type Patient = {
@@ -146,6 +148,13 @@ const NAV: {
     label: 'Mia Academy',
     ar: 'أكاديمية ميا',
     icon: Pill,
+    group: 'INTELLIGENCE',
+  },
+  {
+    id: 'trials',
+    label: 'Trials & info',
+    ar: 'التجارب والمعلومات',
+    icon: Activity,
     group: 'INTELLIGENCE',
   },
   {
@@ -679,6 +688,7 @@ function MiaApp() {
       questionnaires: locale === 'ar' ? 'الاستبيانات' : 'Questionnaires',
       mia: locale === 'ar' ? 'محادثة ميا' : 'Mia chat',
       medication: locale === 'ar' ? 'أكاديمية ميا' : 'Mia Academy',
+      trials: locale === 'ar' ? 'التجارب والمعلومات' : 'Trials & info',
       evidence: locale === 'ar' ? 'مكتبة المراجع' : 'Evidence library',
       governance: locale === 'ar' ? 'السلامة والجاهزية' : 'Safety & readiness',
     }),
@@ -3372,6 +3382,7 @@ function MiaApp() {
           {section === 'questionnaires' ? renderQuestionnairesPage() : null}
           {section === 'mia' ? renderChatPage() : null}
           {section === 'medication' ? renderMedicationPage() : null}
+          {section === 'trials' ? <TrialsInformationPage /> : null}
           {section === 'evidence' ? renderEvidencePage() : null}
           {section === 'governance' ? renderGovernancePage() : null}
           <footer className="app-footer">
