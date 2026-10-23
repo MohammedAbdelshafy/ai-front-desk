@@ -20,6 +20,9 @@ UNKNOWN_VALUES = frozenset({"", "unknown", "not known", "not_known", "unsure", "
 TEACHING_FIELDS = (
     "why_consider",
     "mechanism",
+    "evidence_summary",
+    "alternatives",
+    "pregnancy_lactation",
     "common_adverse_effects",
     "serious_warnings",
     "monitoring",
@@ -30,6 +33,8 @@ SOURCE_FIELDS = (
     "title",
     "url",
     "version",
+    "jurisdiction",
+    "source_type",
     "effective_date",
     "reviewer",
     "reviewed_at",
@@ -92,6 +97,10 @@ def review_medication_options(
             "Clinician decision support only. Review the cited source and the "
             "patient-specific facts independently. This output is not a diagnosis, "
             "prescription, or medication order."
+        ),
+        "interaction_coverage_warning": (
+            "No interaction alert means only that no matching rule was found in this "
+            "curated catalogue; it does not prove that no interaction exists."
         ),
     }
 
@@ -214,6 +223,23 @@ def review_medication_options(
             result["catalog_exclusions"] += 1
             continue
 
+        age_min = entry.get("min_age_years")
+        age_max = entry.get("max_age_years")
+        if age_min is not None and (not _is_finite_number(age_min) or age_value < float(age_min)):
+            result["withheld_options"].append({
+                "id": entry_id, "display_name": generic_name,
+                "reason_code": "patient_population_mismatch",
+                "message": "The patient age is outside this entry's reviewed population.",
+            })
+            continue
+        if age_max is not None and (not _is_finite_number(age_max) or age_value > float(age_max)):
+            result["withheld_options"].append({
+                "id": entry_id, "display_name": generic_name,
+                "reason_code": "patient_population_mismatch",
+                "message": "The patient age is outside this entry's reviewed population.",
+            })
+            continue
+
         missing_facts = sorted({
             key for key in required_facts if _is_unknown(facts.get(key))
         })
@@ -316,6 +342,15 @@ def review_medication_options(
     return result
 
 
+def _is_finite_number(value: Any) -> bool:
+    if isinstance(value, bool):
+        return False
+    try:
+        return math.isfinite(float(value))
+    except (TypeError, ValueError, OverflowError):
+        return False
+
+
 def _is_unknown(value: Any) -> bool:
     if value is None:
         return True
@@ -352,4 +387,4 @@ def _valid_source(source: Any, today: date) -> bool:
         due = date.fromisoformat(source["review_due"])
     except ValueError:
         return False
-    return effective <= reviewed <= today and due >= today
+    return effective <= reviewed <= today and reviewed <= due and due >= today and (due - reviewed).days <= 366
