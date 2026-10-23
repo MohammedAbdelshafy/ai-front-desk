@@ -12,7 +12,7 @@ from datetime import date
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import Any, Mapping
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlencode, urlsplit
 import argparse
 import html
 import json
@@ -675,6 +675,39 @@ It does not diagnose, prescribe, calculate doses, or perform comprehensive drug-
 <div class="note"><strong>Current prototype status</strong>The source registry contains no approved medication entries, so a search should return “No verified evidence found.” That is an intentional safety behavior, not a failure.</div>
 </section>%s</aside></div>
 %s
+<section class="source-directory research-hub">
+  <div class="eyebrow">Clinical trials &amp; medicine information</div>
+  <h2>Research and information centers</h2>
+  <p class="muted">Search terms only. Do not enter patient identifiers or real patient details. Trial records and papers are research context, not treatment authorization.</p>
+  <form action="/research" method="get" autocomplete="off">
+    <div class="form-field">
+      <label for="research-condition">Condition / research topic</label>
+      <input type="text" id="research-condition" name="condition" maxlength="180" placeholder="e.g. synthetic dental pain or endometriosis">
+    </div>
+    <div class="form-field">
+      <label for="research-intervention">Medicine / intervention (optional)</label>
+      <input type="text" id="research-intervention" name="intervention" maxlength="120" placeholder="generic medicine name or intervention">
+    </div>
+    <div class="form-field">
+      <label for="research-location">Trial location</label>
+      <select id="research-location" name="location">
+        <option value="Egypt" selected>Egypt</option>
+        <option value="Global">Global / any location</option>
+      </select>
+    </div>
+    <button type="submit">Build clinical research searches</button>
+  </form>
+  <div class="source-link">
+    <a href="https://edaegypt.gov.eg/en/about-us/home-page-services/home-page-services/inquire-about-reliable-drug-information/" target="_blank" rel="noopener noreferrer">Egyptian Drug Authority · Drug Information Center</a>
+    <p>Egypt-specific medicine information. Officially published contact: 02 2535 4188 · did.admin@edaegypt.gov.eg · Sunday–Thursday, 09:00–15:00; check the official site for current details.</p>
+  </div>
+  <div class="source-link">
+    <a href="https://edaegypt.gov.eg/en/the-regulatory-reference-of-the-egyptian-drug-authority-eda/guidance/" target="_blank" rel="noopener noreferrer">Egyptian Drug Authority · regulatory and pharmacovigilance guidance</a>
+  </div>
+  <div class="source-link">
+    <a href="https://www.who.int/tools/clinical-trials-registry-platform/the-ictrp-search-portal" target="_blank" rel="noopener noreferrer">WHO ICTRP · international trial registry discovery</a>
+  </div>
+</section>
 <footer>Dr. Mia · Local prototype · No case persistence · External calls only when explicitly requested · Not for real patient use</footer>
 </main></body></html>
 """ % (
@@ -699,6 +732,117 @@ It does not diagnose, prescribe, calculate doses, or perform comprehensive drug-
     )
 
 
+
+
+
+def render_research_page(params: Mapping[str, Any]) -> str:
+    """Build public trial/literature searches; never fetch, store, or interpret results."""
+    condition = _one(params, "condition")[:180]
+    intervention = _one(params, "intervention")[:120]
+    location = _one(params, "location", "Egypt")
+    if location not in {"Egypt", "Global"}:
+        location = "Egypt"
+
+    trial_params = {}
+    if condition:
+        trial_params["cond"] = condition
+    if intervention:
+        trial_params["term"] = intervention
+    if location == "Egypt":
+        trial_params["locStr"] = "Egypt"
+    trials_url = "https://clinicaltrials.gov/search"
+    if trial_params:
+        trials_url += "?" + urlencode(trial_params)
+
+    topic_terms = [value for value in (condition, intervention) if value]
+    pubmed_terms = " AND ".join("(" + value + "[Title/Abstract])" for value in topic_terms)
+    pubmed_filter = "(Clinical Trial[Publication Type] OR Randomized Controlled Trial[Publication Type] OR Systematic Review[Publication Type] OR Meta-Analysis[Publication Type])"
+    if pubmed_terms:
+        pubmed_terms += " AND " + pubmed_filter
+    else:
+        pubmed_terms = pubmed_filter
+    pubmed_url = "https://pubmed.ncbi.nlm.nih.gov/?" + urlencode({"term": pubmed_terms})
+
+    if intervention:
+        dailymed_url = "https://dailymed.nlm.nih.gov/dailymed/search.cfm?" + urlencode({"query": intervention})
+        lactmed_url = "https://www.ncbi.nlm.nih.gov/books/?" + urlencode({"term": intervention + " LactMed"})
+    else:
+        dailymed_url = "https://dailymed.nlm.nih.gov/dailymed/"
+        lactmed_url = "https://www.ncbi.nlm.nih.gov/books/NBK501922/"
+
+    cards = [
+        ("ClinicalTrials.gov", "Registry search for study records, location, eligibility, status and posted results.", trials_url,
+         "Study records are sponsor/investigator submitted. Verify posted results and related publications; registration is not clinical approval."),
+        ("WHO ICTRP Search Portal", "Cross-registry discovery for ongoing and completed trials.", "https://trialsearch.who.int/Default.aspx",
+         "Search the condition/intervention in the portal. WHO says registry records are not endorsed by WHO and must not be used in care without a licensed professional."),
+        ("PubMed · clinical studies and reviews", "Find published clinical studies, randomized trials and systematic reviews.", pubmed_url,
+         "Check methods, comparator, outcomes, harms, uncertainty, publication status and population relevance."),
+        ("NIH LactMed", "Drug-specific literature about breast milk, infant exposure and lactation alternatives.", lactmed_url,
+         "Lactation literature is not a general pregnancy-safety guarantee and does not replace clinician judgment."),
+        ("NIH DailyMed", "Current submitted drug-label information and safety sections.", dailymed_url,
+         "US labeling may not match Egyptian registration, local product labeling or local availability."),
+        ("Egyptian Drug Authority · Drug Information Center",
+         "Egypt-specific medicine information inquiry service.",
+         "https://edaegypt.gov.eg/en/about-us/home-page-services/home-page-services/inquire-about-reliable-drug-information/",
+         "Official published contact: 02 2535 4188 · did.admin@edaegypt.gov.eg · Sunday–Thursday, 09:00–15:00 Egypt time; verify current details on the official site."),
+        ("Egyptian Drug Authority · safety and guidance",
+         "Egypt-specific regulatory and pharmacovigilance information.",
+         "https://edaegypt.gov.eg/en/the-regulatory-reference-of-the-egyptian-drug-authority-eda/guidance/",
+         "Use current applicable Egyptian registration, product information and safety guidance."),
+        ("Egyptian Drug Authority · adverse-effect reporting",
+         "Official route for suspected medicine and device adverse reactions.",
+         "https://edaegypt.gov.eg/en/about-us/home-page-services/home-page-services/reporting-side-effects/",
+         "Use the local emergency pathway for urgent symptoms, not an asynchronous reporting form."),
+        ("Egyptian Health Council · clinical learning resources",
+         "Egypt-focused clinical guideline/source discovery.",
+         "https://lms.ehc.gov.eg/lms/",
+         "Confirm the latest applicable guideline and facility protocol before clinical use."),
+        ("WHO guidelines", "International guideline discovery for background evidence review.",
+         "https://www.who.int/publications/who-guidelines",
+         "International guidance must be checked for applicability to Egypt and the local facility."),
+    ]
+
+    out = [
+        "<!doctype html><html lang='en'><head><meta charset='utf-8'>"
+        "<meta name='viewport' content='width=device-width, initial-scale=1'>"
+        "<meta name='referrer' content='no-referrer'>"
+        "<title>Dr. Mia · Clinical Research Sources</title><style>" + STYLE + "</style></head><body>"
+        "<div class='banner'>LOCAL DEMO ONLY · SEARCH TERMS ONLY · NO PATIENT DATA</div>"
+        "<main class='wrap'><header><div><div class='eyebrow'>DR. MIA · RESEARCH INTELLIGENCE</div>"
+        "<h1>Clinical trials &amp; information centers</h1>"
+        "<p class='sub'>Public research search links and Egypt-first medicine information. Mia does not scrape search results or turn research into a prescription.</p>"
+        "</div></header>"
+        "<section class='note'><strong>Research is not a prescribing pathway.</strong>"
+        " Review trial design, population, comparator, registry status, posted results and harms. Look for related peer-reviewed papers and current Egypt/local guidelines. A search match is not proof of benefit, safety, registration or clinical appropriateness.</section>"
+        "<section class='panel source-directory'><h2>Search terms</h2>"
+        "<form action='/research' method='get' autocomplete='off'>"
+        "<div class='form-field'><label for='condition'>Condition / research topic</label>"
+        "<input type='text' id='condition' name='condition' maxlength='180' value='" + esc(condition) + "' placeholder='Condition or non-identifying research topic'></div>"
+        "<div class='form-field'><label for='intervention'>Medicine / intervention (optional)</label>"
+        "<input type='text' id='intervention' name='intervention' maxlength='120' value='" + esc(intervention) + "' placeholder='Generic name or intervention'></div>"
+        "<div class='form-field'><label for='location'>Trial location</label><select id='location' name='location'>"
+        "<option value='Egypt'" + (" selected" if location == "Egypt" else "") + ">Egypt</option>"
+        "<option value='Global'" + (" selected" if location == "Global" else "") + ">Global / any location</option>"
+        "</select></div><button type='submit'>Build source searches</button></form></section>"
+        "<section class='source-directory'><h2>Search and reference links</h2>"
+    ]
+    for title, description, url, note in cards:
+        out.append(
+            "<article class='source-link'><a href='" + esc(url) +
+            "' target='_blank' rel='noopener noreferrer'>" + esc(title) + "</a>"
+            "<p>" + esc(description) + "</p><p class='muted'>" + esc(note) + "</p></article>"
+        )
+    out.append(
+        "<p class='muted'>Search topic: <strong>" + esc(condition or "not supplied") +
+        "</strong> · Intervention: <strong>" + esc(intervention or "not supplied") +
+        "</strong> · Location: <strong>" + esc(location) + "</strong></p>"
+        "<p><a href='/'>Back to the local clinical evidence workbench</a></p></section>"
+        "<footer>Dr. Mia · Local prototype · No query storage · No patient data · No treatment recommendation</footer>"
+        "</main></body></html>"
+    )
+    return "".join(out)
+
+
 class WorkbenchHandler(BaseHTTPRequestHandler):
     server_version = "DrMiaWorkbench/0.1"
 
@@ -719,11 +863,19 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_GET(self) -> None:
-        if self.path == "/":
+        parsed = urlsplit(self.path)
+        if parsed.path == "/":
             self._send_html(200, render_page())
             return
-        asset_name = self.path.rsplit("/", 1)[-1]
-        if self.path.startswith("/assets/") and asset_name in AVATAR_ASSETS:
+        if parsed.path == "/research":
+            params = parse_qs(parsed.query, max_num_fields=8, keep_blank_values=True)
+            if any(len(values[0]) > 180 for values in params.values() if values):
+                self._send_html(400, render_research_page({}))
+                return
+            self._send_html(200, render_research_page(params))
+            return
+        asset_name = parsed.path.rsplit("/", 1)[-1]
+        if parsed.path.startswith("/assets/") and asset_name in AVATAR_ASSETS:
             content_type, filename = AVATAR_ASSETS[asset_name]
             try:
                 data = (BASE / "static" / filename).read_bytes()
@@ -813,8 +965,14 @@ class WorkbenchHandler(BaseHTTPRequestHandler):
             self._send_html(500, render_page(error="The evidence registry could not be loaded. No evidence was returned."))
 
     def log_message(self, format: str, *args: Any) -> None:
-        # Avoid logging case data. Only print the route and status, never request bodies.
-        super().log_message(format, *args)
+        # Avoid logging case data or research terms. Remove query strings from request lines.
+        safe_args = list(args)
+        if safe_args and isinstance(safe_args[0], str):
+            parts = safe_args[0].split()
+            if len(parts) >= 2:
+                parts[1] = parts[1].split("?", 1)[0]
+                safe_args[0] = " ".join(parts)
+        super().log_message(format, *safe_args)
 
 
 def run(port: int = 8767) -> None:
