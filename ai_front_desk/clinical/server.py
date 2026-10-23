@@ -31,6 +31,7 @@ from .dashboard import generate_brief
 from .mia_shell import DENTAL_MIA, TaskStage
 from .question_bank import load_bank, bank_snapshot
 from .store import ClinicalStore, TenantMismatchError
+from .medication_support import load_medication_catalog, review_medication_options
 
 BASE = Path(__file__).resolve().parent
 BANK = load_bank(BASE / "dental_intake_v1.json")
@@ -177,7 +178,8 @@ def render_landing():
     links = "".join(
         f"<li><b>{esc(name)}</b> — "
         f"<a href='/intake?clinic={cid}'>patient intake</a> · "
-        f"<a href='/dashboard?clinic={cid}'>dentist dashboard</a></li>"
+        f"<a href='/dashboard?clinic={cid}'>dentist dashboard</a> · "
+        f"<a href='/medication-review?clinic={cid}'>medication review</a></li>"
         for cid, name in DEMO_CLINICS
     )
     return f"""<html><head><title>Mia Clinical — demo</title>{STYLE}</head><body>
@@ -189,6 +191,166 @@ def render_landing():
 <p class="src">Question bank: {esc(BANK.bank_id)} v{esc(BANK.version)} ·
 review status: {esc(BANK.review_status)} (dentist review pending)</p>
 </div></body></html>"""
+
+
+def render_medication_review(clinic_id, clinic_name):
+    """Clinician-facing synthetic demo; never persists or transmits this request."""
+    catalog = load_medication_catalog()
+    page = (
+        "<html><head><title>Mia Medication Review</title>" + STYLE + "</head><body>"
+        + BANNER + "<div class='wrap'>"
+        + mia_stage_html(
+            manifest_name="Mia Medication Review",
+            stage="review",
+            reason="I can compare a clinician-entered diagnosis with reviewed reference entries. I do not diagnose or prescribe.",
+        )
+        + """
+<h1>Medication teaching and safety review</h1>
+<p><strong>Clinic:</strong> __CLINIC_NAME__</p>
+<p>This clinician-only prototype accepts fictional cases. Enter the diagnosis already made by the clinician and review the patient factors. It does not create or transmit prescriptions.</p>
+<div class="q">
+  <p><b>Catalogue state:</b> __CATALOG_STATUS__</p>
+  <p>The initial medication catalogue is intentionally empty until a dentist/gynecologist and a medication-safety reviewer approve sourced entries.</p>
+</div>
+<form id="medication-review" data-clinic-id="__CLINIC_ID__">
+  <div class="q"><label for="demo-label">Fictional case label</label><input id="demo-label" type="text" value="Demo Patient 01" maxlength="55" required pattern="(Demo|Test|Sample) [A-Za-z0-9][A-Za-z0-9 _-]{0,44}"><small>Use only labels beginning with Demo, Test, or Sample. Never enter real patient data.</small></div>
+  <div class="q"><label for="specialty">Specialty</label><select id="specialty" required><option value="">Choose specialty</option><option value="dentistry">Dentistry</option><option value="gynecology">Gynecology</option></select></div>
+  <div class="q"><label for="diagnosis">Clinician-entered diagnosis code</label><input id="diagnosis" type="text" maxlength="80" required placeholder="Exact code used by your approved pathway"><small>The engine uses exact codes only. It will not infer a diagnosis from symptoms or free text.</small></div>
+  <div class="q"><label for="age">Age in years</label><input id="age" type="number" min="0" max="130" step="1" required></div>
+  <div class="q"><label for="allergies-reviewed">Allergies reviewed by clinician</label><select id="allergies-reviewed" required><option value="">Choose</option><option value="yes">Reviewed and confirmed</option><option value="no">Not reviewed / uncertain</option></select></div>
+  <div class="q"><label for="allergies">Known allergies or reactions (comma-separated; leave empty only if none reported)</label><textarea id="allergies" rows="2" placeholder="Synthetic allergy examples only"></textarea></div>
+  <div class="q"><label for="meds-reviewed">Current medication list reviewed by clinician</label><select id="meds-reviewed" required><option value="">Choose</option><option value="yes">Reviewed and confirmed</option><option value="no">Not reviewed / uncertain</option></select></div>
+  <div class="q"><label for="meds">Current medicines (comma-separated; include known OTC medicines)</label><textarea id="meds" rows="2" placeholder="Synthetic medicine names only"></textarea></div>
+  <div class="q"><label for="pregnancy">Pregnancy status</label><select id="pregnancy" required><option value="">Choose</option><option value="yes">Yes</option><option value="no">No</option><option value="not_applicable">Clinician confirmed not applicable</option><option value="unknown">Unknown</option></select></div>
+  <div class="q"><label for="lactation">Lactation status</label><select id="lactation" required><option value="">Choose</option><option value="yes">Yes</option><option value="no">No</option><option value="not_applicable">Clinician confirmed not applicable</option><option value="unknown">Unknown</option></select></div>
+  <div class="q"><label for="severe-allergy">Relevant severe allergy flag</label><select id="severe-allergy" required><option value="unknown">Unknown / not assessed</option><option value="yes">Present</option><option value="no">Absent after review</option></select></div>
+  <div class="q"><label for="renal">Renal function context</label><select id="renal" required><option value="unknown">Unknown / not assessed</option><option value="normal">Known normal</option><option value="abnormal">Known abnormal</option><option value="not_applicable">Clinician confirmed not applicable</option></select></div>
+  <div class="q"><label for="hepatic">Hepatic function context</label><select id="hepatic" required><option value="unknown">Unknown / not assessed</option><option value="normal">Known normal</option><option value="abnormal">Known abnormal</option><option value="not_applicable">Clinician confirmed not applicable</option></select></div>
+  <div class="q"><label for="extra-facts">Other structured safety facts (JSON object, optional)</label><textarea id="extra-facts" rows="3">{}</textarea><small>Use only synthetic, clinician-confirmed key/value facts requested by a reviewed rule. Core fields above cannot be overwritten here.</small></div>
+  <button type="submit" id="review-button">Evaluate reviewed entries</button>
+</form>
+<section id="review-result" aria-live="polite"></section>
+<script>
+(function () {
+  const form = document.getElementById('medication-review');
+  const output = document.getElementById('review-result');
+  const button = document.getElementById('review-button');
+  function escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (char) {
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[char];
+    });
+  }
+  function csvValues(value) {
+    return String(value || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+  }
+  function render(data) {
+    if (!data || !data.review) {
+      output.innerHTML = '<div class="flag">The review response was not in the expected format. No medication decision was made.</div>';
+      return;
+    }
+    const result = data.review;
+    let html = '<h2>Review result</h2><p><b>Status:</b> ' + escapeHtml(result.status) + '</p>';
+    html += '<p><b>Catalogue:</b> ' + escapeHtml(data.catalog.status) + ' · version ' + escapeHtml(data.catalog.version) + '</p>';
+    html += '<p>' + escapeHtml(result.notice) + '</p>';
+    html += '<p class="escape">' + escapeHtml(result.interaction_coverage_warning || '') + '</p>';
+    if (result.missing_context && result.missing_context.length) {
+      html += '<div class="flag">Review blocked. Missing or unresolved: ' + result.missing_context.map(escapeHtml).join(', ') + '</div>';
+    }
+    const options = result.candidate_options || [];
+    if (!options.length) {
+      if (data.catalog.status !== 'approved') {
+        html += '<div class="q"><b>No medication entries are enabled.</b><p>This is intentional while the catalogue is awaiting qualified review. It is not a conclusion that a medicine is or is not indicated.</p></div>';
+      } else {
+        html += '<div class="q"><b>No eligible candidate was returned from this catalogue.</b><p>This does not establish that medication is unnecessary. Follow the clinician-approved guideline and local workflow.</p></div>';
+      }
+    }
+    options.forEach(function (item) {
+      html += '<article class="q"><h3>' + escapeHtml(item.display_name) + '</h3>';
+      html += '<p><b>State:</b> source-backed option for independent clinician review, not a final decision.</p>';
+      const sections = [
+        ['why_consider','Why this may be considered'],['mechanism','Mechanism'],
+        ['evidence_summary','Evidence summary'],['alternatives','Alternatives'],
+        ['common_adverse_effects','Common adverse effects'],['serious_warnings','Serious warnings'],
+        ['pregnancy_lactation','Pregnancy and lactation'],['monitoring','Monitoring'],
+        ['counseling','Patient counseling'],['dose_summary','Official-label dose context']
+      ];
+      sections.forEach(function (section) {
+        html += '<p><b>' + escapeHtml(section[1]) + ':</b> ' + escapeHtml(item.teaching[section[0]]) + '</p>';
+      });
+      html += '<p><b>Source:</b> <a target="_blank" rel="noopener noreferrer" href="' + escapeHtml(item.source.url) + '">' + escapeHtml(item.source.title) + '</a></p>';
+      html += '<p class="src">Jurisdiction ' + escapeHtml(item.source.jurisdiction) + ' · ' + escapeHtml(item.source.source_type) + ' · version ' + escapeHtml(item.source.version) + ' · effective ' + escapeHtml(item.source.effective_date) + ' · review due ' + escapeHtml(item.source.review_due) + '</p>';
+      html += '</article>';
+    });
+    (result.withheld_options || []).forEach(function (item) {
+      html += '<div class="flag"><b>Withheld for safety review:</b> ' + escapeHtml(item.display_name) + ' · ' + escapeHtml(item.reason_code) + '<p>' + escapeHtml(item.message) + '</p></div>';
+    });
+    output.innerHTML = html;
+  }
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+    let extraFacts;
+    try {
+      extraFacts = JSON.parse(document.getElementById('extra-facts').value || '{}');
+    } catch (_error) {
+      output.innerHTML = '<div class="flag">Additional facts must be valid JSON.</div>';
+      return;
+    }
+    if (!extraFacts || Array.isArray(extraFacts) || typeof extraFacts !== 'object' ||
+        Object.values(extraFacts).some(function (v) { return v !== null && !['string','number','boolean'].includes(typeof v); })) {
+      output.innerHTML = '<div class="flag">Additional facts must be a JSON object with scalar values.</div>';
+      return;
+    }
+    const payload = {
+      clinic_id: form.dataset.clinicId,
+      demo_patient_label: document.getElementById('demo-label').value.trim(),
+      specialty: document.getElementById('specialty').value,
+      diagnosis_code: document.getElementById('diagnosis').value.trim(),
+      age_years: Number(document.getElementById('age').value),
+      allergies_reviewed: document.getElementById('allergies-reviewed').value === 'yes',
+      allergies: csvValues(document.getElementById('allergies').value),
+      current_medications_reviewed: document.getElementById('meds-reviewed').value === 'yes',
+      current_medications: csvValues(document.getElementById('meds').value),
+      pregnancy_status: document.getElementById('pregnancy').value || 'unknown',
+      lactation_status: document.getElementById('lactation').value || 'unknown',
+      severe_allergy: document.getElementById('severe-allergy').value === 'yes' ? true :
+        (document.getElementById('severe-allergy').value === 'no' ? false : 'unknown'),
+      renal_function: document.getElementById('renal').value || 'unknown',
+      hepatic_function: document.getElementById('hepatic').value || 'unknown',
+      additional_facts: extraFacts
+    };
+    button.disabled = true;
+    button.textContent = 'Checking reviewed entries…';
+    output.innerHTML = '<p>Checking exact diagnosis, source status and the supplied synthetic safety context…</p>';
+    try {
+      const response = await fetch('/api/medication-review', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        output.innerHTML = '<div class="flag">' + escapeHtml(data.error || 'The review request could not be processed.') + '</div>';
+      } else {
+        render(data);
+      }
+    } catch (_error) {
+      output.innerHTML = '<div class="flag">The local review endpoint could not be reached. No medication decision was made.</div>';
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Evaluate reviewed entries';
+    }
+  });
+})();
+</script>
+</div></body></html>
+"""
+    )
+    return (
+        page.replace("__CLINIC_NAME__", esc(clinic_name))
+        .replace("__CLINIC_ID__", esc(clinic_id))
+        .replace("__CATALOG_STATUS__", esc(catalog.get("status", "unavailable")))
+    )
 
 
 def render_intake(clinic_id, clinic_name):
@@ -424,13 +586,15 @@ class Handler(BaseHTTPRequestHandler):
         clinic_id = q.get("clinic", [""])[0]
         if u.path == "/":
             self._send(200, render_landing())
-        elif u.path in ("/intake", "/dashboard", "/record", "/api/audit"):
+        elif u.path in ("/intake", "/dashboard", "/record", "/api/audit", "/medication-review"):
             name = self._resolve_clinic(clinic_id)
             if name is None:
                 self._send(404, "Unknown demo clinic.")
                 return
             if u.path == "/intake":
                 self._send(200, render_intake(clinic_id, name))
+            elif u.path == "/medication-review":
+                self._send(200, render_medication_review(clinic_id, name))
             elif u.path == "/dashboard":
                 self._send(200, render_dashboard(clinic_id, name, self.store))
             elif u.path == "/record":
@@ -508,6 +672,74 @@ class Handler(BaseHTTPRequestHandler):
             self._send(400, "Invalid request body.")
             return
         ctype = self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
+
+        if u.path == "/api/medication-review":
+            if ctype != "application/json":
+                self._json(415, {"ok": False, "error": "Content-Type must be application/json"})
+                return
+            try:
+                payload = json.loads(raw.decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                self._json(400, {"ok": False, "error": "invalid JSON"})
+                return
+            if not isinstance(payload, dict):
+                self._json(400, {"ok": False, "error": "request must be a JSON object"})
+                return
+            clinic_id = payload.get("clinic_id", "")
+            if clinic_id not in DEMO_CLINIC_IDS:
+                self._json(404, {"ok": False, "error": "unknown demo clinic"})
+                return
+            demo_label = payload.get("demo_patient_label", "")
+            if not isinstance(demo_label, str) or not DEMO_PATIENT_LABEL_RE.fullmatch(demo_label):
+                self._json(422, {"ok": False, "error": "Use a fictional label beginning with Demo, Test, or Sample."})
+                return
+            allergies = payload.get("allergies", [])
+            medications = payload.get("current_medications", [])
+            extra_facts = payload.get("additional_facts", {})
+            if (not isinstance(allergies, list) or any(not isinstance(x, str) for x in allergies)
+                    or not isinstance(medications, list) or any(not isinstance(x, str) for x in medications)):
+                self._json(422, {"ok": False, "error": "allergies and current_medications must be lists of strings"})
+                return
+            if (not isinstance(extra_facts, dict)
+                    or any(not isinstance(k, str) or not k.strip()
+                           or (v is not None and isinstance(v, (dict, list)))
+                           for k, v in extra_facts.items())):
+                self._json(422, {"ok": False, "error": "additional_facts must be an object of scalar values"})
+                return
+
+            # Extra facts are applied first; trusted, explicitly reviewed form fields override them.
+            facts = dict(extra_facts)
+            facts.update({
+                "age_years": payload.get("age_years"),
+                "allergies_reviewed": payload.get("allergies_reviewed") is True,
+                "allergies": allergies,
+                "current_medications_reviewed": payload.get("current_medications_reviewed") is True,
+                "current_medications": medications,
+                "pregnancy_status": payload.get("pregnancy_status", "unknown"),
+                "lactation_status": payload.get("lactation_status", "unknown"),
+                "severe_allergy": payload.get("severe_allergy", "unknown"),
+                "renal_function": payload.get("renal_function", "unknown"),
+                "hepatic_function": payload.get("hepatic_function", "unknown"),
+            })
+            catalog = load_medication_catalog()
+            review = review_medication_options({
+                "specialty": payload.get("specialty"),
+                "diagnosis_code": payload.get("diagnosis_code"),
+                "patient_facts": facts,
+            }, catalog)
+            self._json(200, {
+                "ok": True,
+                "demo_patient_label": demo_label,
+                "catalog": {
+                    "catalog_id": catalog.get("catalog_id"),
+                    "version": catalog.get("version"),
+                    "status": catalog.get("status"),
+                },
+                "review": review,
+                "persisted": False,
+                "prescription_created": False,
+            })
+            return
 
         if u.path == "/api/intake":
             if ctype != "application/json":
