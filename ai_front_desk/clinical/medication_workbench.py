@@ -772,7 +772,7 @@ def render_research_page(params: Mapping[str, Any]) -> str:
 
     cards = [
         ("ClinicalTrials.gov", "Registry search for study records, location, eligibility, status and posted results.", trials_url,
-         "Study records are sponsor/investigator submitted. Verify posted results and related publications; registration is not clinical approval."),
+         "Study records are sponsor/investigator submitted. Trial registration is not a medication recommendation or clinical approval. Verify posted results and related publications."),
         ("WHO ICTRP Search Portal", "Cross-registry discovery for ongoing and completed trials.", "https://trialsearch.who.int/Default.aspx",
          "Search the condition/intervention in the portal. WHO says registry records are not endorsed by WHO and must not be used in care without a licensed professional."),
         ("PubMed · clinical studies and reviews", "Find published clinical studies, randomized trials and systematic reviews.", pubmed_url,
@@ -806,7 +806,18 @@ def render_research_page(params: Mapping[str, Any]) -> str:
         "<!doctype html><html lang='en'><head><meta charset='utf-8'>"
         "<meta name='viewport' content='width=device-width, initial-scale=1'>"
         "<meta name='referrer' content='no-referrer'>"
-        "<title>Dr. Mia · Clinical Research Sources</title><style>" + STYLE + "</style></head><body>"
+        "<title>Dr. Mia · Clinical Research Sources</title><style>"
+        "body{margin:0;background:#f7faf9;color:#12313d;font:15px/1.55 system-ui,sans-serif}"
+        ".wrap{max-width:1040px;margin:0 auto;padding:20px}.banner{padding:10px 16px;background:#fff1c2;color:#634a00;font-size:12px;font-weight:700}"
+        "header{padding:22px 0}.eyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#087f8c}"
+        "h1{font-size:clamp(26px,4vw,36px);margin:5px 0}h2{font-size:20px;margin:4px 0 12px}"
+        ".sub{color:#60747d}.panel,.source-directory,.note{background:#fff;border:1px solid #d7e5e7;border-radius:14px;padding:17px;margin:14px 0}"
+        ".note{background:#fff4d7}.source-link{padding:12px 0;border-top:1px solid #e1ebed}"
+        ".source-link>a{font-weight:750;color:#086e7b}.source-link p,.muted{font-size:12px;color:#60747d}"
+        ".form-field{margin:12px 0}.form-field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}"
+        "input,select,button{box-sizing:border-box;width:100%;font:inherit;padding:10px;border:1px solid #bed1d5;border-radius:9px;background:#fff;color:#12313d}"
+        "button{width:auto;background:#087f8c;color:#fff;font-weight:750;cursor:pointer}footer{padding:18px 0;color:#60747d;font-size:12px}"
+        "@media(max-width:700px){.wrap{padding:12px}button{width:100%}}</style></head><body>"
         "<div class='banner'>LOCAL DEMO ONLY · SEARCH TERMS ONLY · NO PATIENT DATA</div>"
         "<main class='wrap'><header><div><div class='eyebrow'>DR. MIA · RESEARCH INTELLIGENCE</div>"
         "<h1>Clinical trials &amp; information centers</h1>"
