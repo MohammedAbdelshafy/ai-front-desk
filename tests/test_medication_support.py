@@ -180,6 +180,7 @@ def test_gynecology_requires_confirmed_reproductive_context_before_review():
         specialty="gynecology",
         diagnosis_code="GYN-DX-001",
         pregnancy_status="unknown",
+        lactation_status="unknown",
     )
     result = review_medication_options(request, [entry], today="2026-10-23")
 
