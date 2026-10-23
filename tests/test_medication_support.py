@@ -1,12 +1,15 @@
 """Safety contract tests for Mia's clinician-facing medication review engine."""
 
-import json\n\nfrom ai_front_desk.clinical.medication_support import load_medication_catalog, review_medication_options
+import json
+
+from ai_front_desk.clinical.medication_support import load_medication_catalog, review_medication_options
 
 
 def _request(specialty="dentistry", diagnosis_code="DX-001", **fact_overrides):
     facts = {
         "age_years": 38,
         "allergies_reviewed": True,
+        "allergies": [],
         "current_medications_reviewed": True,
         "current_medications": [],
         "pregnancy_status": "not_applicable",
@@ -45,6 +48,9 @@ def _entry(**overrides):
         "teaching": {
             "why_consider": "Synthetic teaching summary from an approved entry.",
             "mechanism": "Synthetic mechanism description.",
+            "evidence_summary": "Synthetic evidence summary.",
+            "alternatives": "Compare alternatives in the reviewed guideline.",
+            "pregnancy_lactation": "Confirm in the current official label.",
             "common_adverse_effects": "Consult the linked official label.",
             "serious_warnings": "Consult the linked official label.",
             "monitoring": "Confirm monitoring with the cited source.",
@@ -55,6 +61,8 @@ def _entry(**overrides):
             "title": "Synthetic reference used for software tests",
             "url": "https://example.org/demo-reference",
             "version": "test-v1",
+            "jurisdiction": "US",
+            "source_type": "official_label",
             "effective_date": "2026-01-01",
             "reviewer": "Qualified clinician (synthetic test fixture)",
             "reviewed_at": "2026-10-01",
@@ -163,7 +171,7 @@ def test_interaction_conflict_withholds_entry_for_review():
     assert result["withheld_options"][0]["reason_code"] == "interaction_requires_resolution"
 
 
-def test_gynecology_requires_reproductive_context_when_the_entry_depends_on_it():
+def test_gynecology_requires_confirmed_reproductive_context_before_review():
     entry = _entry(
         specialties=["gynecology"],
         diagnosis_codes=["GYN-DX-001"],
@@ -176,8 +184,43 @@ def test_gynecology_requires_reproductive_context_when_the_entry_depends_on_it()
     result = review_medication_options(request, [entry], today="2026-10-23")
 
     assert result["candidate_options"] == []
-    assert result["withheld_options"][0]["reason_code"] == "missing_required_fact"
-    assert "pregnancy_status" in result["withheld_options"][0]["missing_facts"]
+    assert result["status"] == "blocked_incomplete_context"
+    assert "pregnancy_status" in result["missing_context"]
+    assert "lactation_status" in result["missing_context"]
+
+
+def test_documented_allergy_match_withholds_entry():
+    entry = _entry(allergy_terms=["demomed-a allergy"])
+    result = review_medication_options(
+        _request(allergies=["DemoMed-A Allergy"]), [entry], today="2026-10-23"
+    )
+
+    assert result["candidate_options"] == []
+    assert result["withheld_options"][0]["reason_code"] == "contraindication"
+
+
+def test_draft_catalogue_never_exposes_embedded_entries(tmp_path):
+    catalog_file = tmp_path / "catalog.json"
+    catalog_file.write_text(json.dumps({
+        "catalog_id": "test", "version": "1", "status": "draft", "entries": [_entry()]
+    }), encoding="utf-8")
+
+    catalog = load_medication_catalog(catalog_file)
+
+    assert catalog["status"] == "draft"
+    assert catalog["entries"] == []
+    result = review_medication_options(_request(), catalog, today="2026-10-23")
+    assert result["candidate_options"] == []
+
+
+def test_population_age_guard_withholds_out_of_range_entry():
+    entry = _entry(min_age_years=18, max_age_years=64)
+    result = review_medication_options(
+        _request(age_years=67), [entry], today="2026-10-23"
+    )
+
+    assert result["candidate_options"] == []
+    assert result["withheld_options"][0]["reason_code"] == "patient_population_mismatch"
 
 
 def test_untrusted_or_malformed_source_is_not_eligible():
