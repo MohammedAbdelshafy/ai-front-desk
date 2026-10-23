@@ -1,0 +1,51 @@
+{
+  "pack_id": "mia-dentistry-medication-support",
+  "version": "0.1.0",
+  "specialty": "dentistry",
+  "status": "draft",
+  "intended_user": "Licensed dentist or authorized dental prescriber",
+  "intended_use": "Surface source-backed medication teaching and safety considerations for a clinician-entered diagnosis after patient context is reviewed.",
+  "required_shared_context": [
+    "exact clinician-entered diagnosis code",
+    "patient age in years",
+    "allergies reviewed and structured allergy list",
+    "current medications reviewed and structured medication list"
+  ],
+  "candidate_specific_context": [
+    "Only collect renal, hepatic, pregnancy/lactation, weight, comorbidity, procedure, and other dose-relevant facts when an approved rule requires them; missing required facts block that candidate."
+  ],
+  "teaching_sections": [
+    "why consider",
+    "mechanism",
+    "evidence summary",
+    "alternatives",
+    "common adverse effects",
+    "serious warnings",
+    "contraindications and interaction checks",
+    "pregnancy/lactation considerations",
+    "monitoring",
+    "patient counseling",
+    "official-label dose context"
+  ],
+  "forbidden_actions": [
+    "autonomous diagnosis",
+    "single-best-drug ranking",
+    "dose calculation not explicitly approved and validated",
+    "prescription creation, signing, or transmission",
+    "patient-directed advice to start, stop, or change a medicine"
+  ],
+  "clinical_content": {
+    "entries": [],
+    "review_status": "not_started",
+    "reviewer": null,
+    "review_date": null,
+    "review_due": null
+  },
+  "activation_gates": [
+    "A practicing dentist reviews and signs off on the specialty workflow and every medication entry.",
+    "A pharmacist or qualified medication-safety reviewer checks allergy, interaction, contraindication and dose-related rules.",
+    "The source jurisdiction, current official labels/guidelines and update rights are verified.",
+    "Clinical evaluation cases cover contraindications, under-specified cases, children, pregnancy/lactation and interaction conflicts.",
+    "Regulatory, privacy, security and production operational review is approved."
+  ]
+}
