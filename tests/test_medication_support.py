@@ -1,6 +1,6 @@
 """Safety contract tests for Mia's clinician-facing medication review engine."""
 
-from ai_front_desk.clinical.medication_support import review_medication_options
+import json\n\nfrom ai_front_desk.clinical.medication_support import load_medication_catalog, review_medication_options
 
 
 def _request(specialty="dentistry", diagnosis_code="DX-001", **fact_overrides):
