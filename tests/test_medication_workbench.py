@@ -373,3 +373,34 @@ def test_egypt_case_does_not_receive_us_draft_medicine_candidates():
     assert "No review-only evidence card matched these words for the selected jurisdiction" in page
     assert "Egyptian Drug Register" in page
     assert "ibuprofen" not in page.lower()
+
+
+def test_research_hub_builds_trial_literature_and_egypt_information_links(workbench_url):
+    with urlopen(
+        workbench_url + "/research?condition=synthetic+dental+pain&intervention=fictional+test&location=Egypt"
+    ) as response:
+        body = response.read().decode("utf-8")
+        assert response.status == 200
+        assert response.headers["Cache-Control"] == "no-store"
+    assert "ClinicalTrials.gov" in body
+    assert "WHO ICTRP" in body
+    assert "PubMed" in body
+    assert "DailyMed" in body
+    assert "NIH LactMed" in body
+    assert "Egyptian Drug Authority" in body
+    assert "Egyptian Health Council" in body
+    assert "locStr=Egypt" in body
+    assert "did.admin@edaegypt.gov.eg" in body
+    assert "trial registration" in body.lower()
+    assert "not a medication recommendation" in body.lower()
+    assert "fictional test" in body
+
+
+def test_research_hub_escapes_topic_and_does_not_execute_markup(workbench_url):
+    with urlopen(
+        workbench_url + "/research?condition=%3Cscript%3Ealert%281%29%3C%2Fscript%3E&location=Egypt"
+    ) as response:
+        body = response.read().decode("utf-8")
+        assert response.status == 200
+    assert "<script>alert(1)</script>" not in body
+    assert "&lt;script&gt;alert(1)&lt;/script&gt;" in body
