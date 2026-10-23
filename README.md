@@ -46,6 +46,23 @@ python -m pytest -q
 
 The GitHub Actions workflow runs the test suite on relevant branches and pull requests. Check the actual workflow status before claiming a build is green.
 
+## Mia medication review (experimental scaffold)
+
+A local, synthetic-only clinician review screen is available at
+`/medication-review?clinic=demo-smile-arts` when the local server is running.
+It provides the same rule-engine interface for **dentistry** and **gynecology**.
+The API currently uses an intentionally empty, draft catalogue, so it will not
+return medication options. The initial scope is source-backed clinician
+education and safety checks, not autonomous diagnosis or prescribing.
+
+Do not enter real patient data. Nothing is persisted by the medication-review
+endpoint, and it does not create, sign, or transmit prescriptions. A missing
+candidate is not a recommendation to withhold treatment. Each medication
+entry and its rules require qualified specialty-clinician and medication-safety
+review before the entry can be enabled. The code, empty catalogue contract,
+specialty-pack activation gates and known production blockers are documented in
+[`docs/MIA_MEDICATION_SUPPORT_V1.md`](docs/MIA_MEDICATION_SUPPORT_V1.md).
+
 ## Original WhatsApp reference flow
 
 ```bash
