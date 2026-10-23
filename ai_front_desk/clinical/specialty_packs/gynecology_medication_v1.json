@@ -1,0 +1,55 @@
+{
+  "pack_id": "mia-gynecology-medication-support",
+  "version": "0.1.0",
+  "specialty": "gynecology",
+  "status": "draft",
+  "intended_user": "Licensed gynecologist or authorized women's-health prescriber",
+  "intended_use": "Surface source-backed medication teaching and safety considerations for a clinician-entered diagnosis after patient context is reviewed.",
+  "required_shared_context": [
+    "exact clinician-entered diagnosis code",
+    "patient age in years",
+    "allergies reviewed and structured allergy list",
+    "current medications reviewed and structured medication list",
+    "pregnancy status confirmed by clinician or marked not applicable",
+    "lactation status confirmed by clinician or marked not applicable"
+  ],
+  "candidate_specific_context": [
+    "Require the approved entry's patient population, pregnancy/lactation, fertility/reproductive plans, contraindication, interaction, renal/hepatic, comorbidity, weight, and monitoring inputs whenever relevant.",
+    "Unknown pregnancy or lactation status blocks the medication review rather than assuming a negative status."
+  ],
+  "teaching_sections": [
+    "why consider",
+    "mechanism",
+    "evidence summary",
+    "alternatives",
+    "common adverse effects",
+    "serious warnings",
+    "contraindications and interaction checks",
+    "pregnancy/lactation and reproductive considerations",
+    "monitoring",
+    "patient counseling",
+    "official-label dose context"
+  ],
+  "forbidden_actions": [
+    "autonomous diagnosis",
+    "single-best-drug ranking",
+    "assumption that pregnancy/lactation is absent when unknown",
+    "dose calculation not explicitly approved and validated",
+    "prescription creation, signing, or transmission",
+    "patient-directed advice to start, stop, or change a medicine"
+  ],
+  "clinical_content": {
+    "entries": [],
+    "review_status": "not_started",
+    "reviewer": null,
+    "review_date": null,
+    "review_due": null
+  },
+  "activation_gates": [
+    "A practicing gynecologist reviews and signs off on the specialty workflow and every medication entry.",
+    "A pharmacist or qualified medication-safety reviewer checks allergy, interaction, contraindication and dose-related rules.",
+    "Pregnancy, lactation and reproductive-safety warnings are checked against current official sources for the target jurisdiction.",
+    "Clinical evaluation cases cover reproductive status, drug interactions, contraindications, under-specified cases and high-risk presentations.",
+    "Regulatory, privacy, security and production operational review is approved."
+  ]
+}
