@@ -1,0 +1,89 @@
+[
+  {
+    "name": "Dental medication review blocks incomplete context and abstains with an empty approved catalog",
+    "sanity": true,
+    "viewport": "desktop",
+    "covers": [
+      "dentist-confirmed exact diagnosis code",
+      "allergy and medication reconciliation guardrails",
+      "jurisdiction and local protocol review",
+      "unknown pregnancy/lactation context blocks review",
+      "zero approved medication pathway entries",
+      "no autonomous medication selection or prescription"
+    ],
+    "description": "Verifies the core dental medication-review workflow requires dentist-confirmed context and never invents medication suggestions when no pathway is approved.",
+    "steps": [
+      "Open Medication review from the workspace navigation.",
+      "Submit the form with all fields empty.",
+      "Verify the review is blocked and lists missing diagnosis, dentist confirmation, age, allergies, medicines, pregnancy/lactation context, organ-function context and local protocol.",
+      "Enter fictional data: diagnosis code DEMO-DENT-001, diagnosis label Synthetic dental scenario, age 35, allergies 'none reported and confirmed (synthetic)', and current medicines 'none reported and confirmed (synthetic)'.",
+      "Confirm the diagnosis, allergy review, medication reconciliation and local protocol review; set pregnancy/lactation to clinician-confirmed not applicable and renal/hepatic status to clinician-confirmed not applicable.",
+      "Select Review approved pathways."
+    ],
+    "expected": "The app shows zero approved pathways and returns no medication candidate or dose. It says the empty catalog is not advice to withhold treatment, displays teaching-card requirements, and preserves the clinician’s responsibility."
+  },
+  {
+    "name": "Clinical-trials research builder creates independent public source links",
+    "viewport": "desktop",
+    "covers": [
+      "condition/topic search",
+      "optional medicine/intervention query",
+      "Egypt trial location filter",
+      "ClinicalTrials.gov search URL construction",
+      "WHO ICTRP discovery",
+      "PubMed trial and systematic-review search",
+      "research records are not prescribing approval"
+    ],
+    "description": "Verifies search terms produce separate trial and literature links without fetching data into or creating a medicine-ranking system.",
+    "steps": [
+      "Open Trials & research.",
+      "Enter 'synthetic dental pain' as the condition and 'fictional test intervention' as the intervention; keep Egypt selected.",
+      "Click Build source searches.",
+      "Verify ClinicalTrials.gov, WHO ICTRP, PubMed, DailyMed, LactMed and ADA guideline links appear.",
+      "Open ClinicalTrials.gov in a new tab and verify the search includes Egypt as the location.",
+      "Verify the safety note says a trial record is not treatment authorization."
+    ],
+    "expected": "Distinct public source links are displayed for the synthetic topic and intervention; ClinicalTrials.gov is Egypt-focused, and research discovery is separated from medication decisions. No patient details are submitted."
+  },
+  {
+    "name": "Research builder rejects an empty query and safely renders research text on mobile",
+    "viewport": "mobile",
+    "covers": [
+      "empty research-query validation",
+      "visible search-form error state",
+      "mobile research layout",
+      "safe text rendering for search terms",
+      "no automatic query persistence"
+    ],
+    "description": "Verifies a missing topic produces a clear error and a phrase containing markup is rendered as text instead of executing.",
+    "steps": [
+      "Open Trials & research on a mobile viewport.",
+      "Click Build source searches without entering a condition or intervention.",
+      "Verify a message asks for a non-identifying topic or medicine name and no source result cards are shown.",
+      "Enter '<script>synthetic test</script>' as the condition and submit.",
+      "Verify the query appears as text in the page heading and no script popup executes."
+    ],
+    "expected": "Empty searches show a visible validation message. Search terms render as escaped text, and the app does not store the query or make automatic network calls."
+  },
+  {
+    "name": "Information centers show official dental guidance and Egyptian medicine-safety contacts",
+    "viewport": "mobile",
+    "covers": [
+      "ADA current acute dental-pain guideline",
+      "ADA dental-antibiotic guideline and stewardship",
+      "Egyptian Drug Authority Drug Information Center",
+      "DailyMed medicine labeling",
+      "LactMed lactation information",
+      "WHO ICTRP and WHO guidelines",
+      "source jurisdiction warning"
+    ],
+    "description": "Verifies the reference directory exposes source-linked guidance and warns that US references do not establish Egyptian product authorization.",
+    "steps": [
+      "Open Information centers.",
+      "Verify ADA acute pain, ADA antibiotic stewardship, DailyMed, LactMed, WHO ICTRP and Egyptian Drug Authority entries are visible.",
+      "Verify the EDA Drug Information Center phone and email are visible.",
+      "Verify the page warns that US labeling does not establish Egyptian registration or local prescribing rules."
+    ],
+    "expected": "The page shows official source links, EDA contact details and jurisdiction limits. Source discovery alone does not produce a medication recommendation."
+  }
+]
