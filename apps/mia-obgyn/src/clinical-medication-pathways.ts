@@ -111,8 +111,8 @@ export function getApprovedMedicationPathways(
       pathway.medicines.length === 0 ||
       !Array.isArray(pathway.sources) ||
       pathway.sources.length === 0 ||
-      !validReviewer(pathway.clinicianReviewer, today) ||
-      !validReviewer(pathway.pharmacistReviewer, today) ||
+      !validReviewer(pathway.clinicianReviewer, todayIso) ||
+      !validReviewer(pathway.pharmacistReviewer, todayIso) ||
       !validIsoDate(pathway.reviewDueOn) ||
       pathway.reviewDueOn < todayIso
     ) return false;
