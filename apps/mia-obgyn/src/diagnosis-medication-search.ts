@@ -54,17 +54,41 @@ export interface DiagnosisMedicationResult {
 }
 
 function normalize(value: string): string {
+  // US -> UK spelling aliases, applied to BOTH sides of every match
+  // (queries and evidence text pass through this same function), so a
+  // doctor typing US spellings still reaches the UK-spelled evidence.
   return value
     .toLowerCase()
     .normalize('NFKD')
-    .replace(/\u0300-\u036f/g, '')
-    .replace(/[^a-z0-9\s-]/g, ' ');
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .replace(/hemorrhage/g, 'haemorrhage')
+    .replace(/preeclampsia/g, 'pre-eclampsia')
+    .replace(/anemia/g, 'anaemia')
+    .replace(/edema/g, 'oedema')
+    .replace(/estrogen/g, 'oestrogen')
+    .replace(/cesarean/g, 'caesarean')
+    .replace(/fetus/g, 'foetus')
+    .replace(/tumor/g, 'tumour')
+    .replace(/post-partum/g, 'postpartum')
+    .replace(/post partum/g, 'postpartum');
 }
+
+// Severity and certainty words describe a presentation, they do not
+// identify a condition, so they never count as matching tokens.
+const QUALIFIER_TOKENS = new Set([
+  'severe',
+  'mild',
+  'moderate',
+  'acute',
+  'chronic',
+  'suspected',
+]);
 
 function tokensOf(value: string): string[] {
   return normalize(value)
     .split(/\s+/)
-    .filter(token => token.length >= 3);
+    .filter(token => token.length >= 3 && !QUALIFIER_TOKENS.has(token));
 }
 
 /**
@@ -82,25 +106,42 @@ export function searchDiagnosisMedications(
   const sources = searchObgynSources(query, jurisdiction, 10);
   if (!tokens.length) return { medicines: [], sources };
 
+  // Precision rule (fixed 2026-10-24 after the doctor-testing matrix
+  // showed single-token leakage: "gestational diabetes" returned
+  // hypertension medicines because it shares the token "gestational"
+  // with "Gestational hypertension"). A statement's medicines are
+  // included ONLY when:
+  //   (a) its entry matches the query — the full query string appears
+  //       in the condition name, or a single-token query's token does,
+  //       or at least two query tokens appear in the condition name
+  //       (so "postpartum haemorrhage, heavy bleeding" still matches
+  //       while "gestational diabetes" does not); or
+  //   (b) the same threshold is met inside the statement text itself; or
+  //   (c) a query token names a medicine (medicine-name queries).
+  // Anything else stays out, so an unmatched diagnosis returns an
+  // honest empty list instead of a neighbouring condition's medicines.
+  // Known breadth that remains by design: a single generic token such
+  // as "pregnancy" matches every statement mentioning it, including
+  // low-certainty case-study entries — each hit still shows its
+  // condition, aspect and flags so the doctor can see the context.
+  const queryNorm = normalized.trim();
+  const hits = (corpus: string) =>
+    tokens.length === 1
+      ? corpus.includes(tokens[0])
+      : tokens.filter(token => corpus.includes(token)).length >= 2;
   const byMedicine = new Map<string, DiagnosisMedicationHit>();
   for (const entry of CANDIDATE_PATHWAY_EVIDENCE) {
     const conditionNorm = normalize(entry.condition);
-    let entryScore = 0;
-    if (conditionNorm.includes(normalized.trim())) entryScore += 10;
-    for (const token of tokens) {
-      if (conditionNorm.includes(token)) entryScore += 4;
-    }
+    const entryMatches =
+      queryNorm.length > 0 &&
+      (conditionNorm.includes(queryNorm) || hits(conditionNorm));
     for (const statement of entry.statements) {
       const statementNorm = normalize(statement.text);
-      let statementScore = entryScore;
-      for (const token of tokens) {
-        if (statementNorm.includes(token)) statementScore += 2;
-      }
+      const statementMatches = hits(statementNorm);
       const medicineMatch = statement.medicines.some(medicine =>
         tokens.some(token => normalize(medicine).includes(token))
       );
-      if (medicineMatch) statementScore += 6;
-      if (statementScore <= 0) continue;
+      if (!entryMatches && !statementMatches && !medicineMatch) continue;
       for (const medicine of statement.medicines) {
         const key = medicine.toLowerCase();
         const hit = byMedicine.get(key) ?? { name: medicine, statements: [] };

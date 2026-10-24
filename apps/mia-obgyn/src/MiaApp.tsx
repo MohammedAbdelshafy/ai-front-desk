@@ -37,6 +37,8 @@ import {
   UsersRound,
   X,
   type LucideIcon,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import {
   EVIDENCE_SOURCES,
@@ -589,6 +591,16 @@ function MiaApp() {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState('APT-001');
   const [patientSearch, setPatientSearch] = useState('');
   const [locale, setLocale] = useState<'en' | 'ar'>('en');
+  // Theme: stored choice wins, otherwise the OS preference. Applied to
+  // <html data-theme> so the theme CSS layer can override surfaces.
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light';
+    const stored = window.localStorage.getItem('mia-theme');
+    if (stored === 'light' || stored === 'dark') return stored;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
+  });
   const [jurisdiction, setJurisdiction] = useState<Jurisdiction>('EG');
   const [avatarPreset, setAvatarPreset] = useState('ai');
   const [avatarImage, setAvatarImage] = useState<string | null>(MIA_PHOTO_URL);
@@ -723,6 +735,10 @@ function MiaApp() {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
   }, [locale]);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem('mia-theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     if (!toast) return;
@@ -2370,6 +2386,30 @@ function MiaApp() {
                     medResult.medicationHits.map(hit => (
                       <div key={hit.name}>
                         <strong>{hit.name}</strong>
+                        {(() => {
+                          const match = medResult.allergyList.find(
+                            allergy => {
+                              const a = allergy.toLowerCase();
+                              const n = hit.name.toLowerCase();
+                              return (
+                                a.length >= 3 &&
+                                (n.includes(a) || a.includes(n))
+                              );
+                            },
+                          );
+                          return match ? (
+                            <p className="medref-allergy-alert">
+                              {t(
+                                'Allergy flag: matches an entered allergy (' +
+                                  match +
+                                  '). Verify against the label before any use — this flag blocks nothing and chooses nothing; the doctor decides.',
+                                'تنبيه حساسية: يطابق حساسية مدخلة (' +
+                                  match +
+                                  '). تحقق من النشرة قبل أي استعمال — هذا التنبيه لا يمنع شيئًا ولا يختار شيئًا؛ الطبيب يقرر.',
+                              )}
+                            </p>
+                          ) : null;
+                        })()}
                         {hit.statements.map((statement, i) => (
                           <div key={i}>
                             <p className="medref-note">{statement.text}</p>
@@ -3377,6 +3417,9 @@ function MiaApp() {
 
   return (
     <div className={'mia-app ' + (locale === 'ar' ? 'rtl-shell' : '')}>
+      <a className="mia-skip-link" href="#mia-main">
+        {locale === 'ar' ? 'تخطَّ إلى المحتوى' : 'Skip to content'}
+      </a>
       <div className="mia-ambient" aria-hidden="true">
         <span className="mia-ambient-grid" />
         <span className="mia-orb mia-orb-a" />
@@ -3471,7 +3514,7 @@ function MiaApp() {
           aria-label="Close navigation overlay"
         />
       ) : null}
-      <main className="main-shell">
+      <main className="main-shell" id="mia-main">
         <header className="topbar">
           <div className="topbar-leading">
             <button
@@ -3497,6 +3540,21 @@ function MiaApp() {
             >
               <Languages size={15} />
               <span>{locale === 'en' ? 'العربية' : 'English'}</span>
+            </button>
+            <button
+              className="theme-toggle"
+              type="button"
+              onClick={() =>
+                setTheme(value => (value === 'dark' ? 'light' : 'dark'))
+              }
+              aria-label={
+                theme === 'dark'
+                  ? 'Switch to light theme'
+                  : 'Switch to dark theme'
+              }
+            >
+              {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+              <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
             </button>
             <button
               className="notification-btn icon-btn"
