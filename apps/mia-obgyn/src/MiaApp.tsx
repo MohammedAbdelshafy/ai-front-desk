@@ -619,6 +619,15 @@ function MiaApp() {
   // Floating Mia assistant — follows the doctor across every section.
   const [miaFloatOpen, setMiaFloatOpen] = useState(false);
   const [floatQuery, setFloatQuery] = useState('');
+  // Travelling companion: brief glide + section tag on every section change,
+  // and a minimise control so it never blocks content on small screens.
+  const [companionGlide, setCompanionGlide] = useState(false);
+  const [companionHidden, setCompanionHidden] = useState(false);
+  useEffect(() => {
+    setCompanionGlide(true);
+    const timer = window.setTimeout(() => setCompanionGlide(false), 800);
+    return () => window.clearTimeout(timer);
+  }, [section]);
 
   // Medication assist chatbox (Academy page) — same shared conversation.
   const [medQuery, setMedQuery] = useState('');
@@ -2868,17 +2877,52 @@ function MiaApp() {
 
   function renderMiaFloat() {
     const recent = messages.slice(-8);
-    return (
-      <>
+    if (companionHidden) {
+      return (
         <button
           type="button"
-          className={'mia-fab' + (miaFloatOpen ? ' mia-fab-open' : '')}
-          onClick={() => setMiaFloatOpen(open => !open)}
-          aria-label={miaFloatOpen ? 'Close Mia assistant' : 'Open Mia assistant'}
+          className="mia-companion-restore"
+          onClick={() => setCompanionHidden(false)}
+          aria-label="Show Dr Mia assistant"
         >
-          <Avatar image={avatarImage} preset={avatarPreset} size="md" />
-          <span className="mia-fab-ping" />
+          <Avatar image={avatarImage} preset={avatarPreset} />
+          Show Mia
         </button>
+      );
+    }
+    return (
+      <>
+        <div className="mia-companion">
+          <button
+            type="button"
+            className={
+              'mia-fab' +
+              (miaFloatOpen ? ' mia-fab-open' : '') +
+              (companionGlide ? ' mia-companion-glide' : '')
+            }
+            onClick={() => setMiaFloatOpen(open => !open)}
+            aria-label={miaFloatOpen ? 'Close Dr Mia assistant' : 'Open Dr Mia assistant'}
+          >
+            <Avatar image={avatarImage} preset={avatarPreset} size="md" />
+            <span className="mia-fab-ping" />
+          </button>
+          <button
+            type="button"
+            className="mia-companion-minimise"
+            onClick={() => {
+              setMiaFloatOpen(false);
+              setCompanionHidden(true);
+            }}
+            aria-label="Minimise Dr Mia assistant"
+          >
+            <X size={12} />
+          </button>
+          {companionGlide && !miaFloatOpen ? (
+            <span className="mia-companion-tag">
+              Following you · {labels[section]}
+            </span>
+          ) : null}
+        </div>
         {miaFloatOpen ? (
           <div className="mia-float-panel" role="dialog" aria-label="Mia assistant">
             <div className="mia-float-header">
@@ -2992,6 +3036,16 @@ function MiaApp() {
               }}
             >
               Open full Mia chat <ArrowUpRight size={13} />
+            </button>
+            <button
+              type="button"
+              className="mia-float-full"
+              onClick={() => {
+                setMiaFloatOpen(false);
+                setSection('medication');
+              }}
+            >
+              Open medication assist <ArrowUpRight size={13} />
             </button>
           </div>
         ) : null}
@@ -3323,6 +3377,12 @@ function MiaApp() {
 
   return (
     <div className={'mia-app ' + (locale === 'ar' ? 'rtl-shell' : '')}>
+      <div className="mia-ambient" aria-hidden="true">
+        <span className="mia-ambient-grid" />
+        <span className="mia-orb mia-orb-a" />
+        <span className="mia-orb mia-orb-b" />
+        <span className="mia-orb mia-orb-c" />
+      </div>
       <aside className={'sidebar ' + (mobileNav ? 'sidebar-open' : '')}>
         <div className="brand-block">
           <div className="brand-mark">

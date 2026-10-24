@@ -1,0 +1,231 @@
+/* Mia ambient layer: moving background, futuristic polish, travelling companion.
+   Pure CSS, no new dependencies. Panels stay near-opaque so text stays readable.
+   All motion stops under prefers-reduced-motion. */
+
+/* ---- Moving background: slow drifting gradient orbs + soft grid glow ---- */
+.mia-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.mia-ambient-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at 70% 0%, black 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at 70% 0%, black 0%, transparent 75%);
+}
+.mia-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  will-change: transform;
+}
+.mia-orb-a {
+  width: 420px;
+  height: 420px;
+  left: 55%;
+  top: -160px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.16), transparent 65%);
+  animation: mia-orb-drift 46s ease-in-out infinite alternate;
+}
+.mia-orb-b {
+  width: 360px;
+  height: 360px;
+  left: -120px;
+  top: 45%;
+  background: radial-gradient(circle, rgba(13, 148, 136, 0.14), transparent 65%);
+  animation: mia-orb-drift 58s ease-in-out infinite alternate-reverse;
+}
+.mia-orb-c {
+  width: 300px;
+  height: 300px;
+  right: -90px;
+  bottom: -110px;
+  background: radial-gradient(circle, rgba(124, 108, 240, 0.13), transparent 65%);
+  animation: mia-orb-drift 70s ease-in-out infinite alternate;
+}
+@keyframes mia-orb-drift {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(60px, 40px) scale(1.12); }
+}
+
+/* Keep page content above the ambient layer. */
+.mia-app > .main-shell {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- Futuristic polish: glass panels, glowing primary actions ---- */
+.panel {
+  backdrop-filter: blur(8px);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.92),
+    rgba(255, 255, 255, 0.97)
+  );
+  box-shadow:
+    0 1px 2px rgba(16, 31, 56, 0.05),
+    0 12px 32px rgba(16, 31, 56, 0.06);
+}
+.btn-primary {
+  transition:
+    background 150ms ease-out,
+    border-color 150ms ease-out,
+    transform 150ms ease-out,
+    box-shadow 200ms ease-out,
+    filter 150ms ease-out;
+}
+.btn-primary:hover {
+  box-shadow:
+    0 8px 28px rgba(11, 122, 110, 0.38),
+    0 0 0 1px rgba(13, 148, 136, 0.25);
+}
+.nav-item-active {
+  box-shadow:
+    inset 0 0 0 1px rgba(13, 148, 136, 0.12),
+    0 4px 16px rgba(13, 148, 136, 0.1);
+}
+
+/* ---- Travelling companion: FAB wrapper, gentle float, section glide ---- */
+.mia-companion {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 60;
+}
+.mia-companion .mia-fab {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  animation: mia-companion-float 5s ease-in-out infinite;
+}
+.mia-companion .mia-fab:hover {
+  transform: none;
+  box-shadow:
+    0 16px 40px rgba(13, 148, 136, 0.45),
+    0 0 0 3px rgba(13, 148, 136, 0.18);
+}
+@keyframes mia-companion-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+.mia-companion .mia-fab.mia-companion-glide {
+  animation:
+    mia-companion-float 5s ease-in-out infinite,
+    mia-companion-glide 0.8s ease-out;
+}
+@keyframes mia-companion-glide {
+  0% { transform: translateY(0) scale(1); }
+  40% {
+    transform: translateY(-16px) scale(1.08);
+    box-shadow:
+      0 18px 44px rgba(13, 148, 136, 0.5),
+      0 0 0 4px rgba(13, 148, 136, 0.2);
+  }
+  100% { transform: translateY(0) scale(1); }
+}
+.mia-companion-tag {
+  position: absolute;
+  right: 70px;
+  bottom: 18px;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cyan-deep, #0a5f56);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  padding: 6px 10px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(16, 31, 56, 0.14);
+  animation: mia-tag-in 300ms ease-out;
+  pointer-events: none;
+}
+@keyframes mia-tag-in {
+  from { transform: translateX(8px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.mia-companion-minimise {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--line, rgba(23, 43, 77, 0.12));
+  background: #ffffff;
+  color: var(--muted, #5d6f8c);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(16, 31, 56, 0.14);
+  z-index: 1;
+}
+.mia-companion-restore {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(13, 148, 136, 0.3);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 28px rgba(13, 148, 136, 0.28);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text, #101f38);
+}
+
+/* ---- Small screens: companion stays compact, never blocks content ---- */
+@media (max-width: 560px) {
+  .mia-companion {
+    right: 12px;
+    bottom: 12px;
+  }
+  .mia-companion .mia-fab {
+    width: 48px;
+    height: 48px;
+  }
+  .mia-companion .mia-fab .avatar {
+    width: 40px;
+    height: 40px;
+  }
+  .mia-companion-tag {
+    display: none;
+  }
+  .mia-companion-restore {
+    right: 12px;
+    bottom: 12px;
+  }
+  .mia-float-panel {
+    bottom: 72px;
+    right: 12px;
+    width: calc(100vw - 24px);
+  }
+}
+
+/* ---- Reduced motion: static background, no float, glide, or ping ---- */
+@media (prefers-reduced-motion: reduce) {
+  .mia-orb,
+  .mia-companion .mia-fab,
+  .mia-companion .mia-fab.mia-companion-glide,
+  .mia-fab-ping,
+  .mia-float-panel {
+    animation: none;
+  }
+  .mia-fab-ping {
+    opacity: 0;
+  }
+  .mia-ambient-grid {
+    opacity: 0.25;
+  }
+}
