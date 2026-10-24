@@ -1,0 +1,579 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Open-license pharmacology education sources to support foundational learning. This is not an approved clinical prescribing knowledge base.",
+  "ingestion_policy": "Use only entries marked commercial_reuse_permitted for any extracted or adapted content in a commercial product, preserve attribution and license notices, track source versions, and have clinical summaries independently reviewed. Do not use any book as a current drug monograph or patient-specific medication authority.",
+  "sources": [
+    {
+      "id": "openrn-nursing-pharmacology-2e",
+      "title": "Nursing Pharmacology, 2nd edition",
+      "authors": [
+        "Open Resources for Nursing (Open RN)",
+        "Kimberly Ernstmeyer",
+        "Elizabeth Christman"
+      ],
+      "publisher": "Chippewa Valley Technical College",
+      "published_year": 2023,
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK595000/",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "NLM NCBI Bookshelf copyright notice",
+      "source_verification_url": "https://www.ncbi.nlm.nih.gov/books/NBK595000/",
+      "roles": [
+        "foundational_pharmacology",
+        "pharmacokinetics",
+        "pharmacodynamics",
+        "drug_classes",
+        "antimicrobials",
+        "medication_safety_education"
+      ],
+      "limits": [
+        "The authors explicitly state this is not intended to be a drug reference book.",
+        "Designed for prelicensure nursing education, not dental prescribing decisions.",
+        "Any derived clinical card must be reviewed independently by a qualified clinician."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "uic-essentials-of-pharmacology",
+      "title": "Essentials of Pharmacology",
+      "authors": [
+        "Joshua Halpern",
+        "University of Illinois Chicago contributors"
+      ],
+      "publisher": "Medicine LibreTexts / University of Illinois Chicago",
+      "published_year": 2025,
+      "url": "https://med.libretexts.org/Courses/University_of_Illinois_Chicago/Essentials_of_Pharmacology",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "Medicine LibreTexts page license metadata",
+      "source_verification_url": "https://med.libretexts.org/Courses/University_of_Illinois_Chicago/Essentials_of_Pharmacology",
+      "roles": [
+        "foundational_pharmacology",
+        "pharmacokinetics",
+        "pharmacodynamics",
+        "pharmacogenomics",
+        "drug_development",
+        "adverse_effects"
+      ],
+      "limits": [
+        "Educational pharmacology text, not a current product label or patient-specific prescribing reference.",
+        "Check chapter-level license metadata for any third-party content before reuse."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "vt-microbiology-pharmacology-immunology-preclinical",
+      "title": "Microbiology, Pharmacology, and Immunology for Pre-Clinical Students",
+      "authors": [
+        "Jennifer L. Cleveland",
+        "Andrew P. Binks",
+        "Renée J. LeClair"
+      ],
+      "publisher": "Virginia Tech Publishing",
+      "published_year": 2025,
+      "url": "https://open.umn.edu/opentextbooks/textbooks/1778",
+      "license_id": "CC-BY-4.0 reported by Virginia Tech; commercial-use wording unresolved",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "Virginia Tech Publishing announcement; contradictory commercial-use wording requires clarification",
+      "source_verification_url": "https://openvt.lib.vt.edu/2025/04/25/micropharmimmuno/",
+      "roles": [
+        "preclinical_learning",
+        "infectious_disease_foundations",
+        "microbiology",
+        "immunology",
+        "treatment_mechanisms"
+      ],
+      "limits": [
+        "Virginia Tech's official announcement identifies CC BY 4.0 but also describes usage as 'not primarily commercial'; resolve the conflicting commercial-use wording with the publisher before commercial ingestion.",
+        "Verify chapter-level attribution and third-party content before reuse.",
+        "Preclinical medical education reference, not a medication monograph or dental prescribing guideline."
+      ],
+      "ingestion_status": "confirm_commercial_reuse_terms_before_ingestion",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "openstax-pharmacology-for-nurses",
+      "title": "Pharmacology for Nurses",
+      "authors": [
+        "Tina Barbour-Taylor",
+        "Leah Mueller (Sabato)",
+        "Donna Paris",
+        "Dorie Weaver"
+      ],
+      "publisher": "OpenStax / Rice University",
+      "published_year": 2024,
+      "url": "https://openstax.org/books/pharmacology/pages/preface",
+      "license_id": "CC-BY-NC-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "OpenStax official preface and licensing statement",
+      "source_verification_url": "https://openstax.org/books/pharmacology/pages/preface",
+      "roles": [
+        "optional_external_reading_link"
+      ],
+      "limits": [
+        "Noncommercial license; do not ingest, reproduce, adapt, or train a commercial Dr. Mia product on this content without permission from OpenStax.",
+        "Free to read does not grant commercial reuse."
+      ],
+      "ingestion_status": "link_only_no_commercial_ingestion",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "public-health-pharmacy-practice-casebook-2e",
+      "title": "Public Health in Pharmacy Practice: A Casebook, 2nd edition",
+      "authors": [
+        "Jordan R. Covvey",
+        "Vibhuti Arya",
+        "Natalie A. DiPietro Mager",
+        "Neyda V. Gilman",
+        "MaRanda Herring",
+        "Stephanie Lukas",
+        "Leslie Ochs",
+        "Lindsay Waddington"
+      ],
+      "publisher": "Open textbook project",
+      "published_year": 2021,
+      "url": "https://pharmacypracticebook.com/",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "Official open textbook project and license statement",
+      "source_verification_url": "https://pharmacypracticebook.com/",
+      "roles": [
+        "pharmacy_case_based_learning",
+        "medication_safety_education",
+        "infectious_disease_education",
+        "patient_communication",
+        "public_health_pharmacy"
+      ],
+      "limits": [
+        "Educational casebook, not a current drug monograph or dental prescribing guideline.",
+        "Check chapter-level attribution and exclude or separately clear any third-party materials before reuse.",
+        "Do not promote a teaching case into a patient-specific treatment recommendation without independent guideline review and qualified clinician approval."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "essential-clinical-pharmacology-competencies-delphi-2024",
+      "title": "A Modified Delphi Study to Establish Essential Clinical Pharmacology Competencies",
+      "authors": [
+        "Bernadette Johnson-Williams",
+        "Kellie Reynolds",
+        "Joga Gobburu",
+        "Albert Rundio"
+      ],
+      "publisher": "Therapeutic Innovation & Regulatory Science",
+      "published_year": 2024,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11043191/",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "PubMed Central article license statement",
+      "source_verification_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11043191/",
+      "roles": [
+        "clinical_pharmacology_learning_objectives",
+        "competency_based_education",
+        "curriculum_design"
+      ],
+      "limits": [
+        "Research about educational competencies, not a drug guideline or evidence for choosing a medicine.",
+        "Check article-level license text, figure/table notices, and any embedded third-party content before reuse.",
+        "Use to inform teaching objectives and assessment, not patient-specific treatment decisions."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "innovative-pharmacology-curriculum-medical-students-2021",
+      "title": "An innovative pharmacology curriculum for medical students: promoting higher order cognition, learner-centered coaching, and constructive feedback through a social pedagogy framework",
+      "authors": [
+        "Douglas McHugh",
+        "Andrew J. Yanik",
+        "Michael R. Mancini"
+      ],
+      "publisher": "BMC Medical Education",
+      "published_year": 2021,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7863331/",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "PubMed Central article license statement",
+      "source_verification_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7863331/",
+      "roles": [
+        "case_based_pharmacology_teaching",
+        "higher_order_reasoning",
+        "learner_feedback",
+        "clinical_education_design"
+      ],
+      "limits": [
+        "Educational-methods study, not a prescribing guideline or medicine safety database.",
+        "Check article-level license text, figure/table notices, and any embedded third-party content before reuse.",
+        "Use for designing learning workflows and feedback; do not infer patient-specific treatment recommendations."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "generic-versus-brand-names-clinical-pharmacology-education-europe-2026",
+      "title": "The use of generic versus brand names in (clinical) pharmacology education across Europe: a cross-sectional survey",
+      "authors": [
+        "Veronika Slezáková",
+        "Jitka Rychlíčková",
+        "Yoann Cazaubon",
+        "Erik M. Donker",
+        "Ellen van Leeuwen",
+        "Robert Likic",
+        "Dana Mazánková",
+        "Joost D. Piët",
+        "Fabrizio De Ponti",
+        "Walter Raasch",
+        "Floor van Rosse",
+        "Emilio J. Sanz",
+        "Markus Schwaninger",
+        "Michiel A. van Agtmael",
+        "Jelle Tichelaar"
+      ],
+      "publisher": "European Journal of Clinical Pharmacology",
+      "published_year": 2026,
+      "url": "https://link.springer.com/article/10.1007/s00228-026-04005-x",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "Publisher article license statement",
+      "source_verification_url": "https://link.springer.com/article/10.1007/s00228-026-04005-x",
+      "roles": [
+        "generic_and_brand_name_education",
+        "medication_name_normalization",
+        "pharmacology_curriculum_design"
+      ],
+      "limits": [
+        "Research about naming and pharmacology education, not a clinical recommendation or medication equivalence checker.",
+        "Check article-level license text, figure/table notices, and any embedded third-party content before reuse.",
+        "Use to improve generic/brand teaching and retrieval; do not treat name similarity as proof of therapeutic interchangeability."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "pmc-commercial-open-access-collection",
+      "title": "PubMed Central Open Access Subset: Commercial Use Collection",
+      "authors": [
+        "US National Library of Medicine"
+      ],
+      "publisher": "National Center for Biotechnology Information",
+      "published_year": 2026,
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/tools/ftp/",
+      "license_id": "Article-level license required; commercial-use collection index",
+      "license_url": "https://www.ncbi.nlm.nih.gov/pmc/tools/ftp/",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "NCBI official PMC FTP and Open Access Subset documentation",
+      "source_verification_url": "https://www.ncbi.nlm.nih.gov/pmc/tools/ftp/",
+      "roles": [
+        "research_article_discovery",
+        "bulk_open_access_manifest",
+        "biomedical_literature"
+      ],
+      "limits": [
+        "The collection index identifies articles available in a commercial-use collection; each article's license and files still need record-level validation.",
+        "Do not assume every article in PMC is reusable or available for commercial redistribution.",
+        "Use the official NCBI OA service and approved retrieval interfaces; do not scrape site pages."
+      ],
+      "ingestion_status": "catalog_and_validate_article_license_before_ingestion",
+      "clinical_evidence_status": "research_only_not_a_prescribing_authority"
+    },
+    {
+      "id": "who-model-list-essential-medicines-2025",
+      "title": "WHO Model List of Essential Medicines, 24th list (2025)",
+      "authors": [
+        "World Health Organization"
+      ],
+      "publisher": "World Health Organization",
+      "published_year": 2025,
+      "url": "https://www.who.int/publications/i/item/B09474",
+      "license_id": "WHO publication; verify record-specific terms before reuse",
+      "license_url": "https://www.who.int/about/policies/publishing/copyright",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "Official WHO publication page",
+      "source_verification_url": "https://www.who.int/publications/i/item/B09474",
+      "roles": [
+        "essential_medicines_reference",
+        "global_medicine_policy",
+        "formulary_context"
+      ],
+      "limits": [
+        "Global policy/formulary reference, not a dental prescribing guideline or patient-specific recommendation.",
+        "Do not ingest full text into the commercial corpus until WHO's applicable reuse permission is confirmed.",
+        "Use as a linked source and policy context; verify jurisdiction and the local formulary before clinical application."
+      ],
+      "ingestion_status": "link_only_pending_reuse_permission",
+      "clinical_evidence_status": "policy_reference_not_patient_specific_prescribing_authority"
+    },
+    {
+      "id": "egypt-national-essential-medicine-list-2025",
+      "title": "Egypt: National Essential Medicine List 2025 (English)",
+      "authors": [
+        "Ministry of Health and Population, Egypt"
+      ],
+      "publisher": "World Health Organization repository",
+      "published_year": 2025,
+      "url": "https://www.who.int/publications/m/item/egypt--national-essential-medicine-list-2025-%28english%29",
+      "license_id": "National publication hosted by WHO; verify country/publisher reuse terms",
+      "license_url": "https://www.who.int/about/policies/publishing/copyright",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "Official WHO national essential-medicine repository",
+      "source_verification_url": "https://www.who.int/publications/m/item/egypt--national-essential-medicine-list-2025-%28english%29",
+      "roles": [
+        "egypt_local_formulary_context",
+        "national_essential_medicine_list",
+        "jurisdiction_context"
+      ],
+      "limits": [
+        "Use for Egyptian policy/formulary context only, not as a substitute for current local prescribing regulations or clinical guidelines.",
+        "Do not index full text for commercial use until reuse rights from the national publisher are confirmed.",
+        "Record country, publication year, and status; do not apply automatically to a US clinical workflow."
+      ],
+      "ingestion_status": "link_only_pending_reuse_permission",
+      "clinical_evidence_status": "policy_reference_not_patient_specific_prescribing_authority"
+    },
+    {
+      "id": "cdc-dental-pain-swelling-materials-2026",
+      "title": "CDC Dental Pain and Swelling Materials",
+      "authors": [
+        "Centers for Disease Control and Prevention"
+      ],
+      "publisher": "US Centers for Disease Control and Prevention",
+      "published_year": 2026,
+      "url": "https://www.cdc.gov/antibiotic-use/communication-resources/dentists-be-antibiotics-aware-pain-swelling.html",
+      "license_id": "US government work generally public domain; check third-party items",
+      "license_url": "https://www.cdc.gov/other/agencymaterials.html",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "Official CDC page, updated September 17, 2026",
+      "source_verification_url": "https://www.cdc.gov/antibiotic-use/communication-resources/dentists-be-antibiotics-aware-pain-swelling.html",
+      "roles": [
+        "dental_antibiotic_stewardship",
+        "dental_pain_swelling",
+        "current_guidance_discovery"
+      ],
+      "limits": [
+        "Use only within the patient population, scope, and clinical question addressed by the specific CDC guidance.",
+        "Confirm the current underlying fact sheet/guideline version and any third-party elements before reusing text.",
+        "Any derivative product clinical card must be reviewed and approved by a qualified dentist."
+      ],
+      "ingestion_status": "candidate_for_source_version_and_clinician_review",
+      "clinical_evidence_status": "not_a_prescribing_authority_until_card_reviewed"
+    },
+    {
+      "id": "aae-clinical-guidelines-position-statements",
+      "title": "American Association of Endodontists Clinical Guidelines and Position Statements",
+      "authors": [
+        "American Association of Endodontists"
+      ],
+      "publisher": "American Association of Endodontists",
+      "url": "https://www.aae.org/specialty/clinical-resources/guidelines-position-statements/",
+      "license_id": "Copyrighted professional guidance; reuse terms require confirmation",
+      "license_url": "https://www.aae.org/terms-of-use/",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "Official AAE guidelines and position statements index",
+      "source_verification_url": "https://www.aae.org/specialty/clinical-resources/guidelines-position-statements/",
+      "roles": [
+        "endodontic_guidelines",
+        "specialist_scope",
+        "dental_clinical_reference_discovery"
+      ],
+      "limits": [
+        "Guidelines vary by topic, publication date, and status; the page notes that some statements are under review.",
+        "Link-only until the exact document's reuse license or permission is confirmed.",
+        "Do not convert position statements into recommendations outside their clinical scope."
+      ],
+      "ingestion_status": "link_only_pending_permission_and_review",
+      "clinical_evidence_status": "not_a_prescribing_authority_until_card_reviewed"
+    },
+    {
+      "id": "merck-manual-professional",
+      "title": "Merck Manual Professional Edition",
+      "authors": [
+        "Merck & Co., Inc."
+      ],
+      "publisher": "Merck Manual",
+      "url": "https://www.merckmanuals.com/professional",
+      "license_id": "Copyrighted; commercial reuse prohibited without written permission",
+      "license_url": "https://www.merckmanuals.com/professional/resourcespages/termsofuse",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "Merck Manual official permissions/terms page",
+      "source_verification_url": "https://www.merckmanuals.com/professional/resourcespages/faqs",
+      "roles": [
+        "external_reference_link",
+        "clinical_background_reading"
+      ],
+      "limits": [
+        "The official FAQ says users may share links but must not copy or commercially reuse text, images, audio, or video without written permission.",
+        "Never bulk-ingest or index full text into the commercial Dr. Mia corpus without explicit written permission.",
+        "Use source links for users to consult independently."
+      ],
+      "ingestion_status": "link_only_without_written_permission",
+      "clinical_evidence_status": "not_a_prescribing_authority_in_this_product"
+    },
+    {
+      "id": "dental-education-review-open-access-2024",
+      "title": "Application of Emerging Teaching Models in Dental Education: A Systematic Review and Meta-Analysis",
+      "authors": [
+        "Xuefei Liu",
+        "Ling Li and colleagues"
+      ],
+      "publisher": "BMC Medical Education",
+      "published_year": 2024,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11551604/",
+      "license_id": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": true,
+      "source_verified_from": "PMC article copyright/license statement",
+      "source_verification_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11551604/",
+      "roles": [
+        "dental_education",
+        "systematic_review_methods",
+        "case_based_learning",
+        "learning_assessment"
+      ],
+      "limits": [
+        "Educational-methods review, not a dental treatment or drug-prescribing guideline.",
+        "Check article-level license statement and any embedded third-party figure/table notices before reuse.",
+        "Useful for teaching architecture, not patient-specific medication decisions."
+      ],
+      "ingestion_status": "approved_for_educational_content_only",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "dental-education-guide-novice-tutors",
+      "title": "Dental Education: A Guide for Novice Tutors",
+      "authors": [
+        "Authors as listed in source article"
+      ],
+      "publisher": "European Journal of Dental Education / PubMed Central",
+      "published_year": 2023,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10491430/",
+      "license_id": "Article-level license to be verified",
+      "license_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10491430/",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "PMC full-text record; record-level license requires confirmation",
+      "source_verification_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10491430/",
+      "roles": [
+        "dental_education",
+        "case_based_learning",
+        "team_based_learning"
+      ],
+      "limits": [
+        "Educational review, not a clinical treatment guide.",
+        "Do not ingest commercial text until the full article license and third-party content notices are verified.",
+        "Citation and link remain available for independent reading."
+      ],
+      "ingestion_status": "link_only_pending_article_license_review",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "local-anaesthesia-dentistry-review",
+      "title": "Local Anaesthesia in Dentistry: A Review",
+      "authors": [
+        "Aviv Ouanounou and colleagues"
+      ],
+      "publisher": "Journal of the Canadian Dental Association / FDI-related publication",
+      "published_year": 2021,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9275172/",
+      "license_id": "CC-BY-NC-ND-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "PMC article license statement",
+      "source_verification_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9275172/",
+      "roles": [
+        "local_anaesthesia_education",
+        "dental_pharmacology_reference_link",
+        "contraindication_education_topic"
+      ],
+      "limits": [
+        "The article is CC BY-NC-ND: noncommercial and no-derivatives; do not ingest or adapt it into the commercial library without permission.",
+        "Link-only source despite public full-text access.",
+        "Review is foundational and must not replace a current product label or patient-specific clinician assessment."
+      ],
+      "ingestion_status": "link_only_noncommercial_no_derivatives",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    },
+    {
+      "id": "dental-pain-analgesics-guidance-2026-india",
+      "title": "Indian Society of Periodontology Good Clinical Practice Recommendations for Dental Pain Management and Use of Analgesics",
+      "authors": [
+        "Indian Society of Periodontology working group"
+      ],
+      "publisher": "Journal of Indian Society of Periodontology",
+      "published_year": 2026,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13286543/",
+      "license_id": "CC-BY-NC-ND-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+      "commercial_reuse_permitted": false,
+      "attribution_required": true,
+      "source_verified_from": "PMC article license statement",
+      "source_verification_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13286543/",
+      "roles": [
+        "dental_pain_analgesia_guideline_link",
+        "guideline_discovery",
+        "international_guidance_comparison"
+      ],
+      "limits": [
+        "CC BY-NC-ND terms do not permit commercial reuse/adaptation without permission; link only.",
+        "Indian professional guidance must not be automatically applied to US or Egypt practice.",
+        "Exact scope and recommendations require dental clinician review before any comparative teaching summary."
+      ],
+      "ingestion_status": "link_only_noncommercial_no_derivatives",
+      "clinical_evidence_status": "not_a_prescribing_authority_in_this_product"
+    },
+    {
+      "id": "open-textbook-library-catalog",
+      "title": "Open Textbook Library Catalog API and Metadata",
+      "authors": [
+        "Open Education Network contributors"
+      ],
+      "publisher": "Open Textbook Library",
+      "published_year": 2026,
+      "url": "https://open.umn.edu/opentextbooks/discovery",
+      "license_id": "CC0 for the catalog records; each textbook has its own license",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "commercial_reuse_permitted": true,
+      "attribution_required": false,
+      "source_verified_from": "Official Open Textbook Library discovery page",
+      "source_verification_url": "https://open.umn.edu/opentextbooks/discovery",
+      "roles": [
+        "open_textbook_discovery",
+        "license_metadata_discovery",
+        "catalog_refresh"
+      ],
+      "limits": [
+        "CC0 applies to Open Textbook Library catalog records, not automatically to the linked textbook content.",
+        "The library is a referatory, not the content archive; retrieve the book from its publisher and inspect the book/chapter license.",
+        "Metadata discovery is not clinical endorsement or textbook-content ingestion."
+      ],
+      "ingestion_status": "metadata_only_catalog_discovery",
+      "clinical_evidence_status": "not_a_prescribing_authority"
+    }
+  ]
+}

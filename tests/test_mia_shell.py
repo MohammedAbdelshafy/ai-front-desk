@@ -11,12 +11,15 @@ def test_dental_mia_manifest_safety_boundaries():
     assert m.character_id == "dental-mia-v1"
     assert "guide_intake" in m.allowed_actions
     assert "prescribe" not in m.allowed_actions
-    assert any("Never diagnose" in b for b in m.safety_boundaries)
+    assert "retrieve_approved_evidence" in m.allowed_actions
+    assert "clinical quality" in m.role.lower()
+    assert any("approved" in b.lower() and "evidence" in b.lower() for b in m.safety_boundaries)
+    assert any("diagnose" in b.lower() for b in m.safety_boundaries)
 
 
 def test_manifest_serializes():
     d = DENTAL_MIA.to_dict()
-    assert d["name"] == "Dental Mia"
+    assert d["name"] == "Dr. Mia"
     assert isinstance(d["allowed_actions"], list)
 
 

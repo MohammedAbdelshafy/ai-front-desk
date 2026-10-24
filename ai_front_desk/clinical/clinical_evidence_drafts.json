@@ -1,0 +1,232 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Small source-cited review pack for testing the Dr. Mia workbench with synthetic cases. Every card is draft-only and requires review by a qualified dentist before any clinical use.",
+  "status": "draft_for_clinician_review",
+  "jurisdictions": [
+    "US"
+  ],
+  "policy": {
+    "keyword_matching_is_not_diagnosis": true,
+    "not_a_prescription": true,
+    "dose_calculation_enabled": false,
+    "interaction_check_enabled": false,
+    "real_patient_use_enabled": false,
+    "only_named_candidates_from_cited_source": true,
+    "do_not_infer_safety_from_missing_data": true
+  },
+  "cards": [
+    {
+      "id": "draft-us-acute-dental-pain-nonopioid",
+      "title": "Acute dental pain: consider a nonopioid pathway",
+      "clinical_question": "For a clinician-entered adult/adolescent acute dental pain or post-extraction pain scenario, which guideline-backed options should the dentist review first?",
+      "scope": {
+        "jurisdiction": "US",
+        "population": "Adolescents, adults, and older adults within the ADA adult/adolescent guideline scope",
+        "setting": "Temporary management of toothache when definitive care is not immediately available, or acute pain after tooth extraction",
+        "out_of_scope": [
+          "children under 12",
+          "chronic pain",
+          "undifferentiated medical emergencies",
+          "any patient context the source guideline does not cover"
+        ]
+      },
+      "match_terms": [
+        "toothache",
+        "dental pain",
+        "acute dental pain",
+        "tooth extraction",
+        "postoperative dental pain",
+        "pulpitis"
+      ],
+      "evidence_summary": "The ADA's 2024 adult/adolescent acute dental pain guidance identifies nonopioid medicines as first-line for temporary toothache and acute post-extraction pain. ADA's oral-analgesics overview says NSAIDs, alone or with acetaminophen, are generally favored over opioid analgesics for acute dental pain. This is a source summary for clinician review, not a patient-specific selection.",
+      "candidate_options_for_review": [
+        {
+          "name": "NSAID option",
+          "examples_named_in_ADA_overview": [
+            "ibuprofen",
+            "naproxen sodium"
+          ],
+          "use_status": "candidate_class_only",
+          "note": "Dentist must check patient-specific contraindications, product/strength, route, current local label, and complete medication context."
+        },
+        {
+          "name": "Acetaminophen (paracetamol)",
+          "use_status": "candidate_option_or_combination_component",
+          "note": "Dentist must check duplicate products, liver-related cautions, total exposure from all sources, product label, and patient context."
+        }
+      ],
+      "not_approved_or_not_performed": [
+        "No single option is selected by this card.",
+        "No dose or duration is provided or calculated.",
+        "No drug-drug interaction screen has been run.",
+        "This card does not assess all contraindications or determine whether medication is needed instead of definitive dental treatment."
+      ],
+      "required_review_before_clinical_use": [
+        "Verify exact indication, age group, procedure and timing against the current ADA guideline and chairside resource.",
+        "Review allergies and actual reactions, all prescribed/OTC medicines and supplements, relevant history, pregnancy/lactation where applicable, renal/hepatic conditions where relevant, bleeding/GI/cardiovascular risks, duplicate ingredients, and other contraindications.",
+        "Confirm medicine identity, local product label, formulation, route, dose and duration independently; no dose is generated here.",
+        "Use a complete, licensed interaction checker; the current prototype does not have one.",
+        "Record qualified reviewer, review date, source version, approval decision and review due date."
+      ],
+      "sources": [
+        {
+          "source_id": "ada-acute-dental-pain-guideline",
+          "title": "ADA Acute Dental Pain Management Guideline",
+          "url": "https://www.ada.org/resources/research/science/evidence-based-dental-research/pain-management-guideline/",
+          "version": "Adult/adolescent guideline and resources, 2024; confirm current living-guideline version at review"
+        },
+        {
+          "source_id": "ada-oral-analgesics-acute-dental-pain",
+          "title": "ADA Oral Analgesics for Acute Dental Pain",
+          "url": "https://www.ada.org/resources/ada-library/oral-health-topics/oral-analgesics-for-acute-dental-pain",
+          "version": "Official page listed last updated February 2, 2024; recheck before approval"
+        }
+      ],
+      "approval_status": "draft_for_dentist_review",
+      "last_verified": "2026-10-18",
+      "content_rights_status": "pending_rights_and_current_version_review",
+      "commercial_reuse_permitted": false
+    },
+    {
+      "id": "draft-us-pulpal-periapical-antibiotic-stewardship",
+      "title": "Pulpal/periapical pain and swelling: antibiotic stewardship",
+      "clinical_question": "Does the cited dental guidance support an antibiotic pathway for this defined pulpal/periapical scenario, or is definitive dental treatment and follow-up the pathway to consider?",
+      "scope": {
+        "jurisdiction": "US",
+        "population": "CDC/ADA summary describes immunocompetent adults without additional comorbidities; individual guideline scope must be verified",
+        "setting": "Specific pulpal/periapical dental pain and localized swelling scenarios described in the referenced ADA guideline summary",
+        "out_of_scope": [
+          "children",
+          "immunocompromised patients",
+          "prophylaxis",
+          "infections outside the cited pulpal/periapical scope",
+          "unassessed systemic illness",
+          "any scenario not covered by the cited source"
+        ]
+      },
+      "match_terms": [
+        "dental swelling",
+        "tooth swelling",
+        "dental abscess",
+        "apical abscess",
+        "pulpal pain",
+        "periapical pain",
+        "antibiotic for tooth",
+        "dental infection",
+        "facial swelling"
+      ],
+      "evidence_summary": "The CDC's dental pain/swelling materials, which summarize ADA guidance, emphasize definitive conservative dental treatment and state antibiotics are not needed for most urgent pulpal/periapical pain and swelling scenarios in immunocompetent adults without additional comorbidities when definitive dental treatment is available. Antibiotic use depends on the exact condition, systemic involvement, and whether definitive care is available. Verify the current ADA statement/guideline before approving this card.",
+      "candidate_options_for_review": [
+        {
+          "name": "No antibiotic / prioritize definitive dental treatment",
+          "use_status": "guideline_pathway_to_review",
+          "note": "The cited source says antibiotics are not indicated for most covered scenarios when definitive care is available; do not generalize this beyond the exact guideline scope."
+        },
+        {
+          "name": "Amoxicillin",
+          "use_status": "source_named_candidate_only_for_defined_exceptional_scenarios",
+          "note": "Named in the CDC fact sheet summarizing the ADA guideline. Not selected for a case by this card; exact eligibility and current regimen must be checked in the current primary guideline and product reference."
+        },
+        {
+          "name": "Penicillin V potassium",
+          "use_status": "source_named_candidate_only_for_defined_exceptional_scenarios",
+          "note": "Named in the CDC fact sheet summarizing the ADA guideline. Not selected for a case by this card; exact eligibility and current regimen must be checked in the current primary guideline and product reference."
+        }
+      ],
+      "red_flag_escalation": [
+        "Worsening condition",
+        "Possible deep-space infection",
+        "Concern for sepsis or significant systemic involvement"
+      ],
+      "not_approved_or_not_performed": [
+        "No antibiotic indication is inferred from the word 'swelling' or 'abscess' alone.",
+        "No dose, frequency or duration is generated.",
+        "No penicillin-allergy alternative is suggested.",
+        "No drug-drug interaction screen has been run.",
+        "This does not replace diagnosis, source control, referral, examination or local antimicrobial guidance."
+      ],
+      "required_review_before_clinical_use": [
+        "Verify the precise diagnosis and case definition; confirm whether definitive conservative dental treatment is available and the exact source pathway applies.",
+        "Check age, immune status/comorbidities, systemic involvement and urgency/referral needs.",
+        "Record allergy details and reaction phenotype; do not infer allergy alternatives from this card.",
+        "Review current medicines, relevant history, pregnancy/lactation where applicable, renal/hepatic status where relevant, local product registration/label, guideline version and local resistance/stewardship policy.",
+        "Use a complete, licensed interaction checker; the current prototype does not have one.",
+        "Compare with the current 2026 ADA antibiotic-stewardship statement and current ADA guideline before clinical approval."
+      ],
+      "sources": [
+        {
+          "source_id": "cdc-dental-pain-swelling-materials-2026",
+          "title": "CDC Dental Pain and Swelling Materials",
+          "url": "https://www.cdc.gov/antibiotic-use/communication-resources/dentists-be-antibiotics-aware-pain-swelling.html",
+          "version": "Page reviewed and updated September 17, 2026; verify exact fact sheet version"
+        },
+        {
+          "source_id": "cdc-dental-antibiotic-prescribing-summary-pdf",
+          "title": "Dentists: Be Antibiotics Aware — Treating Patients with Dental Pain and Swelling",
+          "url": "https://www.cdc.gov/antibiotic-use/media/pdfs/ADA-treatment-guidelines-508.pdf",
+          "version": "Official CDC PDF summarizing the ADA 2019 guideline; do not treat it as confirmation that the ADA guideline is unsuperseded"
+        },
+        {
+          "source_id": "ada-antibiotic-guideline-2019",
+          "title": "ADA Antibiotics for Dental Pain and Swelling",
+          "url": "https://www.ada.org/resources/research/science/evidence-based-dental-research/antibiotics-for-dental-pain-and-swelling/",
+          "version": "2019 guideline source page; check for current statements and supersession"
+        },
+        {
+          "source_id": "ada-antibiotic-stewardship-statement-2026",
+          "title": "ADA 2026 Antibiotic Stewardship Statement",
+          "url": "https://jada.ada.org/article/S0002-8177(26)00470-8/fulltext",
+          "version": "Online publication listed August 7, 2026; exact current full text and scope require clinician review"
+        }
+      ],
+      "approval_status": "draft_for_dentist_review",
+      "last_verified": "2026-10-18",
+      "content_rights_status": "pending_rights_and_current_version_review",
+      "commercial_reuse_permitted": false
+    },
+    {
+      "id": "draft-us-penicillin-allergy-stop-and-review",
+      "title": "Reported penicillin/amoxicillin allergy: stop and verify",
+      "clinical_question": "What should Mia do when a candidate pathway mentions a beta-lactam but an allergy is reported or allergy history is uncertain?",
+      "scope": {
+        "jurisdiction": "US",
+        "population": "Any patient with a reported or unclear relevant antibiotic allergy",
+        "setting": "Pre-prescription medication review"
+      },
+      "match_terms": [
+        "penicillin allergy",
+        "amoxicillin allergy",
+        "allergic to penicillin",
+        "allergic to amoxicillin",
+        "antibiotic allergy"
+      ],
+      "evidence_summary": "The CDC fact sheet directs clinicians with penicillin allergy to the ADA guideline rather than providing an alternative regimen. Mia should not infer an alternative antibiotic from the allergy label alone. Confirm the actual reaction and obtain current guideline/pharmacist input.",
+      "candidate_options_for_review": [],
+      "required_review_before_clinical_use": [
+        "Record the exact medicine, reaction, timing, severity, treatment required, and whether the allergy has been evaluated.",
+        "Do not suggest a substitute or assume the reported allergy is or is not clinically significant.",
+        "Retrieve the exact current ADA recommendation and relevant product labels for the defined case; escalate uncertainty to a supervising dentist/pharmacist.",
+        "Run interaction and contraindication checks once a clinician-defined candidate medication list is available."
+      ],
+      "sources": [
+        {
+          "source_id": "cdc-dental-antibiotic-prescribing-summary-pdf",
+          "title": "CDC/ADA Dental Antibiotic Stewardship Summary",
+          "url": "https://www.cdc.gov/antibiotic-use/media/pdfs/ADA-treatment-guidelines-508.pdf",
+          "version": "CDC PDF summarizing ADA guideline; confirm current ADA guidance"
+        },
+        {
+          "source_id": "ada-antibiotic-guideline-2019",
+          "title": "ADA Antibiotics for Dental Pain and Swelling",
+          "url": "https://www.ada.org/resources/research/science/evidence-based-dental-research/antibiotics-for-dental-pain-and-swelling/",
+          "version": "Check current scope, allergy pathway and any superseding statement"
+        }
+      ],
+      "approval_status": "draft_for_dentist_review",
+      "last_verified": "2026-10-18",
+      "content_rights_status": "pending_rights_and_current_version_review",
+      "commercial_reuse_permitted": false
+    }
+  ],
+  "content_rights_status": "pending_review_per_source_not_approved_for_commercial_ingestion"
+}

@@ -31,6 +31,7 @@ from .dashboard import generate_brief
 from .mia_shell import DENTAL_MIA, TaskStage
 from .question_bank import load_bank, bank_snapshot
 from .store import ClinicalStore, TenantMismatchError
+from .avatar_customizer import AVATAR_ASSETS, render_avatar_customizer
 
 BASE = Path(__file__).resolve().parent
 BANK = load_bank(BASE / "dental_intake_v1.json")
@@ -58,7 +59,7 @@ STYLE = """
 body{font:16px/1.5 system-ui,-apple-system,sans-serif;margin:0;color:#1a1a1a}
 .wrap{max-width:720px;margin:0 auto;padding:16px}
 .mia-stage{display:flex;align-items:flex-start;gap:14px;margin:14px 0 20px;padding:14px;background:linear-gradient(135deg,#eef2ff,#f8f9ff);border:1px solid #dce4ff;border-radius:16px;box-shadow:0 4px 18px rgba(49,76,160,.07)}
-.mia-avatar{width:64px;height:64px;flex:0 0 64px;object-fit:cover;object-position:top center;border-radius:15px;background:#e3eaff;border:1px solid #d4defd}
+.mia-avatar{width:64px;height:64px;flex:0 0 64px;object-fit:cover;object-position:top center;border-radius:15px;background:#e3eaff;border:1px solid #d4defd}.mia-platform-avatar{width:64px;height:64px;flex:0 0 64px}.mia-platform-avatar [data-mia-avatar-image]{width:100%;height:100%;object-fit:cover;object-position:top center;border-radius:15px}
 .mia-stage-content{min-width:0;flex:1}.mia-stage-head{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}
 .mia-stage-head strong{font-size:15px;letter-spacing:-.2px;color:#26365a}.mia-stage>div p{font-size:13px;color:#586784;line-height:1.55;margin:7px 0 0}
 .mia-stage .stage{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;padding:4px 8px;color:#3554bf;background:#e1e9ff;border:1px solid #cedaff;border-radius:20px}
@@ -96,16 +97,19 @@ def esc(s):
     return html.escape(str(s), quote=True)
 
 
-def mia_stage_html(manifest_name="Dental Mia", stage="listening", reason=""):
+def mia_stage_html(manifest_name="Dr. Mia", stage="listening", reason=""):
     default_message = (
         "I'm your intake guide. I can explain this workflow, but I don't diagnose "
         "conditions or recommend medicines."
     )
     message = reason or default_message
     return (
-        "<section class='mia-stage' aria-label='Dental Mia assistant'>"
+        "<section class='mia-stage' aria-label='Dr. Mia assistant'>"
+        "<div class='mia-avatar-shell mia-platform-avatar' data-mia-avatar-shell>"
         "<img class='mia-avatar' src='/assets/mia-stand-hi.webp' "
-        "alt='Mia, your AI intake guide' width='64' height='64'>"
+        "alt='Dr. Mia, your AI dental assistant' width='64' height='64' "
+        "data-mia-avatar-image data-default-src='/assets/mia-stand-hi.webp'>"
+        "<span data-mia-avatar-emoji aria-hidden='true' hidden>🤖</span></div>"
         "<div class='mia-stage-content'>"
         "<div class='mia-stage-head'>"
         f"<strong>{esc(manifest_name)}</strong>"
@@ -125,6 +129,7 @@ def mia_stage_html(manifest_name="Dental Mia", stage="listening", reason=""):
         "<button type='submit'>Ask Mia</button></div>"
         "</form>"
         "</details></div></section>"
+        + render_avatar_customizer("Personalize your Mia")
         + MIA_CHAT_SCRIPT
     )
 
@@ -452,6 +457,15 @@ class Handler(BaseHTTPRequestHandler):
                     self._json(403, {"ok": False, "error": "Cross-clinic access denied."})
                 except KeyError:
                     self._json(404, {"ok": False, "error": "Submission not found."})
+        elif u.path.startswith("/assets/") and u.path.rsplit("/", 1)[-1] in AVATAR_ASSETS:
+            asset_name = u.path.rsplit("/", 1)[-1]
+            content_type, filename = AVATAR_ASSETS[asset_name]
+            try:
+                asset_data = (BASE / "static" / filename).read_bytes()
+            except OSError:
+                self._send(404, "Avatar customization asset not found.")
+                return
+            self._send(200, asset_data, content_type)
         elif u.path == "/assets/mia-stand-hi.webp":
             asset = BASE / "static" / "mia-stand-hi.webp"
             try:
