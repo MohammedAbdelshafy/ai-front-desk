@@ -52,6 +52,10 @@ import {
   CANDIDATE_PATHWAY_EVIDENCE,
   CANDIDATE_CASE_URLS,
 } from './candidate-pathway-evidence';
+import {
+  searchDiagnosisMedications,
+  type DiagnosisMedicationHit,
+} from './diagnosis-medication-search';
 import { ACADEMY_CASES } from './academy-cases';
 import TrialsInformationPage from './TrialsInformationPage';
 import MedicationPathwaysPage from './MedicationPathwaysPage';
@@ -642,6 +646,7 @@ function MiaApp() {
   });
   const [medResult, setMedResult] = useState<null | {
     sources: EvidenceSource[];
+    medicationHits: DiagnosisMedicationHit[];
     allergyList: string[];
     medicine: string;
     urgent: boolean;
@@ -1976,6 +1981,12 @@ function MiaApp() {
       .filter(part => part.trim())
       .join(' ');
     const sources = searchObgynSources(query || 'obstetrics', jurisdiction, 6);
+    const diagnosisQuery = [medDiagnosis, medSymptoms]
+      .filter(part => part.trim())
+      .join(' ');
+    const medicationHits = diagnosisQuery
+      ? searchDiagnosisMedications(diagnosisQuery, jurisdiction).medicines
+      : [];
     const allergyList = medAllergies
       .split(/[,\n;]+/)
       .map(part => part.trim())
@@ -1983,6 +1994,7 @@ function MiaApp() {
     const urgent = EMERGENCY_RE.test(medSymptoms + ' ' + medDiagnosis);
     setMedResult({
       sources,
+      medicationHits,
       allergyList,
       medicine: medMedicine.trim(),
       urgent,
@@ -2327,6 +2339,60 @@ function MiaApp() {
                       {t(
                         'No strong match in the directory. Broaden the terms or try the Evidence library.',
                         'لا توجد مطابقة قوية في الدليل. وسّع المصطلحات أو جرّب مكتبة المراجع.'
+                      )}
+                    </p>
+                  )}
+                </div>
+                <div className="medref-block">
+                  <strong className="medref-block-title">
+                    {t(
+                      'Medicines named in our evidence for this diagnosis',
+                      'الأدوية المذكورة في أدلتنا لهذا التشخيص'
+                    )}{' '}
+                    ({medResult.medicationHits.length})
+                  </strong>
+                  <p className="medref-note">
+                    {t(
+                      'Searched across the full library — every book and information centre — not just trials. These medicines are NAMED in candidate guideline evidence; that is discovery, not a recommendation. No approved pathway exists until a named clinician and pharmacist sign one off. The doctor decides.',
+                      'تم البحث عبر المكتبة كاملة — كل الكتب ومراكز المعلومات — وليس التجارب فقط. هذه الأدوية مذكورة في أدلة إرشادية مرشحة؛ هذا اكتشاف وليس توصية. لا يوجد مسار معتمد حتى يوقّع عليه طبيب وصيدلي بالاسم. الطبيب يقرر.'
+                    )}
+                  </p>
+                  {medResult.medicationHits.length ? (
+                    medResult.medicationHits.map(hit => (
+                      <div key={hit.name}>
+                        <strong>{hit.name}</strong>
+                        {hit.statements.map((statement, i) => (
+                          <div key={i}>
+                            <p className="medref-note">{statement.text}</p>
+                            <small>
+                              {statement.condition} · {statement.aspect} ·{' '}
+                              <a
+                                href={statement.citation.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {statement.citation.title} (
+                                {statement.citation.publisher})
+                              </a>
+                            </small>
+                            {statement.flags.length ? (
+                              <p className="medref-note">
+                                {t(
+                                  'Disagreement / flag: ',
+                                  'اختلاف / ملاحظة: '
+                                )}
+                                {statement.flags.join(' ')}
+                              </p>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="medref-empty">
+                      {t(
+                        'No medicine named in our candidate evidence for this diagnosis. The books and centres above are where to look — this list stays empty rather than guessed.',
+                        'لا يوجد دواء مذكور في أدلتنا المرشحة لهذا التشخيص. الكتب والمراكز أعلاه هي مصدر البحث — هذه القائمة تبقى فارغة بدلًا من التخمين.'
                       )}
                     </p>
                   )}
