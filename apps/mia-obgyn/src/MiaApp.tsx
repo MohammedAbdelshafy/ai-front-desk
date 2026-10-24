@@ -625,7 +625,7 @@ function MiaApp() {
   const [companionHidden, setCompanionHidden] = useState(false);
   useEffect(() => {
     setCompanionGlide(true);
-    const timer = window.setTimeout(() => setCompanionGlide(false), 800);
+    const timer = window.setTimeout(() => setCompanionGlide(false), 3000);
     return () => window.clearTimeout(timer);
   }, [section]);
 
