@@ -6,7 +6,7 @@ import {
   MEDICATION_PATHWAYS,
   type PathwayMedicine,
 } from './clinical-medication-pathways';
-import './medication-pathways.css';
+import './clinical-medication-pathways.css';
 
 export default function MedicationPathwaysPage() {
   const [diagnosisCode, setDiagnosisCode] = useState('');
