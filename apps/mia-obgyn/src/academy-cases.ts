@@ -11,6 +11,13 @@
 // Content compiled from candidate-pathway-evidence.ts (public guidelines
 // read live 2026-10-19). ACOG PB 183 statements rest on two independent
 // secondary summaries (full text paywalled) — medium confidence, labelled.
+// Cases 4–5 (history taking, diagnosis reasoning) are compiled from public
+// guideline summaries — NICE NG88, NICE NG126, ACOG PB 128, ACOG PB 200,
+// FIGO PALM-COEIN, RCOG GTG 21 — paraphrased for teaching; the learner
+// should read the guideline itself before applying anything. Nothing here
+// diagnoses or triages a real patient: cases teach reasoning frameworks
+// (which questions to ask, how a differential is built), and the doctor
+// always decides.
 
 export interface AcademyCase {
   id: string;
@@ -171,6 +178,102 @@ export const ACADEMY_CASES: AcademyCase[] = [
     citation: {
       label: 'WHO 2011 · ACOG PB 222 · NICE NG133',
       url: 'https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia',
+    },
+  },
+  {
+    id: 'case-history-taking-aub',
+    title: 'Case 4 — Take the history before you touch the probe',
+    titleAr: 'الحالة ٤ — التاريخ المرضي أولًا',
+    topic: 'History taking — abnormal uterine bleeding',
+    patient:
+      'Synthetic patient: a 32-year-old with periods every 21 days, lasting 9 days, flooding through pads with clots, and tired all the time. Twice she has spotted between periods. No bleeding after intercourse. No hormonal contraception. One pregnancy three years ago. Her mother, she says, “had heavy periods too.”',
+    patientAr:
+      'مريضة افتراضية: عمرها ٣٢ عامًا، دورتها كل ٢١ يومًا وتستمر ٩ أيام، مع نزيف غزير يخترق الفوط وتجلطات، وإرهاق دائم. لاحظت نزيفًا بين الدورات مرتين. لا نزيف بعد الجماع. لا وسائل هرمونية. حمل واحد قبل ثلاث سنوات. وتقول إن والدتها «كانت تعاني غزارة الطمث أيضًا».',
+    decisionPoint:
+      'Which history domains must be covered before examination or tests — and which single answers change the pathway entirely?',
+    decisionPointAr:
+      'ما مجالات التاريخ المرضي التي يجب تغطيتها قبل الفحص أو التحاليل — وأي إجابة واحدة تغيّر المسار كاملًا؟',
+    thinking: [
+      'Describe the bleeding in FIGO terms before naming a cause: frequency (under 24 days is frequent), duration (over 8 days is prolonged), regularity, and volume (flooding and clots, in her own words). The description is the classification input — not decoration.',
+      'Separate pattern from red flags, and ask for the red flags by name: bleeding between periods, bleeding after intercourse, and any bleeding after the menopause are different pathways from heavy regular bleeding. Never wait for them to be volunteered.',
+      'Screen for a bleeding disorder in every heavy-bleeding history: heavy bleeding since her first period, bruising, nosebleeds, gum bleeding, postpartum haemorrhage, family history. A positive screen changes the workup before any scan.',
+      'Ask the drug and systemic list against the COEIN categories: anticoagulants, hormonal medicines, thyroid symptoms, weight change, milky discharge, excess hair or acne — each answer maps to a cause before a probe is picked up.',
+      'Ask impact, not just millilitres: heavy menstrual bleeding is defined by its effect on her quality of life. Her own account of that impact is part of the diagnosis.',
+    ],
+    positions: [
+      {
+        authority: 'NICE NG88 (heavy menstrual bleeding)',
+        text: 'Assessment starts with history and examination. Take a full blood count; arrange a pregnancy test where relevant; consider pelvic examination and ultrasound when the history points that way. Heavy menstrual bleeding itself is defined by its impact on the woman’s quality of life, not by a measured volume.',
+      },
+      {
+        authority: 'ACOG PB 128 (abnormal uterine bleeding)',
+        text: 'Classify the bleeding with the PALM-COEIN system, then evaluate: history, pregnancy test, blood count, and — where indicated — thyroid and coagulation testing and endometrial sampling in selected patients (notably age over 45, or younger patients with risk factors).',
+      },
+      {
+        authority: 'FIGO PALM-COEIN (Munro 2011, revised 2018)',
+        text: 'Structural causes — Polyp, Adenomyosis, Leiomyoma, Malignancy and hyperplasia — sit opposite non-structural causes — Coagulopathy, Ovulatory dysfunction, Endometrial, Iatrogenic, Not yet classified. Normal cycle parameters: frequency 24–38 days, duration 8 days or fewer, regular variation. The history you take is what places her in the system.',
+      },
+    ],
+    disagreement:
+      'What “heavy” means. NICE NG88 defines heavy menstrual bleeding by its impact on the woman’s quality of life — a subjective, patient-reported measure. FIGO’s system classifies by objective cycle parameters: frequency, duration, regularity. Same complaint, two definitions: one asks how it affects her life, the other measures the cycle. A good history captures both — and never substitutes a pad count for her own account.',
+    safetyChecklist: [
+      'Pregnancy test in every reproductive-age bleeding history before anything else is assumed.',
+      'Bleeding after the menopause, persistent bleeding between periods, or bleeding after intercourse goes down the urgent suspected-cancer pathway per local protocol — never filed under “heavy periods.”',
+      'Severe anaemia symptoms (fainting, breathlessness, chest pain) mean same-day assessment, not a routine booking.',
+      'A positive bleeding-disorder screen needs haematology input before invasive procedures.',
+      'Record the FIGO parameters (frequency, regularity, duration, volume) in the notes — the next clinician inherits your classification.',
+    ],
+    citation: {
+      label: 'NICE NG88 · ACOG PB 128 · FIGO PALM-COEIN (Munro 2011, revised 2018)',
+      url: 'https://www.nice.org.uk/guidance/ng88',
+    },
+  },
+  {
+    id: 'case-diagnosis-early-pregnancy-bleeding',
+    title: 'Case 5 — Bleeding at 7 weeks: one complaint, five diagnoses',
+    titleAr: 'الحالة ٥ — نزيف في الأسبوع ٧: شكوى واحدة وخمسة تشخيصات',
+    topic: 'Diagnosis reasoning — bleeding in early pregnancy',
+    patient:
+      'Synthetic patient: a 28-year-old, 7 weeks by her last period, with light vaginal bleeding since yesterday and mild crampy lower abdominal pain. No shoulder-tip pain, no fainting, no fever, no tissue passed. One previous early miscarriage at 8 weeks. No contraception.',
+    patientAr:
+      'مريضة افتراضية: عمرها ٢٨ عامًا، في الأسبوع ٧ من آخر دورة، مع نزيف مهبلي خفيف منذ أمس وألم أسفل البطن يشبه التقلصات. لا ألم في طرف الكتف، لا إغماء، لا حمى، لم يخرج أي نسيج. إجهاض مبكر سابق في الأسبوع ٨. لا وسائل منع حمل.',
+    decisionPoint:
+      'Build the differential before ordering anything: which diagnoses must be on the list, and which history, examination, and test findings separate them?',
+    decisionPointAr:
+      'ابنِ التشخيص التفريقي قبل طلب أي فحص: ما التشخيصات التي يجب أن تكون في القائمة، وما الذي يفرّق بينها من التاريخ والفحص والتحاليل؟',
+    thinking: [
+      'List the differential first, before any test: threatened miscarriage, ectopic pregnancy, molar pregnancy, subchorionic haematoma, cervical cause — plus mimics such as cervical ectropion and infection. A test ordered without a list cannot discriminate.',
+      'Pain pattern is discriminating history: one-sided pelvic pain, shoulder-tip pain, fainting, and abdominal tenderness point toward ectopic rupture. Ask for each by name.',
+      'A single hormone value is not a verdict: in a viable intrauterine pregnancy the level typically rises substantially over 48 hours, but a slow rise does not by itself confirm location, and one value diagnoses nothing.',
+      'Ultrasound is the discriminator, but only with the right question: where is the sac, is there a yolk sac and a fetal pole with a heartbeat, is there an adnexal mass or free fluid? “Pregnancy of unknown location” is itself a legitimate interim diagnosis — with a follow-up plan.',
+      'Never close the case on reassurance alone: every early-pregnancy bleeding presentation leaves with a documented plan — repeat scan, repeat hormone level, or a written safety-net with return triggers.',
+    ],
+    positions: [
+      {
+        authority: 'NICE NG126 (ectopic pregnancy and miscarriage)',
+        text: 'Transvaginal ultrasound is first-line for diagnosis. A pregnancy of unknown location is managed with serial hormone levels and ultrasound. Methotrexate only when strict published criteria are met: no significant pain, unruptured mass under 35 mm, no visible heartbeat, hormone level below the set threshold, and able to attend follow-up. For miscarriage, expectant, medical, and surgical options are all offered with discussion.',
+      },
+      {
+        authority: 'ACOG PB 200 (early pregnancy loss)',
+        text: 'Diagnosis rests on ultrasound criteria (for example, a mean sac diameter of 25 mm or more without an embryo, or no embryo with a heartbeat two weeks after a sac was seen). Management is expectant, medical (misoprostol, with mifepristone pretreatment improving efficacy), or surgical by vacuum aspiration — chosen with the patient, not for her.',
+      },
+      {
+        authority: 'RCOG Green-top Guideline 21 (ectopic pregnancy)',
+        text: 'Surgical management is the standard when rupture or instability is present. Methotrexate is reserved for stable, selected cases meeting strict criteria, with follow-up until hormone levels resolve. Diagnosis and treatment decisions are never made on a single hormone value.',
+      },
+    ],
+    disagreement:
+      'Expectant versus active management — and where the methotrexate line sits. NICE NG126 keeps strict published thresholds for methotrexate and keeps expectant management on the table for selected stable cases; ACOG’s early-pregnancy-loss framework leans on patient preference across expectant, medical, and surgical options, with different emphasis on medical regimens. Same patient, different default postures. The lesson: “watch and wait” and “treat now” are both active decisions with criteria — not a decision versus a non-decision.',
+    safetyChecklist: [
+      'Rupture red flags (shoulder-tip pain, fainting, collapse, abdominal tenderness, heavy bleeding) mean emergency resuscitation and urgent surgical review — never routine follow-up.',
+      'A pregnancy of unknown location always leaves with a timed plan (repeat hormone level and scan) and written return triggers.',
+      'Molar pregnancy: histology after any evacuation, plus hormone surveillance — never closed as “miscarriage” without it.',
+      'Check Rh(D) status and give anti-D per local protocol where indicated.',
+      'Document the differential and what would change it — the next clinician should see your reasoning, not just your conclusion.',
+    ],
+    citation: {
+      label: 'NICE NG126 · ACOG PB 200 · RCOG GTG 21',
+      url: 'https://www.nice.org.uk/guidance/ng126',
     },
   },
 ];
