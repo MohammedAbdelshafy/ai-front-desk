@@ -1,0 +1,1109 @@
+/* Mia enhancements: floating assistant + medication reference workspace.
+   Light premium styling; uses the app theme tokens with light fallbacks. */
+
+.mia-fab {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 60;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--cyan, #0d9488);
+  background: var(--panel, #ffffff);
+  box-shadow:
+    0 10px 28px rgba(13, 148, 136, 0.28),
+    0 2px 6px rgba(16, 31, 56, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.mia-fab:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow:
+    0 14px 34px rgba(13, 148, 136, 0.34),
+    0 2px 6px rgba(16, 31, 56, 0.12);
+}
+.mia-fab .avatar {
+  width: 52px;
+  height: 52px;
+}
+.mia-fab-ping {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--cyan, #0d9488);
+  opacity: 0.55;
+  animation: mia-fab-ping 2.4s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes mia-fab-ping {
+  0% { transform: scale(0.92); opacity: 0.55; }
+  70% { transform: scale(1.12); opacity: 0; }
+  100% { transform: scale(1.12); opacity: 0; }
+}
+
+.mia-float-panel {
+  position: fixed;
+  right: 22px;
+  bottom: 94px;
+  z-index: 60;
+  width: min(380px, calc(100vw - 44px));
+  max-height: min(600px, calc(100vh - 140px));
+  display: flex;
+  flex-direction: column;
+  background: var(--panel, #ffffff);
+  border: 1px solid var(--line, rgba(23, 43, 77, 0.12));
+  border-radius: 18px;
+  box-shadow:
+    0 24px 60px rgba(16, 31, 56, 0.18),
+    0 2px 8px rgba(16, 31, 56, 0.08);
+  overflow: hidden;
+  animation: mia-float-in 200ms ease-out;
+}
+@keyframes mia-float-in {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.mia-float-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line, rgba(23, 43, 77, 0.12));
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.1), rgba(124, 108, 240, 0.08));
+}
+.mia-float-header > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.mia-float-header strong {
+  font-size: 14px;
+  color: var(--text, #101f38);
+}
+.mia-float-header small {
+  font-size: 11px;
+  color: var(--muted, #5d6f8c);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.mia-float-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 120px;
+}
+.mia-float-messages .message-bubble {
+  font-size: 13px;
+}
+.mia-float-messages .message-bubble p {
+  margin: 0 0 6px;
+}
+.mia-float-sources {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+.mia-float-sources a {
+  font-size: 12px;
+  color: var(--cyan-deep, #0f766e);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.mia-float-sources span {
+  font-size: 11px;
+  color: var(--muted, #5d6f8c);
+}
+.mia-float-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 14px;
+  border-top: 1px solid var(--line, rgba(23, 43, 77, 0.12));
+}
+.mia-float-chips button {
+  font-size: 11.5px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line, rgba(23, 43, 77, 0.14));
+  background: var(--panel-2, #f8fbff);
+  color: var(--text, #101f38);
+}
+.mia-float-chips button:hover {
+  border-color: var(--cyan, #0d9488);
+  color: var(--cyan-deep, #0f766e);
+}
+.mia-float-form {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px 6px;
+}
+.mia-float-form input {
+  flex: 1;
+  border: 1px solid var(--line, rgba(23, 43, 77, 0.14));
+  border-radius: 12px;
+  padding: 9px 12px;
+  font-size: 13px;
+  background: var(--panel-2, #f8fbff);
+  color: var(--text, #101f38);
+}
+.mia-float-form input:focus {
+  border-color: var(--cyan, #0d9488);
+  outline: none;
+}
+.mia-float-form .send-button {
+  flex: none;
+}
+.mia-float-full {
+  margin: 4px 14px 12px;
+  font-size: 12px;
+  color: var(--cyan-deep, #0f766e);
+  background: none;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  padding: 4px 0;
+}
+.mia-float-full:hover {
+  text-decoration: underline;
+}
+
+/* ---- Medication reference workspace ---- */
+.medref-boundary {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(180, 83, 9, 0.28);
+  background: rgba(180, 83, 9, 0.07);
+  color: var(--text, #101f38);
+  font-size: 13px;
+}
+.medref-boundary svg {
+  flex: none;
+  color: #b45309;
+  margin-top: 1px;
+}
+.medref-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 5fr) minmax(340px, 7fr);
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 1080px) {
+  .medref-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.medref-form-panel h3,
+.medref-results-panel h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 15px;
+  color: var(--text, #101f38);
+}
+.medref-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.medref-field > span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted, #5d6f8c);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.medref-field input,
+.medref-field textarea,
+.medref-field select {
+  border: 1px solid var(--line, rgba(23, 43, 77, 0.14));
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  background: var(--panel-2, #f8fbff);
+  color: var(--text, #101f38);
+  width: 100%;
+}
+.medref-field textarea {
+  resize: vertical;
+}
+.medref-field input:focus,
+.medref-field textarea:focus,
+.medref-field select:focus {
+  border-color: var(--cyan, #0d9488);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.14);
+}
+.medref-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 560px) {
+  .medref-row {
+    grid-template-columns: 1fr;
+  }
+}
+.medref-submit {
+  width: 100%;
+  justify-content: center;
+  margin-top: 4px;
+}
+.medref-hint {
+  display: block;
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: var(--muted, #5d6f8c);
+  text-align: center;
+}
+.medref-empty {
+  font-size: 13.5px;
+  color: var(--muted, #5d6f8c);
+  line-height: 1.6;
+}
+.medref-urgent {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(225, 29, 72, 0.08);
+  border: 1px solid rgba(225, 29, 72, 0.32);
+  color: var(--text, #101f38);
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.medref-urgent svg {
+  flex: none;
+  color: #e11d48;
+  margin-top: 1px;
+}
+.medref-block {
+  margin-bottom: 18px;
+}
+.medref-block-title {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: var(--text, #101f38);
+}
+.medref-note {
+  font-size: 12.5px;
+  color: var(--muted, #5d6f8c);
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+.medref-source {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line, rgba(23, 43, 77, 0.12));
+  border-radius: 12px;
+  margin-bottom: 8px;
+  background: var(--panel-2, #f8fbff);
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+.medref-source:hover {
+  border-color: var(--cyan, #0d9488);
+  transform: translateY(-1px);
+}
+.medref-source > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.medref-source strong {
+  font-size: 13px;
+  color: var(--text, #101f38);
+}
+.medref-source small {
+  font-size: 11.5px;
+  color: var(--muted, #5d6f8c);
+}
+.medref-source svg {
+  flex: none;
+  color: var(--cyan-deep, #0f766e);
+}
+.medref-allergies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.medref-allergy-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(225, 29, 72, 0.09);
+  border: 1px solid rgba(225, 29, 72, 0.3);
+  color: #be123c;
+}
+.medref-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--text, #101f38);
+  cursor: pointer;
+}
+.medref-check:hover {
+  background: var(--panel-2, #f8fbff);
+}
+.medref-check input {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--cyan-deep, #0f766e);
+  flex: none;
+}
+
+/* ---- Approved medication pathways ---- */
+.medref-pathways-panel {
+  margin-top: 16px;
+}
+.medref-pathways-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.medref-pathways-head h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 15px;
+  color: var(--text, #101f38);
+}
+.medref-pathway-count {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--panel-2, #f8fbff);
+  border: 1px solid var(--line, rgba(23, 43, 77, 0.14));
+  color: var(--muted, #5d6f8c);
+}
+.medref-approval-list {
+  margin: 8px 0 8px 20px;
+  padding: 0;
+  font-size: 13px;
+  color: var(--text, #101f38);
+  line-height: 1.7;
+}
+.medref-pathway {
+  border: 1px solid var(--line, rgba(23, 43, 77, 0.12));
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-top: 10px;
+  background: var(--panel-2, #f8fbff);
+}
+.medref-pathway header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.medref-pathway header strong {
+  font-size: 14.5px;
+  color: var(--text, #101f38);
+}
+.medref-pathway-jurisdiction {
+  font-size: 11.5px;
+  color: var(--muted, #5d6f8c);
+}
+.medref-pathway ul {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.medref-pathway li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text, #101f38);
+  flex-wrap: wrap;
+}
+.medref-role {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  flex: none;
+}
+.medref-role-first-line {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+  border: 1px solid rgba(22, 163, 74, 0.3);
+}
+.medref-role-alternative {
+  background: rgba(13, 148, 136, 0.1);
+  color: #0f766e;
+  border: 1px solid rgba(13, 148, 136, 0.3);
+}
+.medref-role-not-recommended-here {
+  background: rgba(225, 29, 72, 0.09);
+  color: #be123c;
+  border: 1px solid rgba(225, 29, 72, 0.3);
+}
+.medref-pathway footer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted, #5d6f8c);
+  border-top: 1px solid var(--line, rgba(23, 43, 77, 0.1));
+  padding-top: 10px;
+}
+.medref-pathway footer a {
+  color: var(--cyan-deep, #0f766e);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+/* ---- Candidate evidence panel ---- */
+.medref-flags {
+  margin: 8px 0;
+}
+.medref-flag {
+  font-size: 12.5px;
+  color: #b45309;
+  background: rgba(180, 83, 9, 0.08);
+  border: 1px solid rgba(180, 83, 9, 0.25);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin: 6px 0;
+  line-height: 1.5;
+}
+.medref-case-links {
+  margin-top: 14px;
+  border-top: 1px solid var(--line, rgba(23, 43, 77, 0.1));
+  padding-top: 12px;
+}
+.medref-case-links h4 {
+  margin: 0 0 8px;
+  font-size: 13.5px;
+  color: var(--text, #101f38);
+}
+.medref-case-links ul {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.medref-case-links a {
+  font-size: 13px;
+  color: var(--cyan-deep, #0f766e);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+/* ============================================================
+   PREMIUM POLISH — refined clinical luxury layer
+   Restraint, precision, quiet depth. No gimmicks.
+   ============================================================ */
+
+/* ---- Typography refinement ---- */
+h1, h2, h3 {
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.panel h3 {
+  font-weight: 700;
+}
+
+/* ---- Premium buttons ---- */
+button, .btn, [class*="button"] {
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+button:not(:disabled):hover, .btn:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+button:not(:disabled):active, .btn:not(:disabled):active {
+  transform: translateY(0);
+}
+button:focus-visible, a:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--cyan, #0c7c70);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---- Card refinement: quiet depth ---- */
+.panel {
+  box-shadow:
+    0 1px 2px rgba(16, 31, 56, 0.04),
+    0 12px 32px -12px rgba(16, 31, 56, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.7);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+/* ---- Interactive chips & nav: tactile ---- */
+.nav-item, [class*="chip"], [class*="quick"] {
+  transition: background 0.18s ease, color 0.18s ease,
+    border-color 0.18s ease, transform 0.15s ease;
+}
+.nav-item:hover, [class*="chip"]:hover {
+  transform: translateY(-1px);
+}
+
+/* ---- Inputs: premium focus ---- */
+input, select, textarea {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--cyan, #0c7c70);
+  box-shadow: 0 0 0 3px rgba(12, 124, 112, 0.12);
+  outline: none;
+}
+
+/* ---- Hero: premium gradient air ---- */
+[class*="hero"] {
+  background:
+    radial-gradient(120% 90% at 20% 0%, rgba(12, 124, 112, 0.08) 0%, transparent 55%),
+    radial-gradient(100% 80% at 90% 10%, rgba(37, 99, 235, 0.06) 0%, transparent 50%);
+}
+
+/* ---- Floating Mia: premium presence ---- */
+.mia-float-btn {
+  box-shadow:
+    0 2px 6px rgba(16, 31, 56, 0.12),
+    0 16px 40px -8px rgba(12, 124, 112, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+.mia-float-btn:hover {
+  transform: scale(1.06);
+  box-shadow:
+    0 2px 6px rgba(16, 31, 56, 0.12),
+    0 20px 48px -8px rgba(12, 124, 112, 0.45);
+}
+
+/* ---- Section transitions ---- */
+main > section, [class*="page"] {
+  animation: premium-rise 0.35s ease both;
+}
+@keyframes premium-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Scrollbar & selection ---- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 31, 56, 0.18);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(16, 31, 56, 0.3); background-clip: content-box; border: 2px solid transparent; }
+::selection { background: rgba(12, 124, 112, 0.18); }
+
+/* ---- Links: refined underline ---- */
+a:not([class*="btn"]):not([class*="button"]) {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* ============================================================
+   MOBILE — phone-first layer (founder's primary device)
+   Complements index.css's 760px drawer nav; never fights it.
+   ============================================================ */
+
+@media (max-width: 768px) {
+  /* ---- No horizontal overflow, ever ---- */
+  html, body {
+    overflow-x: hidden;
+  }
+  .mia-app {
+    overflow-x: clip;
+  }
+  img, svg, video, iframe {
+    max-width: 100%;
+  }
+
+  /* ---- Readable type floor ---- */
+  body {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ---- Panels: comfortable phone padding ---- */
+  .panel {
+    padding: 16px 14px;
+    border-radius: 14px;
+  }
+
+  /* ---- Grids stack (medref-grid already 1fr at 1080px; belt + braces) ---- */
+  .medref-grid,
+  .medref-row,
+  [class*="grid-2"], [class*="grid-3"], [class*="cols-"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ---- Tables scroll instead of breaking layout ---- */
+  .panel table,
+  .medref-results-panel table,
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ---- Nav drawer: proper touch targets ---- */
+  .nav-item {
+    min-height: 48px;
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+  .sidebar {
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  /* ---- Forms: full-width, thumb-friendly ---- */
+  .medref-field input,
+  .medref-field textarea,
+  .medref-field select,
+  .chat-composer input,
+  .chat-composer textarea,
+  input, select, textarea {
+    min-height: 44px;
+    font-size: 16px; /* stops iOS auto-zoom on focus */
+    width: 100%;
+  }
+  .medref-submit,
+  .chat-composer button,
+  button[type="submit"] {
+    min-height: 48px;
+    width: 100%;
+    font-size: 15px;
+  }
+
+  /* ---- Chat stacks ---- */
+  .chat-layout {
+    flex-direction: column;
+  }
+  .chat-sidebar {
+    display: none;
+  }
+  .chat-panel {
+    width: 100%;
+  }
+  .composer-inner {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* ---- Hero / overview stacks ---- */
+  [class*="hero"] {
+    padding: 24px 16px;
+  }
+  [class*="hero"] h1 {
+    font-size: 24px;
+  }
+
+  /* ---- Floating Mia: smaller, reachable, clear of chrome ---- */
+  .mia-fab,
+  .mia-float-btn {
+    width: 52px;
+    height: 52px;
+    right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  .mia-float-panel {
+    right: 10px;
+    left: 10px;
+    width: auto;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 160px);
+  }
+  .mia-float-chips {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ---- Pathway / evidence cards: readable on phone ---- */
+  .medref-pathways-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .medref-pathway header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  /* ---- Page chrome ---- */
+  .page-body {
+    padding: 16px 12px max(24px, env(safe-area-inset-bottom));
+  }
+}
+
+/* ---- 480px refinement pass: small phones ---- */
+@media (max-width: 480px) {
+  .panel {
+    padding: 14px 12px;
+    border-radius: 12px;
+  }
+  [class*="hero"] {
+    padding: 20px 12px;
+  }
+  [class*="hero"] h1 {
+    font-size: 21px;
+  }
+  h2 { font-size: 18px; }
+  h3 { font-size: 15px; }
+
+  .mia-fab,
+  .mia-float-btn {
+    width: 48px;
+    height: 48px;
+  }
+  .mia-float-panel {
+    bottom: calc(70px + env(safe-area-inset-bottom));
+    border-radius: 14px;
+  }
+
+  .medref-pathway,
+  .medref-block {
+    padding: 12px;
+  }
+  .topbar {
+    padding: 0 10px;
+  }
+}
+
+/* ============================================================
+   PRINT — clean clinical reference output
+   ============================================================ */
+
+@media print {
+  /* ---- Hide all chrome and interactivity ---- */
+  .sidebar,
+  .topbar,
+  .mobile-menu,
+  .nav-backdrop,
+  .mia-float-btn,
+  .mia-float-panel,
+  .chat-composer,
+  .chat-controls,
+  .chat-sidebar,
+  form,
+  button,
+  input,
+  select,
+  textarea,
+  footer,
+  [class*="footer"] {
+    display: none !important;
+  }
+
+  /* ---- Printed header line ---- */
+  body::before {
+    content: "Mia OB-GYN \2014 clinical reference (not a prescription)";
+    display: block;
+    font-size: 11pt;
+    font-weight: 700;
+    color: #000;
+    border-bottom: 2px solid #000;
+    padding-bottom: 6pt;
+    margin-bottom: 14pt;
+  }
+
+  /* ---- Black on white, no decoration ---- */
+  html, body, .mia-app {
+    background: #fff !important;
+    color: #000 !important;
+    overflow: visible;
+  }
+  .panel,
+  .medref-pathway,
+  .medref-block,
+  .medref-urgent,
+  .medref-flag {
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    border: 1pt solid #999 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, p, li, span, a {
+    color: #000 !important;
+    text-shadow: none !important;
+  }
+  a {
+    text-decoration: none;
+  }
+  /* Show link targets for references */
+  .medref-results-panel a[href^="http"]::after,
+  .medref-case-links a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    word-break: break-all;
+  }
+
+  /* ---- Keep headings with their content ---- */
+  h1, h2, h3, h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}
+
+/* ---------- Detail polish: reference pack meta + copy, float counter ---------- */
+.medref-pack-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: -2px 0 14px;
+  padding: 8px 12px;
+  background: rgba(12, 124, 112, 0.07);
+  border: 1px solid rgba(12, 124, 112, 0.16);
+  border-radius: 10px;
+}
+.medref-timestamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--cyan);
+  font-weight: 700;
+}
+.btn-ghost:hover {
+  background: rgba(12, 124, 112, 0.08);
+  border-color: rgba(12, 124, 112, 0.35);
+}
+.btn-sm {
+  padding: 7px 12px;
+  font-size: 12.5px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.mia-float-input-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+.mia-float-input-wrap input {
+  flex: 1;
+  width: 100%;
+}
+.mia-float-count {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  pointer-events: none;
+}
+@media print {
+  .medref-pack-meta .btn-ghost {
+    display: none;
+  }
+}
+
+/* ---- Mia Academy teaching cases ---- */
+.academy-panel { margin-top: 20px; }
+.academy-case {
+  border: 1px solid #dde4f0;
+  border-radius: 14px;
+  margin-top: 12px;
+  background: #ffffff;
+  overflow: hidden;
+}
+.academy-case-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: start;
+  min-height: 48px;
+}
+.academy-case-head strong { display: block; color: #101f38; font-size: 15px; }
+.academy-case-head small { display: block; color: #5b6b84; font-size: 12.5px; margin-top: 2px; }
+.academy-case-head .chevron-open { transform: rotate(180deg); }
+.academy-case-body { padding: 4px 16px 16px; border-top: 1px solid #eef2f8; }
+.academy-patient { color: #24344d; font-size: 14px; line-height: 1.6; margin: 12px 0; }
+.academy-decision {
+  background: #f0f7f5;
+  border: 1px solid #cfe6df;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.academy-decision strong { color: #0c7c70; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+.academy-decision p { margin: 6px 0 0; color: #101f38; font-size: 14px; line-height: 1.55; }
+.academy-reveal-btn {
+  background: #0c7c70;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+.academy-reveal-btn:hover { background: #0a6a5f; }
+.academy-block { margin-top: 14px; }
+.academy-block > strong { color: #101f38; font-size: 13.5px; }
+.academy-block ul { margin: 8px 0 0; padding-inline-start: 20px; color: #24344d; font-size: 13.5px; line-height: 1.6; }
+.academy-position {
+  border-inline-start: 3px solid #0c7c70;
+  background: #f7fafc;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-top: 8px;
+}
+.academy-position span { font-weight: 700; color: #0c7c70; font-size: 12.5px; }
+.academy-position p { margin: 4px 0 0; color: #24344d; font-size: 13.5px; line-height: 1.6; }
+.academy-disagreement {
+  background: #fdf6ec;
+  border: 1px solid #f0dcae;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 14px;
+}
+.academy-disagreement strong { color: #8a6414; font-size: 13px; }
+.academy-disagreement p { margin: 6px 0 0; color: #4a3a12; font-size: 13.5px; line-height: 1.6; }
+.academy-case-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #eef2f8;
+  font-size: 12.5px;
+  color: #5b6b84;
+}
+.academy-case-foot a { color: #0c7c70; font-weight: 600; text-decoration: none; }
+@media print {
+  .academy-reveal-btn { display: none; }
+}
+
+/* ---- Medication assist chatbox (Academy page) ---- */
+.medassist-panel {
+  display: flex;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 18px;
+  align-items: flex-start;
+}
+.medassist-video {
+  position: relative;
+  flex: 0 0 168px;
+  width: 168px;
+  margin-top: -34px;
+  animation: medassist-float 6s ease-in-out infinite;
+}
+.medassist-video video {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 18px;
+  box-shadow: 0 14px 30px rgba(16, 31, 56, 0.22);
+  border: 3px solid #ffffff;
+  display: block;
+  background: #dfe7f2;
+}
+.medassist-live {
+  position: absolute;
+  bottom: 10px;
+  inset-inline-start: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 31, 56, 0.78);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+@keyframes medassist-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .medassist-video { animation: none; }
+}
+.medassist-main { flex: 1 1 auto; min-width: 0; }
+.medassist-head h3 { margin: 0; color: #101f38; font-size: 17px; }
+.medassist-head p { margin: 4px 0 12px; color: #5b6b84; font-size: 13px; line-height: 1.5; }
+.medassist-messages {
+  max-height: 330px;
+  overflow-y: auto;
+  background: #f7fafc;
+  border: 1px solid #e4ebf4;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+@media (max-width: 720px) {
+  .medassist-panel { flex-direction: column; }
+  .medassist-video { flex: none; width: 128px; margin-top: -30px; }
+  .medassist-messages { max-height: 280px; }
+}
+@media print {
+  .medassist-panel { display: none; }
+}
