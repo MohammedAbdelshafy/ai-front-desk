@@ -2,11 +2,11 @@
 type: repository
 status: active
 owner_repo: MohammedAbdelshafy/ai-front-desk
-product_name: Mia Front Desk
+product_name: Mia Dental OS
 source_of_truth: https://github.com/MohammedAbdelshafy/ai-front-desk
 ---
 
-# Mia Front Desk CONTEXT
+# Mia Dental OS CONTEXT
 
 One job: help a clinic or service team organize first inquiries and hand off the next action, without pretending a demo is live.
 
