@@ -1,8 +1,8 @@
-# Mia Front Desk
+# Mia Dental OS
 
-A reference build for collecting first inquiries, gathering intake details and handing anything that needs a person to staff. It can use WhatsApp Business Cloud API, n8n and OpenAI when configured and verified; the repository slug stays ai-front-desk.
+Mia Dental OS is an early dental intake and history-summary prototype. It may use WhatsApp Business Cloud API, n8n and OpenAI when configured and verified. The demo uses fictional data only and is not suitable for real patient records.
 
-It also includes a dental intake demo with a dentist-facing history view. It uses fictional data only and is not suitable for real patient records.
+This repository is separate from Mia Voice, the voice product. Keep dental-administrative workflows distinct from clinical decision-support functions.
 
 ## What's inside
 
