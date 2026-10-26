@@ -1,8 +1,8 @@
-# AI Front Desk
+# Mia Front Desk
 
-A WhatsApp support-agent reference build using **WhatsApp Business Cloud API + n8n + OpenAI**. WhatsApp intake → qualification → human escalation → follow-up. No vendor lock-in.
+A reference build for collecting first inquiries, gathering intake details and handing anything that needs a person to staff. It can use WhatsApp Business Cloud API, n8n and OpenAI when configured and verified; the repository slug stays ai-front-desk.
 
-This repository now also contains the **Mia Clinical Platform demo**: dental pre-visit intake plus a dentist-facing history dashboard, with reusable foundations for future specialties. The clinical demo uses synthetic data only and is not suitable for real patient records.
+It also includes a dental intake demo with a dentist-facing history view. It uses fictional data only and is not suitable for real patient records.
 
 ## What's inside
 
