@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Dr. Mia Clinic OS administrative intake and clinic operations reference build."
 authors = [{name = "Mohammed Abdelshafy"}]
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 
 [project.scripts]
