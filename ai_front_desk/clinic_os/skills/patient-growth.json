@@ -1,0 +1,28 @@
+{
+  "skill_id": "patient-growth",
+  "version": "1.0.0",
+  "name": "Patient Growth",
+  "outcome": "Track the path from marketing inquiry to booking and attendance, and improve the clinic's new-patient flow.",
+  "readiness_status": "design_only",
+  "required_inputs": [
+    "Clinic-approved campaigns and spend data",
+    "Lead source and inquiry events",
+    "Booking and attended-visit outcomes"
+  ],
+  "outputs": [
+    "Campaign source summary",
+    "Inquiry and booking counts",
+    "Patient acquisition experiment log"
+  ],
+  "guardrails": [
+    "Do not promise more patients or revenue without evidence.",
+    "Ad spend is separate unless expressly included in a signed scope.",
+    "Do not infer marketing attribution when the source is missing.",
+    "Use only approved and lawful contact methods."
+  ],
+  "activation_requirements": [
+    "Campaign analytics and event definitions agreed with the clinic.",
+    "Baseline and reporting window recorded before changes.",
+    "Measurement method and attribution limits disclosed."
+  ]
+}

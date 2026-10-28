@@ -31,6 +31,7 @@ from .dashboard import generate_brief
 from .mia_shell import DENTAL_MIA, TaskStage
 from .question_bank import load_bank, bank_snapshot
 from .store import ClinicalStore, TenantMismatchError
+from ..clinic_os.workflow_registry import load_workflow_skills
 
 BASE = Path(__file__).resolve().parent
 BANK = load_bank(BASE / "dental_intake_v1.json")
@@ -48,8 +49,8 @@ DEMO_CLINIC_IDS = {clinic_id for clinic_id, _name in DEMO_CLINICS}
 
 BANNER = (
     "<div style='background:#fff3cd;color:#664d03;padding:10px 14px;"
-    "font:14px system-ui'>DEMO — synthetic data only. Not HIPAA-compliant. "
-    "Not for real patient use.</div>"
+    "font:14px system-ui'><strong>Dr. Mia Clinic OS DEMO</strong> — synthetic data only. "
+    "Do not enter real patient information. This prototype is not approved for live clinical use.</div>"
 )
 
 STYLE = """
@@ -96,16 +97,16 @@ def esc(s):
     return html.escape(str(s), quote=True)
 
 
-def mia_stage_html(manifest_name="Dental Mia", stage="listening", reason=""):
+def mia_stage_html(manifest_name="Dr. Mia", stage="listening", reason=""):
     default_message = (
         "I'm your intake guide. I can explain this workflow, but I don't diagnose "
         "conditions or recommend medicines."
     )
     message = reason or default_message
     return (
-        "<section class='mia-stage' aria-label='Dental Mia assistant'>"
+        "<section class='mia-stage' aria-label='Dr. Mia Clinic OS intake guide'>"
         "<img class='mia-avatar' src='/assets/mia-stand-hi.webp' "
-        "alt='Mia, your AI intake guide' width='64' height='64'>"
+        "alt='Dr. Mia, your clinic intake guide' width='64' height='64'>"
         "<div class='mia-stage-content'>"
         "<div class='mia-stage-head'>"
         f"<strong>{esc(manifest_name)}</strong>"
@@ -176,20 +177,21 @@ MIA_CHAT_SCRIPT = r"""<script>
 def render_landing():
     links = "".join(
         f"<li><b>{esc(name)}</b> — "
-        f"<a href='/intake?clinic={cid}'>patient intake</a> · "
-        f"<a href='/dashboard?clinic={cid}'>dentist dashboard</a></li>"
+        f"<a href='/intake?clinic={cid}'>patient history demo</a> · "
+        f"<a href='/dashboard?clinic={cid}'>practice dashboard</a></li>"
         for cid, name in DEMO_CLINICS
     )
-    return f"""<html><head><title>Mia Clinical — demo</title>{STYLE}</head><body>
+    return f"""<html><head><title>Dr. Mia Clinic OS — demo</title>{STYLE}</head><body>
 {BANNER}<div class="wrap">
-{mia_stage_html(stage="idle", reason="choose a demo clinic")}
-<h1>Mia Clinical Platform — local demo</h1>
-<p>Dental pre-visit intake + dentist history brief. Synthetic data only.</p>
+{mia_stage_html(stage="idle", reason="choose a synthetic demo clinic")}
+<h1>Dr. Mia Clinic OS</h1>
+<p>Start with pre-visit history. Review patient-reported answers, completeness flags, staff review, and daily count-only operations. The specialty-specific questionnaire is currently a dental demo.</p>
 <ul>{links}</ul>
+<p><a href="/workflows">View workflow skills and readiness →</a></p>
 <p class="src">Question bank: {esc(BANK.bank_id)} v{esc(BANK.version)} ·
-review status: {esc(BANK.review_status)} (dentist review pending)</p>
+review status: {esc(BANK.review_status)} (qualified dentist review pending)</p>
+<p class="src">All clinic records and operational counts shown here are synthetic examples. They are not customer results.</p>
 </div></body></html>"""
-
 
 def render_intake(clinic_id, clinic_name):
     qs_html = []
@@ -231,9 +233,7 @@ def render_intake(clinic_id, clinic_name):
 {BANNER}<div class="wrap">
 {mia_stage_html(stage="listening", reason="guiding your pre-visit history")}
 <h1>Pre-visit health history</h1>
-<p><b>{esc(clinic_name)}</b> · takes about 5 minutes. You can skip anything
-you're unsure about. <span class="escape">Your answers are recorded exactly as
-you give them.</span></p>
+<p><b>{esc(clinic_name)}</b> · answer what you know and do not guess. This is a synthetic-data demo; never enter a real person's information. <span class="escape">The care team must review any real questionnaire before clinical use.</span></p>
 <form id="intake">
 {''.join(qs_html)}
 <button type="submit" id="submitBtn">Submit my history</button>
@@ -280,6 +280,47 @@ form.addEventListener('submit', async e=>{{
 </script></div></body></html>"""
 
 
+def _local_day_window(timestamp=None):
+    """Return local midnight and next local midnight as Unix timestamps."""
+    now = time.time() if timestamp is None else float(timestamp)
+    local_now = time.localtime(now)
+    start = time.mktime((
+        local_now.tm_year, local_now.tm_mon, local_now.tm_mday,
+        0, 0, 0, -1, -1, -1,
+    ))
+    end = time.mktime((
+        local_now.tm_year, local_now.tm_mon, local_now.tm_mday + 1,
+        0, 0, 0, -1, -1, -1,
+    ))
+    return start, end
+
+
+def render_workflow_catalog():
+    state_labels = {
+        "demo_only": "Demo only",
+        "design_only": "Planned · not live",
+        "limited_implementation": "Limited implementation · count-only events",
+        "clinical_review_required": "Clinical review required — not enabled",
+    }
+    cards = []
+    for skill in load_workflow_skills():
+        cards.append(
+            "<article class='q'>"
+            f"<h2>{esc(skill['name'])}</h2>"
+            f"<p>{esc(skill['outcome'])}</p>"
+            f"<p><b>Status:</b> {esc(state_labels[skill['readiness_status']])}</p>"
+            f"<p class='src'>Version {esc(skill['version'])} · {esc(skill['skill_id'])}</p>"
+            f"<p><b>Activation gate:</b> {esc(skill['activation_requirements'][0])}</p>"
+            "</article>"
+        )
+    return f"""<html><head><title>Dr. Mia Clinic OS — workflow skills</title>{STYLE}</head><body>
+{BANNER}<div class="wrap">{mia_stage_html(stage="working", reason="showing defined workflow modules")}
+<h1>Workflow skills</h1>
+<p>Every module has a version, outcome, prerequisites, guardrails, and an honest readiness state. Listing a skill does not mean it is active in a clinic.</p>
+{''.join(cards)}
+<p><a href="/">← Back to demo</a></p></div></body></html>"""
+
+
 def render_dashboard(clinic_id, clinic_name, store):
     subs = store.list_submissions(clinic_id)
     rows = "".join(
@@ -288,12 +329,51 @@ def render_dashboard(clinic_id, clinic_name, store):
         f"<td><a href='/record?clinic={clinic_id}&sub={s['submission_id']}'>open brief</a></td></tr>"
         for s in subs
     ) or "<tr><td colspan=4>No submissions yet.</td></tr>"
-    return f"""<html><head><title>Dentist dashboard — {esc(clinic_name)}</title>{STYLE}</head><body>
+    start_at, end_at = _local_day_window()
+    scorecard = store.daily_scorecard(clinic_id, start_at, end_at)
+    display_metrics = (
+        ("New inquiries", "new_inquiry_received"),
+        ("Missed calls", "missed_call"),
+        ("Recovered inquiries", "missed_call_recovered"),
+        ("Appointments booked", "appointment_booked"),
+        ("Appointments attended", "appointment_attended"),
+        ("No-shows", "no_show"),
+        ("Intakes completed", "intake_completed"),
+        ("History reviews", "intake_reviewed"),
+        ("Open work items", "staff_task_opened"),
+        ("Completed work items", "staff_task_completed"),
+    )
+    metric_cards = "".join(
+        f"<div class='q'><b>{esc(label)}</b><p style='font-size:26px;margin:4px 0'>"
+        f"{scorecard['counts'].get(event_type, 0)}</p></div>"
+        for label, event_type in display_metrics
+    )
+    mode_labels = {
+        "synthetic_demo": "SYNTHETIC SAMPLE DATA",
+        "mixed_demo_and_operational": "MIXED: SYNTHETIC + OPERATIONAL EVENTS",
+        "operational_events": "OPERATIONAL EVENTS",
+        "no_events": "NO EVENTS RECORDED",
+    }
+    limitations = "".join(f"<li>{esc(item)}</li>" for item in scorecard["limitations"])
+    scorecard_html = f"""
+<h2>Today's operations scorecard</h2>
+<p><b>{esc(mode_labels[scorecard['data_mode']])}</b> ·
+{scorecard['event_count']} recorded events in this local calendar day.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px">{metric_cards}</div>
+<p class="src">Counts only. The current demo does not infer revenue, ROI, conversion rates, or causal effects.</p>
+<details><summary>Reporting limits</summary><ul>{limitations}</ul></details>
+<p><a href="/api/scorecard?clinic={clinic_id}">Open scorecard data (JSON)</a> ·
+<a href="/workflows">Workflow skill readiness</a></p>"""
+    return f"""<html><head><title>Dr. Mia Clinic OS — {esc(clinic_name)}</title>{STYLE}</head><body>
 {BANNER}<div class="wrap">
-{mia_stage_html(stage="working", reason="listing intake submissions")}
-<h1>Dentist dashboard</h1><p><b>{esc(clinic_name)}</b></p>
-<table><tr><th>Patient</th><th>Status</th><th>Submitted</th><th></th></tr>{rows}</table>
-<p><a href="/">← demo home</a></p></div></body></html>"""
+{mia_stage_html(stage="working", reason="listing synthetic intake submissions and observed event counts")}
+<h1>Practice dashboard</h1><p><b>{esc(clinic_name)}</b></p>
+{scorecard_html}
+<h2>Pre-visit history queue</h2>
+<table><tr><th>Synthetic patient</th><th>Status</th><th>Submitted</th><th></th></tr>{rows}</table>
+<p><a href="/intake?clinic={clinic_id}">Open patient history demo</a> · <a href="/">← demo home</a></p>
+</div></body></html>"""
+
 
 
 def render_record(clinic_id, sub_id, store):
@@ -471,6 +551,20 @@ class Handler(BaseHTTPRequestHandler):
         elif u.path == "/api/manifest":
             from .mia_shell import DENTAL_MIA
             self._json(200, DENTAL_MIA.to_dict())
+        elif u.path == "/workflows":
+            self._send(200, render_workflow_catalog())
+        elif u.path == "/api/workflow-skills":
+            self._json(200, {"product": "Dr. Mia Clinic OS", "skills": load_workflow_skills()})
+        elif u.path == "/api/scorecard":
+            name = self._resolve_clinic(clinic_id)
+            if name is None:
+                self._json(404, {"ok": False, "error": "Unknown demo clinic."})
+                return
+            start_at, end_at = _local_day_window()
+            report = self.store.daily_scorecard(clinic_id, start_at, end_at)
+            report["clinic_name"] = name
+            report["reporting_timezone"] = time.tzname[0]
+            self._json(200, report)
         elif u.path == "/api/fhir/questionnaire":
             self._json(200, BANK.to_fhir_questionnaire())
         elif u.path == "/api/fhir/questionnaire-response":
@@ -599,8 +693,93 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def ensure_demo_clinics(store: ClinicalStore):
+    """Initialize fixed demo tenants with clearly synthetic examples only."""
     for cid, name in DEMO_CLINICS:
         store.register_clinic(cid, name)
+        existing = {item["patient_ref"] for item in store.list_submissions(cid, limit=200)}
+        sample_records = [
+            {
+                "id.demo_label": "Demo Patient Casey",
+                "id.contact_pref": "Phone call",
+                "visit.reason": "Routine checkup / cleaning",
+                "visit.concerns": "Synthetic example: no current concern reported.",
+                "visit.last_dental": "Within 6 months",
+                "med.taking_any": "No",
+                "med.antibiotics_recent": "No",
+                "allergy.med_allergy": "No",
+                "allergy.latex": "No",
+                "allergy.anesthesia": "No",
+                "cond.heart": ["None"],
+                "cond.bp_diabetes": ["Neither"],
+                "hist.anesthesia_complications": "No",
+                "other.pregnancy": "No",
+                "other.tobacco": "No",
+                "consent.accuracy": "Yes",
+            },
+            {
+                "id.demo_label": "Demo Patient Riley",
+                "id.contact_pref": "Text message",
+                "visit.reason": "Tooth pain",
+                "visit.concerns": "Synthetic example: sample reports intermittent sensitivity.",
+                "visit.last_dental": "1-2 years ago",
+                "med.taking_any": "No",
+                "med.list": "Synthetic conflict example: medication entry needs confirmation.",
+                "med.antibiotics_recent": "No",
+                "allergy.med_allergy": "No",
+                "allergy.med_which": "Synthetic conflict example: allergy detail needs confirmation.",
+                "allergy.latex": "No",
+                "allergy.anesthesia": "No",
+                "cond.heart": ["None"],
+                "cond.bp_diabetes": ["Neither"],
+                "hist.anesthesia_complications": "No",
+                "other.pregnancy": "No",
+                "other.tobacco": "No",
+                "consent.accuracy": "Yes",
+            },
+        ]
+        for answers in sample_records:
+            patient_ref = answers["id.demo_label"]
+            if patient_ref not in existing:
+                result = process_intake(BANK, answers)
+                if result["valid"]:
+                    store.save_submission(
+                        cid, BANK.bank_id, BANK.version, patient_ref, answers,
+                        actor="demo_seed",
+                    )
+
+        # Separate labelled synthetic operational events from any future
+        # observed operational events. Daily keys avoid duplicate seeds on restart.
+        now = time.time()
+        local_now = time.localtime(now)
+        day_start = time.mktime((
+            local_now.tm_year, local_now.tm_mon, local_now.tm_mday,
+            0, 0, 0, -1, -1, -1,
+        ))
+        day_key = time.strftime("%Y-%m-%d", local_now)
+        sample_counts = {
+            "new_inquiry_received": 7,
+            "missed_call": 4,
+            "missed_call_recovered": 2,
+            "appointment_booked": 5,
+            "appointment_attended": 4,
+            "no_show": 1,
+            "no_show_followup_completed": 1,
+            "intake_started": 4,
+            "intake_completed": 3,
+            "intake_reviewed": 2,
+            "staff_task_opened": 6,
+            "staff_task_completed": 5,
+            "marketing_lead_received": 3,
+            "new_patient_attended": 2,
+        }
+        for event_type, count in sample_counts.items():
+            for index in range(count):
+                store.record_operational_event(
+                    cid, event_type, source="demo_synthetic",
+                    idempotency_key=f"demo-v1:{day_key}:{cid}:{event_type}:{index + 1}",
+                    occurred_at=max(day_start + 1, now - index * 15),
+                    actor="demo_seed",
+                )
 
 
 def run(host="127.0.0.1", port=8766):

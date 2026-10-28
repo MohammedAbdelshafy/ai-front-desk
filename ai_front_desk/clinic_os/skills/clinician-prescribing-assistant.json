@@ -1,0 +1,29 @@
+{
+  "skill_id": "clinician-prescribing-assistant",
+  "version": "1.0.0",
+  "name": "Clinician Prescribing Assistant / Professor",
+  "outcome": "In a future clinician-controlled workbench, organize source-cited medication references and safety questions for qualified review.",
+  "readiness_status": "clinical_review_required",
+  "required_inputs": [
+    "Clinician-entered intent and context",
+    "Current jurisdiction-specific official sources",
+    "Approved review and evaluation records"
+  ],
+  "outputs": [
+    "Source-linked reference information",
+    "Missing-context checklist",
+    "Flags requiring clinician or pharmacist assessment"
+  ],
+  "guardrails": [
+    "Not enabled for patient use.",
+    "No autonomous diagnosis, medicine selection, dose calculation, prescription generation, signing or transmission.",
+    "An empty or unapproved pathway is not advice to withhold care.",
+    "Only qualified clinicians decide treatment."
+  ],
+  "activation_requirements": [
+    "Named licensed clinician and medication-safety reviewer.",
+    "Current source licensing, jurisdiction and clinical evaluation.",
+    "Security, privacy and applicable regulatory review.",
+    "Explicit release approval for each defined pathway."
+  ]
+}
