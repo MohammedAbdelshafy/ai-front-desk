@@ -62,12 +62,11 @@ class CharacterManifest:
 
 DENTAL_MIA = CharacterManifest(
     character_id="dental-mia-v1",
-    name="Dental Mia",
-    role="Patient intake guide for dental clinics",
+    name="Dr. Mia",
+    role="Clinic intake guide; specialty-specific forms are supplied by the clinic profile",
     greeting=(
-        "Hi, I'm Mia. I'll guide you through your pre-visit health history. "
-        "This takes about 5 minutes. You can skip anything you're unsure about, "
-        "and ask for clinic staff at any time."
+        "Hi, I'm Dr. Mia. I'll guide you through the clinic's pre-visit history. "
+        "Answer what you know, and ask the clinic team for help when needed."
     ),
     allowed_actions=("guide_intake", "answer_faq", "request_handoff"),
     domain_pack_ids=("dental-intake@1.0.0",),
