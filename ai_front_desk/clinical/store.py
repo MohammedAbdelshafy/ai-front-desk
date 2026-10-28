@@ -119,7 +119,7 @@ OPERATIONAL_EVENT_SOURCES = {
     "staff", "system", "website", "phone", "sms", "whatsapp",
     "marketing", "pms", "demo_synthetic",
 }
-OPERATIONAL_IDEMPOTENCY_KEY_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,99}\\Z")
+OPERATIONAL_IDEMPOTENCY_KEY_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,99}")
 
 
 class ClinicalStore:
