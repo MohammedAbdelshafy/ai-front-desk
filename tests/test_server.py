@@ -210,9 +210,12 @@ def test_scorecard_api_labels_seeded_events_as_synthetic(live_server):
 
 
 def test_scorecard_api_rejects_unknown_clinic(live_server):
-    code, body = _get(live_server, "/api/scorecard?clinic=attacker-selected-tenant")
-    assert code == 404
-    assert "Unknown demo clinic" in body
+    try:
+        _get(live_server, "/api/scorecard?clinic=attacker-selected-tenant")
+        raise AssertionError("expected 404 for unknown clinic")
+    except urllib.error.HTTPError as error:
+        assert error.code == 404
+        assert "Unknown demo clinic" in error.read().decode()
 
 
 def test_workflow_catalog_api_includes_nine_readiness_labelled_skills(live_server):
