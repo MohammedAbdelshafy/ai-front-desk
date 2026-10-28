@@ -300,7 +300,7 @@ def render_workflow_catalog():
         "demo_only": "Demo only",
         "design_only": "Planned · not live",
         "limited_implementation": "Limited implementation · count-only events",
-        "clinical_review_required": "Blocked pending clinical review",
+        "clinical_review_required": "Clinical review required — not enabled",
     }
     cards = []
     for skill in load_workflow_skills():
