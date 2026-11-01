@@ -13,7 +13,7 @@
 - The clinician view separates patient-reported answers, system-check flags, deterministic rollups, and staff corrections.
 - Reviews and corrections are recorded in a local audit trail.
 - The local demo seeds fictional patient records and a visibly synthetic daily operations scorecard.
-- A count-only operational event ledger deduplicates events and scopes queries by clinic.
+- A count-only operational event ledger enforces canonical UUID idempotency keys, non-identifying actor roles, legacy actor redaction on reads, duplicate protection, and clinic-scoped queries.
 - A workflow registry explains each planned outcome, inputs, outputs, guardrails and current readiness state.
 
 ## Readiness matrix
