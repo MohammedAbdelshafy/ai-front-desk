@@ -135,12 +135,22 @@ def test_legacy_free_form_actor_is_redacted_when_events_are_listed(store):
            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         ("evt_legacy", "clinic-a", "missed_call", "phone", key, now, now, "Dr Jane Smith"),
     )
+    store._db.execute(
+        """INSERT INTO audit_log
+           (clinic_id, actor, action, target, detail, created_at)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        ("clinic-a", "Dr Jane Smith", "operational_event.recorded",
+         "evt_legacy", "type=missed_call; source=phone", now),
+    )
     store._db.commit()
 
     events = store.list_operational_events("clinic-a")
+    audit = store.audit_trail("clinic-a", target="evt_legacy")
 
     assert len(events) == 1
     assert events[0]["actor"] == "unknown"
+    assert len(audit) == 1
+    assert audit[0]["actor"] == "unknown"
 
 
 def test_daily_scorecard_is_scoped_and_uses_event_occurrence_window(store):
