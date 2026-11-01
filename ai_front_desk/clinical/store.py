@@ -119,7 +119,11 @@ OPERATIONAL_EVENT_SOURCES = {
     "staff", "system", "website", "phone", "sms", "whatsapp",
     "marketing", "pms", "demo_synthetic",
 }
-OPERATIONAL_IDEMPOTENCY_KEY_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,99}")
+OPERATIONAL_EVENT_ACTORS = frozenset({"staff", "system", "demo_synthetic"})
+OPERATIONAL_IDEMPOTENCY_KEY_RE = re.compile(
+    r"[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+    re.IGNORECASE,
+)
 
 
 class ClinicalStore:
@@ -316,9 +320,9 @@ class ClinicalStore:
             raise ValueError(f"unknown operational event source: {source}")
         if (not isinstance(idempotency_key, str)
                 or not OPERATIONAL_IDEMPOTENCY_KEY_RE.fullmatch(idempotency_key)):
-            raise ValueError("idempotency key must be an opaque 1–100 character token")
-        if not isinstance(actor, str) or not actor.strip() or len(actor) > 120:
-            raise ValueError("actor label must be 1–120 characters")
+            raise ValueError("idempotency key must be a canonical UUID token")
+        if not isinstance(actor, str) or actor not in OPERATIONAL_EVENT_ACTORS:
+            raise ValueError("actor must be a non-identifying operational role")
         if occurred_at is None:
             occurred_at = time.time()
         if isinstance(occurred_at, bool) or not isinstance(occurred_at, (int, float)):
@@ -347,11 +351,11 @@ class ClinicalStore:
                 occurred_at, created_at, actor)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             (event_id, clinic_id, event_type, source, idempotency_key,
-             occurred_at, created_at, actor.strip()),
+             occurred_at, created_at, actor),
         )
         # The audit trail stores only event classification, never the idempotency
         # key, patient data, or message contents.
-        self._audit(clinic_id, actor.strip(), "operational_event.recorded", event_id,
+        self._audit(clinic_id, actor, "operational_event.recorded", event_id,
                     f"type={event_type}; source={source}")
         self._db.commit()
         return event_id
@@ -372,8 +376,10 @@ class ClinicalStore:
             clauses.append("occurred_at < ?")
             params.append(float(end_at))
         rows = self._db.execute(
-            "SELECT event_id, clinic_id, event_type, source, occurred_at, created_at, actor "
-            "FROM operational_events WHERE " + " AND ".join(clauses) +
+            """SELECT event_id, clinic_id, event_type, source, occurred_at, created_at,
+                      CASE WHEN actor IN ('staff', 'system', 'demo_synthetic')
+                           THEN actor ELSE 'unknown' END AS actor
+               FROM operational_events WHERE """ + " AND ".join(clauses) +
             " ORDER BY occurred_at, event_id",
             params,
         ).fetchall()
@@ -443,13 +449,23 @@ class ClinicalStore:
     def audit_trail(self, clinic_id: str, target: str = "") -> list[dict[str, Any]]:
         if target:
             rows = self._db.execute(
-                """SELECT * FROM audit_log WHERE clinic_id = ? AND target = ?
+                """SELECT seq, clinic_id,
+                          CASE WHEN action = 'operational_event.recorded'
+                                    AND actor NOT IN ('staff', 'system', 'demo_synthetic')
+                               THEN 'unknown' ELSE actor END AS actor,
+                          action, target, detail, created_at
+                   FROM audit_log WHERE clinic_id = ? AND target = ?
                    ORDER BY seq""",
                 (clinic_id, target),
             ).fetchall()
         else:
             rows = self._db.execute(
-                "SELECT * FROM audit_log WHERE clinic_id = ? ORDER BY seq",
+                """SELECT seq, clinic_id,
+                          CASE WHEN action = 'operational_event.recorded'
+                                    AND actor NOT IN ('staff', 'system', 'demo_synthetic')
+                               THEN 'unknown' ELSE actor END AS actor,
+                          action, target, detail, created_at
+                   FROM audit_log WHERE clinic_id = ? ORDER BY seq""",
                 (clinic_id,),
             ).fetchall()
         return [dict(r) for r in rows]
