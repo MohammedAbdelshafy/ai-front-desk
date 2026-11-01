@@ -22,6 +22,7 @@ import json
 import os
 import re
 import time
+import uuid
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
@@ -776,9 +777,12 @@ def ensure_demo_clinics(store: ClinicalStore):
             for index in range(count):
                 store.record_operational_event(
                     cid, event_type, source="demo_synthetic",
-                    idempotency_key=f"demo-v1:{day_key}:{cid}:{event_type}:{index + 1}",
+                    idempotency_key=str(uuid.uuid5(
+                        uuid.NAMESPACE_URL,
+                        f"dr-mia-demo:{day_key}:{cid}:{event_type}:{index + 1}",
+                    )),
                     occurred_at=max(day_start + 1, now - index * 15),
-                    actor="demo_seed",
+                    actor="demo_synthetic",
                 )
 
 
