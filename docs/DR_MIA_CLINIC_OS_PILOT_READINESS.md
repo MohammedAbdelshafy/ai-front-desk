@@ -1,7 +1,7 @@
-# Dr. Mia Clinic OS — Pilot Readiness Record
+# Dr. Mia Clinics OS — Pilot Readiness Record
 
 **Review date:** 2026-10-28  
-**Product display name:** Dr. Mia Clinic OS  
+**Product display name:** Dr. Mia Clinics OS  
 **Current demonstration specialty:** Dentistry  
 **Current status:** Synthetic-data prototype; demo readiness is distinct from production-pilot readiness.  
 **Entry offer:** $1,500 Quality-Audit Pilot. Monthly package prices remain intentionally unset.
