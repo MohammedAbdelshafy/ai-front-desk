@@ -1,4 +1,4 @@
-name: Python tests
+name: Python tests and deploy smoke
 
 on:
   push:
@@ -14,6 +14,7 @@ permissions:
 
 jobs:
   pytest:
+    name: Python test suite
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -30,3 +31,68 @@ jobs:
           python -m pip install pytest
       - name: Run tests
         run: python -m pytest -q
+
+  docker-smoke:
+    name: Docker build and container smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Build production image
+        run: docker build --pull -t mia-dental-os:ci .
+      - name: Start container with persistent-data mount
+        run: |
+          docker volume create mia-dental-ci-data
+          docker run --detach --rm --name mia-dental-ci \
+            --publish 8767:8767 \
+            --mount source=mia-dental-ci-data,target=/data \
+            --env PORT=8767 \
+            --env PRESCRIBE_HOST=0.0.0.0 \
+            --env PRESCRIBE_DB=/data/prescribe.sqlite3 \
+            --env PRESCRIBE_STATE_DIR=/data \
+            --env PRESCRIBE_SECURE_COOKIES=1 \
+            mia-dental-os:ci
+      - name: Verify HTTP routes and security headers
+        run: |
+          python - <<'PY'
+          import time
+          import urllib.error
+          import urllib.request
+
+          base = "http://127.0.0.1:8767"
+          expected_routes = ("/", "/signup", "/signin", "/legal", "/privacy", "/terms", "/security")
+          last_error = None
+          for _ in range(40):
+              try:
+                  with urllib.request.urlopen(base + "/", timeout=2) as response:
+                      if response.status != 200:
+                          raise RuntimeError(f"landing status was {response.status}")
+                  last_error = None
+                  break
+              except Exception as exc:
+                  last_error = exc
+                  time.sleep(1)
+          if last_error:
+              raise SystemExit(f"container never became healthy: {last_error}")
+
+          for route in expected_routes:
+              req = urllib.request.Request(base + route)
+              with urllib.request.urlopen(req, timeout=5) as response:
+                  body = response.read().decode("utf-8", errors="replace")
+                  assert response.status == 200, f"{route}: unexpected status"
+                  assert body.strip(), f"{route}: empty body"
+                  headers = response.headers
+                  assert headers.get("X-Content-Type-Options") == "nosniff", f"{route}: nosniff missing"
+                  assert headers.get("X-Frame-Options") == "DENY", f"{route}: frame guard missing"
+                  if route == "/":
+                      assert "Mia Dental OS" in body
+                      assert "Mia Dental Prescribing Copilot" in body
+          print("Docker smoke passed: landing, auth, legal routes and security headers.")
+          PY
+      - name: Inspect container logs on failure
+        if: failure()
+        run: docker logs mia-dental-ci || true
+      - name: Stop container
+        if: always()
+        run: docker stop mia-dental-ci || true

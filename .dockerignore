@@ -1,0 +1,19 @@
+# Keep the image lean: app code + runtime-served legal docs only.
+# NOTE: docs/legal/ is read by the app at runtime (/legal, /privacy,
+# /terms, /security) — it MUST stay in the image.
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+tests/
+.mia-prescribe/
+*.sqlite3
+*.db
+.git/
+.gitignore
+dist/
+.env
+.venv/
+venv/
+docs/adr/
+docs/security/
