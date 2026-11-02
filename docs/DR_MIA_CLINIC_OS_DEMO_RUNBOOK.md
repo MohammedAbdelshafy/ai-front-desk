@@ -1,4 +1,4 @@
-# Dr. Mia Clinic OS — Repeatable Demo Runbook
+# Dr. Mia Clinics OS — Repeatable Demo Runbook
 
 ## Safety status
 
@@ -18,7 +18,7 @@ The SQLite file defaults to `~/.mia-clinical-demo/clinical-demo.sqlite3`. For a 
 
 ## Demo sequence (8–10 minutes)
 
-1. **Set context (30 seconds).** Dr. Mia Clinic OS is being developed around better-prepared visits, consistent follow-up, patient growth and owner visibility. The current runnable workflow is the patient-history demo.
+1. **Set context (30 seconds).** Dr. Mia Clinics OS is being developed around better-prepared visits, consistent follow-up, patient growth and owner visibility. The current runnable workflow is the patient-history demo.
 2. **Show the intake (2 minutes).** Open `/intake?clinic=demo-smile-arts`. Submit only fictional answers with a label such as `Demo Patient Jordan`.
 3. **Show the brief (2 minutes).** Open `/dashboard?clinic=demo-smile-arts`, select a sample patient, and review the history brief. Distinguish patient-reported answers, structural flags, corrections and clinician review.
 4. **Show owner visibility (1 minute).** Point out the daily scorecard. Its status must say synthetic sample data. Counts are not conversion rates or revenue.
