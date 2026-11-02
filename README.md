@@ -8,10 +8,6 @@ The clinic-operations product is built around better-prepared visits, consistent
 
 The repository slug and Python package remain `ai-front-desk` for compatibility. The approved product display name is **Dr. Mia Clinics OS**.
 
-> **Current status: synthetic-data prototype.** The local demo is not a deployed clinical service, EHR, or production patient-data system. It does not send live messages, place calls, book appointments, or provide medication recommendations. Do not enter real patient information.
-
-The repository slug and Python package remain `ai-front-desk` for compatibility. The approved product display name is **Dr. Mia Clinics OS**.
-
 ## What the demo contains
 
 - Versioned conditional dental history questionnaire, currently marked draft pending licensed dentist review.
