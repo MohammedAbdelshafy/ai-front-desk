@@ -2,12 +2,12 @@
 type: repository
 status: active
 owner_repo: MohammedAbdelshafy/ai-front-desk
-product_name: Dr. Mia Clinic OS
+product_name: Dr. Mia Clinics OS
 source_of_truth: https://github.com/MohammedAbdelshafy/ai-front-desk
 reviewed: 2026-10-28
 ---
 
-# Dr. Mia Clinic OS — Project Context
+# Dr. Mia Clinics OS — Project Context
 
 One job: help clinics deliver better-prepared visits, consistent patient follow-up, patient growth and owner visibility without pretending a prototype is a live clinic service.
 
