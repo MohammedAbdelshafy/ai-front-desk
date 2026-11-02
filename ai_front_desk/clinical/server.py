@@ -50,7 +50,7 @@ DEMO_CLINIC_IDS = {clinic_id for clinic_id, _name in DEMO_CLINICS}
 
 BANNER = (
     "<div style='background:#fff3cd;color:#664d03;padding:10px 14px;"
-    "font:14px system-ui'><strong>Dr. Mia Clinic OS DEMO</strong> — synthetic data only. "
+    "font:14px system-ui'><strong>Dr. Mia Clinics OS DEMO</strong> — synthetic data only. "
     "Do not enter real patient information. This prototype is not approved for live clinical use.</div>"
 )
 
@@ -105,7 +105,7 @@ def mia_stage_html(manifest_name="Dr. Mia", stage="listening", reason=""):
     )
     message = reason or default_message
     return (
-        "<section class='mia-stage' aria-label='Dr. Mia Clinic OS intake guide'>"
+        "<section class='mia-stage' aria-label='Dr. Mia Clinics OS intake guide'>"
         "<img class='mia-avatar' src='/assets/mia-stand-hi.webp' "
         "alt='Dr. Mia, your clinic intake guide' width='64' height='64'>"
         "<div class='mia-stage-content'>"
@@ -182,10 +182,10 @@ def render_landing():
         f"<a href='/dashboard?clinic={cid}'>practice dashboard</a></li>"
         for cid, name in DEMO_CLINICS
     )
-    return f"""<html><head><title>Dr. Mia Clinic OS — demo</title>{STYLE}</head><body>
+    return f"""<html><head><title>Dr. Mia Clinics OS — demo</title>{STYLE}</head><body>
 {BANNER}<div class="wrap">
 {mia_stage_html(stage="idle", reason="choose a synthetic demo clinic")}
-<h1>Dr. Mia Clinic OS</h1>
+<h1>Dr. Mia Clinics OS</h1>
 <p>Start with pre-visit history. Review patient-reported answers, completeness flags, staff review, and daily count-only operations. The specialty-specific questionnaire is currently a dental demo.</p>
 <ul>{links}</ul>
 <p><a href="/workflows">View workflow skills and readiness →</a></p>
@@ -314,7 +314,7 @@ def render_workflow_catalog():
             f"<p><b>Activation gate:</b> {esc(skill['activation_requirements'][0])}</p>"
             "</article>"
         )
-    return f"""<html><head><title>Dr. Mia Clinic OS — workflow skills</title>{STYLE}</head><body>
+    return f"""<html><head><title>Dr. Mia Clinics OS — workflow skills</title>{STYLE}</head><body>
 {BANNER}<div class="wrap">{mia_stage_html(stage="working", reason="showing defined workflow modules")}
 <h1>Workflow skills</h1>
 <p>Every module has a version, outcome, prerequisites, guardrails, and an honest readiness state. Listing a skill does not mean it is active in a clinic.</p>
@@ -365,7 +365,7 @@ def render_dashboard(clinic_id, clinic_name, store):
 <details><summary>Reporting limits</summary><ul>{limitations}</ul></details>
 <p><a href="/api/scorecard?clinic={clinic_id}">Open scorecard data (JSON)</a> ·
 <a href="/workflows">Workflow skill readiness</a></p>"""
-    return f"""<html><head><title>Dr. Mia Clinic OS — {esc(clinic_name)}</title>{STYLE}</head><body>
+    return f"""<html><head><title>Dr. Mia Clinics OS — {esc(clinic_name)}</title>{STYLE}</head><body>
 {BANNER}<div class="wrap">
 {mia_stage_html(stage="working", reason="listing synthetic intake submissions and observed event counts")}
 <h1>Practice dashboard</h1><p><b>{esc(clinic_name)}</b></p>
@@ -555,7 +555,7 @@ class Handler(BaseHTTPRequestHandler):
         elif u.path == "/workflows":
             self._send(200, render_workflow_catalog())
         elif u.path == "/api/workflow-skills":
-            self._json(200, {"product": "Dr. Mia Clinic OS", "skills": load_workflow_skills()})
+            self._json(200, {"product": "Dr. Mia Clinics OS", "skills": load_workflow_skills()})
         elif u.path == "/api/scorecard":
             name = self._resolve_clinic(clinic_id)
             if name is None:
