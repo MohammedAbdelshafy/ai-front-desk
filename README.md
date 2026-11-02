@@ -1,6 +1,6 @@
-# Mia Dental OS
+# Dr. Mia Clinics OS
 
-Mia Dental OS is an early dental intake and history-summary prototype. It may use WhatsApp Business Cloud API, n8n and OpenAI when configured and verified. The demo uses fictional data only and is not suitable for real patient records.
+Dr. Mia Clinics OS is an early-stage clinic workflow product family. This repository contains an early dental intake and history-summary prototype. It may use WhatsApp Business Cloud API, n8n and OpenAI when configured and verified. The demo uses fictional data only and is not suitable for real patient records.
 
 This repository is separate from Mia Voice, the voice product. Keep dental-administrative workflows distinct from clinical decision-support functions.
 
