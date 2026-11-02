@@ -1,6 +1,12 @@
 # Dr. Mia Clinics OS
 
-Dr. Mia Clinics OS is a clinic-operations product built around better-prepared visits, consistent patient follow-up, patient growth, and an owner-friendly daily quality view. The clinic-facing name and workflows are intended to be configurable by specialty; this repository currently contains a **dental intake demonstration**, not a production multi-specialty service.
+Dr. Mia Clinics OS is an early-stage clinic workflow product family. This repository contains an early dental intake and history-summary prototype. It may use WhatsApp Business Cloud API, n8n and OpenAI when configured and verified. The demo uses fictional data only and is not suitable for real patient records.
+
+The clinic-operations product is built around better-prepared visits, consistent patient follow-up, patient growth, and an owner-friendly daily quality view. The clinic-facing workflows are intended to be configurable by specialty; this repository currently contains a dental intake demonstration, not a production multi-specialty service.
+
+> **Current status: synthetic-data prototype.** The local demo is not a deployed clinical service, EHR, or production patient-data system. It does not send live messages, place calls, book appointments, or provide medication recommendations. Do not enter real patient information.
+
+The repository slug and Python package remain `ai-front-desk` for compatibility. The approved product display name is **Dr. Mia Clinics OS**.
 
 > **Current status: synthetic-data prototype.** The local demo is not a deployed clinical service, EHR, or production patient-data system. It does not send live messages, place calls, book appointments, or provide medication recommendations. Do not enter real patient information.
 
