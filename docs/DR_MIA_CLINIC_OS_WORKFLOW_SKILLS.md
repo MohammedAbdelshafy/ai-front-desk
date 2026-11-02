@@ -1,4 +1,4 @@
-# Dr. Mia Clinic OS — Outcome Workflow Skills
+# Dr. Mia Clinics OS — Outcome Workflow Skills
 
 Skills are versioned delivery contracts. **A definition is not a live capability.** Read each JSON file's `readiness_status` before including a feature in a proposal.
 
