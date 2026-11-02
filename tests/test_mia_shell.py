@@ -16,7 +16,7 @@ def test_dental_mia_manifest_safety_boundaries():
 
 def test_manifest_serializes():
     d = DENTAL_MIA.to_dict()
-    assert d["name"] == "Dental Mia"
+    assert d["name"] == "Dr. Mia"
     assert isinstance(d["allowed_actions"], list)
 
 

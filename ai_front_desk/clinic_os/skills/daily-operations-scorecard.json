@@ -1,0 +1,27 @@
+{
+  "skill_id": "daily-operations-scorecard",
+  "version": "1.0.0",
+  "name": "Daily Operations Scorecard",
+  "outcome": "Show the owner observed daily counts for inquiries, missed calls, recovered opportunities, bookings, attendance, intake and outstanding work.",
+  "readiness_status": "limited_implementation",
+  "required_inputs": [
+    "Tenant-scoped operational event ledger",
+    "Defined reporting timezone and period",
+    "Explicit distinction between operational and synthetic demo events"
+  ],
+  "outputs": [
+    "Count-only daily summary",
+    "Source and data-mode label",
+    "Known limitations alongside the numbers"
+  ],
+  "guardrails": [
+    "Do not invent ROI, conversion rates, or causal effects from separate count totals.",
+    "Never mix synthetic demo events with measured clinic outcomes without clear labeling.",
+    "No patient identifiers or message bodies in operational metric events."
+  ],
+  "activation_requirements": [
+    "Event types and event sources defined.",
+    "Provider and staff event capture tested for duplicates and missing events.",
+    "Dashboard surfaces the reporting window, data mode, missing coverage and limitations."
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "skill_id": "no-show-recovery",
+  "version": "1.0.0",
+  "name": "No-Show Recovery",
+  "outcome": "Make missed appointments visible and help the clinic offer appropriate rescheduling follow-up.",
+  "readiness_status": "design_only",
+  "required_inputs": [
+    "Trusted attendance outcome",
+    "Clinic-approved follow-up policy",
+    "Patient communication preferences and consent"
+  ],
+  "outputs": [
+    "Follow-up task",
+    "Reschedule request or confirmed appointment outcome",
+    "Outstanding no-show queue"
+  ],
+  "guardrails": [
+    "Do not assume a no-show from missing data.",
+    "Do not pressure or shame patients.",
+    "A reschedule is not a confirmed booking until the authoritative calendar confirms it."
+  ],
+  "activation_requirements": [
+    "Attendance event source verified.",
+    "Clinic-approved, respectful follow-up timing and messaging.",
+    "Staff can pause automation, correct status, and take over."
+  ]
+}

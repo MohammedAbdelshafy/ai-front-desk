@@ -1,0 +1,28 @@
+{
+  "skill_id": "recall-reactivation",
+  "version": "1.0.0",
+  "name": "Recall and Reactivation",
+  "outcome": "Help the clinic identify due follow-up or recall work and manage approved contact to support continuity of care.",
+  "readiness_status": "design_only",
+  "required_inputs": [
+    "Clinic-defined recall criteria",
+    "Trusted patient/appointment system data",
+    "Consent, contact preference and suppression information"
+  ],
+  "outputs": [
+    "Staff-reviewable due list",
+    "Approved contact tasks",
+    "Booking and outcome counts"
+  ],
+  "guardrails": [
+    "The clinic defines clinical recall timing.",
+    "Do not infer a treatment need or make clinical recommendations.",
+    "Apply opt-outs and communication rules before any contact.",
+    "Do not create duplicate patient records or appointment writes."
+  ],
+  "activation_requirements": [
+    "A supported authorized practice-management data path.",
+    "Clinician-approved recall criteria and clinic-approved messages.",
+    "Deduplication, access controls, privacy review and staff handoff."
+  ]
+}

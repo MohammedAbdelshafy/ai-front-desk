@@ -1,0 +1,28 @@
+{
+  "skill_id": "appointment-reminders",
+  "version": "1.0.0",
+  "name": "Appointment Reminders",
+  "outcome": "Help patients prepare for visits and confirm, reschedule, or ask the practice for assistance.",
+  "readiness_status": "design_only",
+  "required_inputs": [
+    "Trusted appointment data or staff-approved schedule",
+    "Clinic-approved reminder templates",
+    "Verified contact and applicable consent state"
+  ],
+  "outputs": [
+    "Scheduled reminder task",
+    "Delivery result or failure",
+    "Patient response and handoff status"
+  ],
+  "guardrails": [
+    "A reminder must not expose unnecessary clinical details.",
+    "Never represent an appointment request as confirmed without trusted scheduling confirmation.",
+    "Do not retry indefinitely or message after opt-out.",
+    "Do not send from the local synthetic demo."
+  ],
+  "activation_requirements": [
+    "Validated scheduling source and timezone behavior.",
+    "Provider delivery, idempotency and retry/dead-letter handling.",
+    "Clinic-reviewed wording, consent rules, opt-out and privacy review."
+  ]
+}

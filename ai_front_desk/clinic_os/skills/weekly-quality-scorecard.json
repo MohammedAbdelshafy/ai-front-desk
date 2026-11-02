@@ -1,0 +1,27 @@
+{
+  "skill_id": "weekly-quality-scorecard",
+  "version": "1.0.0",
+  "name": "Weekly Quality Scorecard",
+  "outcome": "Give the owner a weekly review of intake completeness, unresolved follow-ups, event coverage, attendance and process reliability.",
+  "readiness_status": "design_only",
+  "required_inputs": [
+    "Seven-day operational event window",
+    "Questionnaire validation/review events",
+    "Clinic-approved quality definitions and baseline"
+  ],
+  "outputs": [
+    "Weekly trend summary",
+    "Unresolved operational exceptions",
+    "Evidence-backed improvement actions"
+  ],
+  "guardrails": [
+    "Quality indicators must be defined before reporting.",
+    "Do not present synthetic counts as clinic results.",
+    "Do not score clinical quality or clinician competence without an approved validated measure."
+  ],
+  "activation_requirements": [
+    "Clinic owner approves metric definitions and thresholds.",
+    "Source coverage and data quality are documented.",
+    "Review cadence and owner for each corrective action are agreed."
+  ]
+}

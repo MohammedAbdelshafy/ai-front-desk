@@ -1,0 +1,29 @@
+{
+  "skill_id": "pre-visit-history",
+  "version": "1.0.0",
+  "name": "Pre-Visit History",
+  "outcome": "Collect a patient's reported history before arrival and prepare a structured brief for the clinician to review.",
+  "readiness_status": "demo_only",
+  "required_inputs": [
+    "Clinic-approved questionnaire version",
+    "Patient-submitted answers",
+    "Authenticated clinic context in any production deployment"
+  ],
+  "outputs": [
+    "Original patient-reported answers",
+    "Missing-answer and contradiction flags",
+    "Structured history brief with source labels",
+    "Review handoff to clinic staff"
+  ],
+  "guardrails": [
+    "Do not diagnose, triage, recommend medication, or prescribe.",
+    "Never overwrite original patient answers with a summary or correction.",
+    "Label missing, contradictory, uncertain, and clinician-entered information distinctly.",
+    "Current demo data must remain synthetic."
+  ],
+  "activation_requirements": [
+    "Qualified clinician must review and approve the questionnaire.",
+    "Production identity, access control, tenant isolation, privacy, security, retention and deletion controls must pass review.",
+    "A staff member must be able to review and correct the brief with an audit trail."
+  ]
+}

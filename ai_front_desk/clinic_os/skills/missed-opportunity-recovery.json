@@ -1,0 +1,29 @@
+{
+  "skill_id": "missed-opportunity-recovery",
+  "version": "1.0.0",
+  "name": "Missed Opportunity Recovery",
+  "outcome": "Turn an unanswered call or inquiry into an owned follow-up task and measure whether it was reached, booked, or closed.",
+  "readiness_status": "design_only",
+  "required_inputs": [
+    "Provider-supplied call or inquiry event",
+    "Clinic-approved callback window and message template",
+    "Applicable communication consent and suppression state"
+  ],
+  "outputs": [
+    "Deduplicated follow-up task",
+    "Attempt and outcome log",
+    "Pending work for staff",
+    "Counts for the operations scorecard"
+  ],
+  "guardrails": [
+    "Do not claim a missed call was recovered without an observed outcome.",
+    "Do not contact people until provider, consent, opt-out, and legal requirements are approved.",
+    "No message bodies or patient identifiers in aggregate metric events.",
+    "Never send outreach from a staff member's personal account without authorization."
+  ],
+  "activation_requirements": [
+    "Supported telephony or messaging integration configured and tested.",
+    "Clinic-approved scripts, operating hours, consent, opt-out and handoff policy.",
+    "Idempotency, bounded retries, suppression, monitoring and staff takeover tests."
+  ]
+}

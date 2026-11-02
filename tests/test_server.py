@@ -186,3 +186,57 @@ def test_mia_manifest_endpoint(live_server):
     manifest = json.loads(body)
     assert manifest["character_id"] == "dental-mia-v1"
     assert "Never diagnose" in " ".join(manifest["safety_boundaries"])
+
+def test_dashboard_contains_explicitly_synthetic_daily_scorecard(live_server):
+    code, body = _get(live_server, "/dashboard?clinic=demo-smile-arts")
+    assert code == 200
+    assert "Today's operations scorecard" in body
+    assert "SYNTHETIC SAMPLE DATA" in body
+    assert "Missed calls" in body
+    assert "Appointments attended" in body
+    assert "do not infer" in body.lower() or "counts reflect recorded events" in body.lower()
+
+
+def test_scorecard_api_labels_seeded_events_as_synthetic(live_server):
+    code, body = _get(live_server, "/api/scorecard?clinic=demo-smile-arts")
+    assert code == 200
+    report = json.loads(body)
+    assert report["data_mode"] == "synthetic_demo"
+    assert report["synthetic_event_count"] == report["event_count"]
+    assert report["event_count"] > 0
+    assert report["counts"]["missed_call"] == 4
+    assert report["counts"]["missed_call_recovered"] == 2
+    assert report["reporting_timezone"]
+
+
+def test_scorecard_api_rejects_unknown_clinic(live_server):
+    try:
+        _get(live_server, "/api/scorecard?clinic=attacker-selected-tenant")
+        raise AssertionError("expected 404 for unknown clinic")
+    except urllib.error.HTTPError as error:
+        assert error.code == 404
+        assert "Unknown demo clinic" in error.read().decode()
+
+
+def test_workflow_catalog_api_includes_nine_readiness_labelled_skills(live_server):
+    code, body = _get(live_server, "/api/workflow-skills")
+    assert code == 200
+    payload = json.loads(body)
+    assert payload["product"] == "Dr. Mia Clinic OS"
+    skills = {item["skill_id"]: item for item in payload["skills"]}
+    assert len(skills) == 9
+    assert skills["pre-visit-history"]["readiness_status"] == "demo_only"
+    assert skills["daily-operations-scorecard"]["readiness_status"] == "limited_implementation"
+    assert skills["clinician-prescribing-assistant"]["readiness_status"] == "clinical_review_required"
+    assert skills["missed-opportunity-recovery"]["readiness_status"] == "design_only"
+
+
+def test_workflow_catalog_page_does_not_claim_all_modules_are_live(live_server):
+    code, body = _get(live_server, "/workflows")
+    assert code == 200
+    assert "Dr. Mia Clinic OS" in body
+    assert "Demo only" in body
+    assert "Planned" in body
+    assert "Clinical review required" in body
+    assert "does not activate a workflow" in body.lower() or "does not mean it is active" in body.lower()
+
