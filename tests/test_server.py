@@ -222,7 +222,7 @@ def test_workflow_catalog_api_includes_nine_readiness_labelled_skills(live_serve
     code, body = _get(live_server, "/api/workflow-skills")
     assert code == 200
     payload = json.loads(body)
-    assert payload["product"] == "Dr. Mia Clinic OS"
+    assert payload["product"] == "Dr. Mia Clinics OS"
     skills = {item["skill_id"]: item for item in payload["skills"]}
     assert len(skills) == 9
     assert skills["pre-visit-history"]["readiness_status"] == "demo_only"
@@ -234,7 +234,7 @@ def test_workflow_catalog_api_includes_nine_readiness_labelled_skills(live_serve
 def test_workflow_catalog_page_does_not_claim_all_modules_are_live(live_server):
     code, body = _get(live_server, "/workflows")
     assert code == 200
-    assert "Dr. Mia Clinic OS" in body
+    assert "Dr. Mia Clinics OS" in body
     assert "Demo only" in body
     assert "Planned" in body
     assert "Clinical review required" in body
