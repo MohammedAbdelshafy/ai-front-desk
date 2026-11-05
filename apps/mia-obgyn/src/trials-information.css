@@ -1,0 +1,40 @@
+.trials-information-page { display:flex; flex-direction:column; gap:16px; }
+.trials-safety-notice { display:flex; align-items:flex-start; gap:12px; padding:15px 17px; border:1px solid rgba(224,181,91,.34); border-radius:14px; background:rgba(224,181,91,.08); }
+.trials-safety-notice > svg { color:#d7ab54; flex:0 0 auto; margin-top:2px; }
+.trials-safety-notice strong { display:block; font-size:12px; margin-bottom:4px; }
+.trials-safety-notice p { margin:0; color:var(--muted,#8290aa); font-size:11px; line-height:1.65; }
+.trials-search-panel { padding:18px; }
+.trials-search-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.trials-search-panel .form-field { min-width:0; margin-top:13px; }
+.trials-search-panel .form-field label { display:block; font-size:11px; font-weight:700; margin-bottom:7px; color:var(--muted,#8290aa); }
+.trials-search-panel .form-field input,.trials-search-panel .form-field select { width:100%; min-width:0; border:1px solid rgba(135,161,211,.2); border-radius:10px; padding:10px 11px; background:rgba(7,13,24,.36); color:inherit; font:inherit; font-size:12px; }
+.trials-search-panel .form-field select option { color:#10233b; }
+.research-links-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; margin-top:18px; }
+.research-link-card { min-width:0; display:flex; flex-direction:column; border:1px solid rgba(135,161,211,.17); border-radius:13px; padding:14px; background:rgba(7,13,24,.2); }
+.research-link-kind { align-self:flex-start; display:inline-flex; border-radius:25px; padding:4px 7px; font-size:8px; font-weight:800; letter-spacing:.06em; }
+.kind-trial-registry { background:rgba(111,168,255,.12); color:#8cb9ff; }
+.kind-literature { background:rgba(176,145,255,.12); color:#c3adff; }
+.kind-medicine-info { background:rgba(97,219,192,.1); color:#70e1cf; }
+.kind-guideline { background:rgba(129,186,255,.12); color:#8dbdfb; }
+.kind-safety { background:rgba(224,181,91,.12); color:#d9ad53; }
+.research-link-card h3 { font-size:13px; margin:9px 0 6px; }
+.research-link-card p { font-size:10px; line-height:1.6; color:var(--muted,#8290aa); margin:5px 0; }
+.research-link-card .research-link-note { border-top:1px solid rgba(135,161,211,.12); padding-top:8px; margin-top:9px; }
+.research-link-card a { display:flex; align-items:center; gap:6px; margin-top:auto; padding-top:11px; text-decoration:none; font-size:10px; font-weight:750; color:var(--cyan,#64dfce); }
+.research-link-card a svg { flex:0 0 auto; }
+.research-links-preview { margin-top:18px; border:1px dashed rgba(135,161,211,.25); border-radius:12px; padding:14px; }
+.research-links-preview h3 { display:flex; align-items:center; gap:7px; font-size:12px; }
+.research-links-preview p { color:var(--muted,#8290aa); font-size:11px; line-height:1.6; }
+.research-link-chips { display:flex; flex-wrap:wrap; gap:7px; }
+.research-link-chips span { padding:5px 8px; border:1px solid rgba(135,161,211,.18); border-radius:20px; font-size:9px; color:var(--muted,#8290aa); }
+.trials-local-guidelines { padding:18px; }
+.trials-guideline-list { display:grid; gap:8px; }
+.trials-guideline-list a { display:flex; flex-direction:column; gap:4px; border:1px solid rgba(135,161,211,.16); border-radius:10px; padding:11px; text-decoration:none; }
+.trials-guideline-list a strong { font-size:11px; color:var(--cyan,#64dfce); }
+.trials-guideline-list a span,.trials-guideline-list a small { font-size:10px; line-height:1.5; color:var(--muted,#8290aa); }
+.trials-method-panel { display:flex; align-items:flex-start; gap:11px; padding:15px 17px; border:1px solid rgba(135,161,211,.17); border-radius:13px; background:rgba(7,13,24,.18); }
+.trials-method-panel > svg { color:var(--cyan,#64dfce); flex:0 0 auto; margin-top:2px; }
+.trials-method-panel strong { display:block; font-size:12px; margin-bottom:7px; }
+.trials-method-panel ol { padding-left:18px; margin:0; color:var(--muted,#8290aa); font-size:10px; line-height:1.75; }
+.trials-inline-error { color:#d9ad53; font-size:11px; }
+@media(max-width:760px) { .trials-search-grid,.research-links-grid { grid-template-columns:minmax(0,1fr); } }

@@ -1,0 +1,42 @@
+.medication-pathways-page { display:flex; flex-direction:column; gap:16px; }
+.medication-pathway-intro { display:flex; align-items:flex-start; gap:12px; padding:15px 17px; border:1px solid rgba(224,181,91,.38); border-radius:14px; background:rgba(224,181,91,.09); }
+.medication-pathway-intro > svg { flex:0 0 auto; margin-top:2px; color:#d29a25; }
+.medication-pathway-intro strong { display:block; margin-bottom:4px; }
+.medication-pathway-intro p { margin:0; color:var(--muted,#71809b); font-size:12px; line-height:1.6; }
+.medication-pathway-form { padding:18px; }
+.medication-pathway-form .medication-pathway-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px; }
+.medication-pathway-form .form-field { min-width:0; margin-top:13px; }
+.medication-pathway-form .form-field label { display:block; margin-bottom:7px; font-size:11px; font-weight:700; color:var(--muted,#8290aa); }
+.medication-pathway-form .form-field input,.medication-pathway-form .form-field select,.medication-pathway-form .form-field textarea { width:100%; min-width:0; border:1px solid rgba(135,161,211,.2); border-radius:10px; padding:10px 11px; background:rgba(7,13,24,.36); color:inherit; font:inherit; font-size:12px; }
+.medication-pathway-form .form-field textarea { resize:vertical; min-height:68px; }
+.medication-pathway-checks { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:15px; }
+.medication-pathway-check { display:flex; align-items:flex-start; gap:8px; padding:10px; border:1px solid rgba(135,161,211,.16); border-radius:10px; background:rgba(7,13,24,.22); font-size:11px; line-height:1.45; }
+.medication-pathway-check input { margin-top:2px; accent-color:var(--cyan,#64dfce); }
+.medication-pathway-form .hint { margin:5px 0 0; color:var(--muted,#8290aa); font-size:10px; line-height:1.5; }
+.medication-pathway-results { display:flex; flex-direction:column; gap:12px; }
+.medication-pathway-results .panel { padding:17px; }
+.medication-pathway-blockers { border:1px solid rgba(224,181,91,.36); border-radius:13px; padding:14px 16px; background:rgba(224,181,91,.08); }
+.medication-pathway-blockers h3 { margin:0 0 8px; font-size:13px; }
+.medication-pathway-blockers ul { margin:0; padding-left:19px; font-size:11px; line-height:1.7; }
+.medication-pathway-empty { border:1px dashed rgba(135,161,211,.35); border-radius:14px; padding:18px; background:rgba(7,13,24,.18); }
+.medication-pathway-empty h3 { margin:0 0 7px; font-size:14px; }
+.medication-pathway-empty p { font-size:11px; line-height:1.65; color:var(--muted,#8290aa); margin:5px 0; }
+.medication-pathway-source-list { display:grid; gap:9px; margin-top:12px; }
+.medication-pathway-source { display:block; padding:11px 12px; border:1px solid rgba(135,161,211,.16); border-radius:10px; text-decoration:none; color:inherit; }
+.medication-pathway-source strong { display:block; color:var(--cyan,#64dfce); font-size:11px; margin-bottom:4px; }
+.medication-pathway-source span { display:block; font-size:10px; color:var(--muted,#8290aa); line-height:1.5; }
+.medication-pathway-card { border:1px solid rgba(135,161,211,.2); border-radius:14px; padding:16px; }
+.medication-pathway-card + .medication-pathway-card { margin-top:12px; }
+.medication-pathway-card > p { color:var(--muted,#8290aa); font-size:11px; line-height:1.6; }
+.medication-pathway-option { margin-top:12px; border:1px solid rgba(135,161,211,.17); border-radius:12px; padding:13px; }
+.medication-pathway-option h4 { font-size:13px; margin:0; }
+.medication-pathway-option p { font-size:11px; line-height:1.6; color:var(--muted,#8290aa); }
+.medication-pathway-role { display:inline-flex; border-radius:30px; padding:4px 8px; margin-top:7px; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; background:rgba(99,218,195,.1); color:var(--cyan,#64dfce); }
+.medication-pathway-role.role-warning { background:rgba(224,181,91,.12); color:#d9ad53; }
+.medication-pathway-teaching { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:12px; }
+.medication-pathway-teaching section { min-width:0; border-radius:9px; padding:10px; background:rgba(7,13,24,.22); }
+.medication-pathway-teaching h5 { margin:0 0 5px; font-size:10px; color:var(--cyan,#64dfce); }
+.medication-pathway-teaching p { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; font-size:10px; }
+.medication-pathway-citations { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.medication-pathway-citations a { font-size:10px; color:var(--cyan,#64dfce); overflow-wrap:anywhere; }
+@media (max-width:760px) { .medication-pathway-form .medication-pathway-form-grid,.medication-pathway-checks,.medication-pathway-teaching { grid-template-columns:minmax(0,1fr); } }

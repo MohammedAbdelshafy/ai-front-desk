@@ -1,0 +1,122 @@
+/* Advanced theme layer — imported LAST so it wins over base styles.
+ *
+ * 1. Dark mode: [data-theme="dark"] on <html>, driven by the topbar
+ *    toggle in MiaApp (stored choice, else the OS preference). Surfaces
+ *    that use CSS variables flip automatically; the rules below cover
+ *    the handful of surfaces that hardcode light colours.
+ * 2. Skip link: keyboard-only, visible on focus.
+ * 3. Allergy flag in the medication workspace.
+ *
+ * Deliberately NOT here: a service worker. On GitHub Pages the worker
+ * script itself sits behind a fixed cache window, so an offline-first
+ * worker can keep serving stale clinical content after a deploy. The
+ * manifest alone still gives Add to Home Screen on iOS; a worker is a
+ * separate decision with a cache-invalidation plan, not a free win.
+ */
+
+.mia-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  z-index: 200;
+  background: var(--panel, #ffffff);
+  color: var(--text, #101f38);
+  border: 1px solid var(--line, rgba(16, 31, 56, 0.09));
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.mia-skip-link:focus {
+  left: 8px;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #33415c;
+  background: transparent;
+  border: 0;
+  font-size: 11px;
+  padding: 8px 4px;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  color: var(--text, #101f38);
+}
+
+.medref-allergy-alert {
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  background: rgba(220, 38, 38, 0.08);
+  color: #991b1b;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0d1526;
+  --panel: #14203a;
+  --panel-2: #1a2a4a;
+  --panel-3: #22345c;
+  --line: rgba(148, 178, 230, 0.16);
+  --muted: #93a6c4;
+  --text: #e8eefb;
+  background: var(--bg);
+  color: var(--text);
+}
+
+[data-theme="dark"] .sidebar {
+  background: rgba(16, 26, 48, 0.94);
+}
+
+[data-theme="dark"] .topbar {
+  background: rgba(16, 26, 48, 0.82);
+}
+
+[data-theme="dark"] .stat-card {
+  background: var(--panel);
+}
+
+[data-theme="dark"] .chat-controls select,
+[data-theme="dark"] .jurisdiction-filter select {
+  background: var(--panel);
+  color: var(--text);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background: var(--panel-2);
+  color: var(--text);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .mia-companion-minimise,
+[data-theme="dark"] .mia-companion-restore {
+  background: var(--panel);
+  color: var(--muted);
+}
+
+[data-theme="dark"] .language-toggle,
+[data-theme="dark"] .theme-toggle {
+  color: #c6d3ea;
+}
+
+[data-theme="dark"] .mia-ambient-grid {
+  opacity: 0.25;
+}
+
+[data-theme="dark"] .mia-orb {
+  opacity: 0.5;
+}
+
+[data-theme="dark"] .medref-allergy-alert {
+  color: #fca5a5;
+  background: rgba(220, 38, 38, 0.18);
+}

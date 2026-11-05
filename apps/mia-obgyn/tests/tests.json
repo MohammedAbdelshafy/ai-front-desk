@@ -1,0 +1,113 @@
+[
+  {
+    "name": "Doctor can review a synthetic patient and ask Mia for references",
+    "sanity": true,
+    "viewport": "desktop",
+    "covers": [
+      "OB-GYN-only navigation",
+      "synthetic patient search/profile",
+      "appointment detail",
+      "Mia reference chat",
+      "source citations",
+      "no approved medication pathway notice",
+      "ClinicalTrials.gov search link with Egypt location filter",
+      "WHO ICTRP and PubMed research discovery",
+      "Egyptian Drug Authority medication information and adverse-reaction links",
+      "NIH LactMed and DailyMed references",
+      "trial records clearly separated from prescribing approval",
+      "exact diagnosis-code medication pathway page",
+      "dentist-independent OB-GYN clinician diagnosis confirmation",
+      "allergy and current medication reconciliation gate",
+      "pregnancy/lactation and local protocol context gate",
+      "empty approved catalog no-match abstention",
+      "no medication selection or prescription transmission"
+    ],
+    "description": "Exercises the primary doctor journey from dashboard through a synthetic patient appointment to source-cited chat, without prescribing.",
+    "steps": [
+      "Open the dashboard and verify the 'SYNTHETIC DATA ONLY' badge.",
+      "Open Appointments and select 'Antenatal follow-up' for Demo Patient A.",
+      "Open Mia chat, ask 'Find guidance for postpartum haemorrhage', and submit.",
+      "Review the returned links and the safety note.",
+      "Open Trials & info from the navigation.",
+      "Enter 'endometriosis' as the research topic and 'synthetic test intervention' as the optional intervention; keep Egypt selected.",
+      "Click Build source searches and verify links appear for ClinicalTrials.gov, WHO ICTRP, PubMed, NIH LactMed, DailyMed and the Egyptian Drug Authority.",
+      "Verify ClinicalTrials.gov search is Egypt-focused and the page requests research terms only, not patient case details.",
+      "Verify the EDA Drug Information Center contact details and the trial-versus-treatment boundary are visible.",
+      "Open Medication pathways from the navigation.",
+      "Click Review approved pathways before entering the required clinical context and verify the review is blocked.",
+      "Enter only fictional values: exact code GYN-DEMO-001, label Synthetic demonstration diagnosis, age 29, allergies 'none reported and confirmed (synthetic)', medicines 'none reported and confirmed (synthetic)'.",
+      "Confirm the diagnosis and the allergy/medicine reviews; set pregnancy/lactation to clinician-confirmed not applicable or a reviewed value, select known/not-applicable organ context and confirm the local protocol.",
+      "Click Review approved pathways again and verify the empty approved catalog returns no medicine candidate or dose and says the catalog gap is not advice to withhold care."
+    ],
+    "expected": "The appointment shows synthetic history; Mia displays relevant clickable source links and explicitly says no approved medication pathway is configured. No dental navigation appears. Trials & info builds public research queries and surfaces Egypt-specific medicine-information/safety sources without turning a registry record or search result into a medication recommendation; no patient data is submitted or stored. The dedicated Medication pathways page is also reachable. It blocks incomplete context and, because no real pathway entries have been approved, shows a transparent no-match state without selecting or dosing a medicine."
+  },
+  {
+    "name": "Questionnaire supports conditional intake and local demo submission",
+    "viewport": "desktop",
+    "covers": [
+      "pre-visit questionnaire",
+      "conditional gestational-week field",
+      "required validation",
+      "synthetic-only submission",
+      "submission review state"
+    ],
+    "description": "Checks that questionnaire branching follows pregnancy status and submission is labelled as a browser demo.",
+    "steps": [
+      "Open Questionnaires.",
+      "Change 'Are you currently pregnant?' to 'No' and verify the gestational-week field is hidden.",
+      "Change the answer back to 'Yes', complete the required fields if needed, and click 'Mark demo intake submitted'."
+    ],
+    "expected": "The gestational-week field appears only when 'Yes' is selected. Submission shows the browser-demo confirmation and clinician-verification warning; no real patient link is issued."
+  },
+  {
+    "name": "Unknown allergies are never represented as a negative finding",
+    "viewport": "mobile",
+    "covers": [
+      "patient allergy provenance",
+      "unknown-versus-negative safety distinction",
+      "responsive profile layout"
+    ],
+    "description": "Checks the mobile patient view preserves unknown allergy status and the safety warning.",
+    "steps": [
+      "At mobile viewport, open Patients and select Demo Patient B.",
+      "Inspect the Allergies & reactions card.",
+      "Open Mia chat and review the visible synthetic-only boundary."
+    ],
+    "expected": "The profile displays 'Unknown' and 'Must confirm', not 'No known allergies', and identifies the record as synthetic."
+  },
+  {
+    "name": "Jurisdiction filters do not present US-only guidance as Egypt authority",
+    "viewport": "desktop",
+    "covers": [
+      "jurisdiction-aware retrieval",
+      "Egypt-specific references",
+      "US-only source exclusion in Egypt mode",
+      "source directory provenance"
+    ],
+    "description": "Verifies a reference search in Egypt mode returns Egypt/global sources and excludes US-only ACOG guidance.",
+    "steps": [
+      "Open Mia chat and set jurisdiction to 'Egypt · EG'.",
+      "Ask 'preeclampsia hypertension pregnancy' and send.",
+      "Review the source results and source jurisdiction labels."
+    ],
+    "expected": "The results may show Egypt/global references but not ACOG's US-only practice bulletin. The interface labels the response source discovery and does not recommend a drug."
+  },
+  {
+    "name": "Arabic UI toggle, avatar customization, and governance warning are available",
+    "viewport": "desktop",
+    "covers": [
+      "English/Arabic interface toggle",
+      "RTL layout",
+      "local avatar presets",
+      "readiness/governance block",
+      "real-patient-use warning"
+    ],
+    "description": "Checks localization controls, client-only avatar selection and the production readiness block.",
+    "steps": [
+      "Click the Arabic language toggle and verify the main navigation changes to Arabic and layout direction switches.",
+      "Open the profile menu and select the Clinician avatar preset.",
+      "Open Safety & readiness."
+    ],
+    "expected": "Arabic navigation and RTL layout appear; the local avatar changes without uploading a portrait; readiness states live clinical use is blocked and warns not to enter real patient data."
+  }
+]

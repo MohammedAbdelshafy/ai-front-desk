@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dr. Mia — Clinic Quality Manager for Dental Clinics</title>
+<meta name="description" content="Meet Dr. Mia: your clinic's quality manager. She owns the quality of every patient touchpoint — missed-call recovery, no-show follow-up, patient recall — with a weekly quality scorecard for the owner. Interactive demo.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <img src="mia-avatar.jpg" alt="Dr. Mia" class="brand-avatar">
+      <div>
+        <div class="brand-name">Dr. Mia</div>
+        <div class="brand-sub">Clinic Quality Manager · Dental</div>
+      </div>
+    </div>
+    <nav class="topnav">
+      <a href="#demo">Live demo</a>
+      <a href="#what">What she owns</a>
+      <a href="#how">How it works</a>
+      <a href="#pilot">Pricing</a>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="mailto:abdelshafyclapps@gmail.com?subject=Dr.%20Mia%20%241%2C500%20quality%20audit%20—%20my%20clinic">Start with the $1,500 audit</a>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <div class="pill-row">
+          <span class="pill pill-demo">Interactive demo below — simulated conversation</span>
+          <span class="pill">$1,500 quality audit · one location · 30 days</span>
+        </div>
+        <h1>Meet your clinic's<br>quality manager.</h1>
+        <p class="lede"><strong>She doesn't answer your phones. She makes sure no patient ever slips through them.</strong> Dr. Mia owns the quality of every patient touchpoint — every missed call recovered, every no-show chased, every dormant patient recalled, every treatment plan followed up, every visit turned into a review — and you get a weekly quality scorecard that makes the leaks impossible to ignore.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#pilot">See the audit pilot</a>
+          <a class="btn btn-ghost" href="#demo">Try the live demo</a>
+        </div>
+        <div class="proof-strip">
+          <span>Weekly quality scorecard for the owner</span>
+          <span class="dot">·</span>
+          <span>Runs on your own WhatsApp Business number</span>
+          <span class="dot">·</span>
+          <span>You keep the workflow</span>
+        </div>
+      </div>
+      <div class="hero-art">
+        <img src="mia-avatar.jpg" alt="Dr. Mia, clinic quality manager" class="hero-avatar">
+        <div class="hero-card">
+          <div class="hero-card-title">Weekly quality scorecard — demo clinic</div>
+          <div class="hero-stat"><strong>6</strong> missed calls recovered</div>
+          <div class="hero-stat"><strong>9</strong> no-show follow-ups sent</div>
+          <div class="hero-stat"><strong>14</strong> dormant patients recalled</div>
+          <div class="hero-fine">Illustrative — simulated demo data</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVE DEMO -->
+  <section id="demo" class="section">
+    <div class="section-inner">
+      <h2>See the front-desk add-on in action.</h2>
+      <p class="section-sub">The AI Front Desk add-on (+$1,200/mo, below) answers your patients on WhatsApp — FAQs, booking requests, missed-call recovery. This is exactly what a patient experiences. Ask about hours, insurance, prices — or tap <em>Book a cleaning</em> and watch her take a booking request. Simulated conversation, synthetic data.</p>
+
+      <div class="demo-grid">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="chat-head">
+            <img src="mia-avatar.jpg" alt="Dr. Mia">
+            <div>
+              <div class="chat-name">Dr. Mia</div>
+              <div class="chat-status"><span class="online-dot"></span>online · Lakeside Family Dental (demo)</div>
+            </div>
+          </div>
+          <div id="chat-log" class="chat-log" aria-live="polite"></div>
+          <div id="chip-row" class="chip-row"></div>
+          <form id="chat-form" class="chat-input" autocomplete="off">
+            <input id="chat-text" type="text" maxlength="200" placeholder="Type a message…" aria-label="Type a message">
+            <button type="submit" aria-label="Send">➤</button>
+          </form>
+        </div>
+
+        <div class="demo-side">
+          <h3>Behind the chat</h3>
+          <div class="demo-note">
+            <strong>Missed-call recovery.</strong> When nobody picks up, Mia texts the caller back in 60 seconds — most clinics never call back at all. This recovery system is part of every quality plan, not just the add-on.
+            <button id="missed-call-btn" class="btn btn-ghost btn-sm demo-btn">Simulate a missed call</button>
+          </div>
+          <div class="demo-note">
+            <strong>Human escalation.</strong> Anything she can't answer confidently goes straight to your front desk — with the full conversation attached.
+            <button id="escalate-btn" class="btn btn-ghost btn-sm demo-btn">See an escalation</button>
+          </div>
+          <div class="demo-note fine">
+            The real Dr. Mia runs on <strong>your clinic's own WhatsApp Business number</strong> — patients message the number they already know. This page is a simulation of that experience.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT SHE OWNS -->
+  <section id="what" class="section section-alt">
+    <div class="section-inner">
+      <h2>What she owns</h2>
+      <p class="section-sub">Every patient touchpoint, watched. The leaks stop being invisible.</p>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">📞</div>
+          <h3>Missed-call recovery</h3>
+          <p>Every missed call gets a text-back in 60 seconds, 24/7 — a lost caller becomes a conversation before they dial the next clinic.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📅</div>
+          <h3>No-show follow-up</h3>
+          <p>Follow-up sequences chase every no-show until they're rebooked or closed out — no silent gaps in the schedule.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📊</div>
+          <h3>Weekly quality scorecard</h3>
+          <p>Calls recovered, bookings saved, leaks found — in the owner's hands every week, so quality is a number, not a feeling.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔁</div>
+          <h3>Recall automation <span class="tier-tag">Growth +</span></h3>
+          <p>Dormant-patient reactivation campaigns that bring back patients who have gone quiet.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📋</div>
+          <h3>Treatment-plan follow-up <span class="tier-tag">Growth +</span></h3>
+          <p>Unscheduled treatment is the biggest leak in most practices. Mia follows it up until it's booked or declined.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">⭐</div>
+          <h3>Review generation <span class="tier-tag">Growth +</span></h3>
+          <p>Every visit is turned into a review request, so happy patients build your reputation while you work.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="section">
+    <div class="section-inner">
+      <h2>How it works</h2>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div><h3>Start with the audit</h3><p>We measure your patient flow with real numbers: missed-call rate, no-show rate, dormant-patient count, unscheduled treatment value.</p></div></div>
+        <div class="step"><div class="step-n">2</div><div><h3>First recovery system on</h3><p>During the pilot, missed-call text-back in 60 seconds goes live on your clinic's own WhatsApp Business number.</p></div></div>
+        <div class="step"><div class="step-n">3</div><div><h3>Scorecard every week</h3><p>You see calls recovered, bookings saved, and leaks found — then decide on a plan with the numbers in front of you.</p></div></div>
+      </div>
+      <div class="build-note">Honest note: zero clinics are live today — the first practices in are founding practices. The workflows behind this demo are tested code (28/28 automated scenarios green), and this page is a simulation; the real Dr. Mia runs on your clinic's own WhatsApp Business number.</div>
+    </div>
+  </section>
+
+  <!-- PILOT & PRICING -->
+  <section id="pilot" class="section section-alt">
+    <div class="section-inner">
+      <h2>Start with the quality audit</h2>
+      <p class="section-sub">Founding practices start here: a quality audit of your patient flow with real numbers, plus the first recovery system switched on.</p>
+      <div class="pilot-card">
+        <div class="pilot-price">$1,500 <span>one-time · one location · 30 days</span></div>
+        <ul class="pilot-list">
+          <li>Quality audit with real numbers: missed-call rate, no-show rate, dormant-patient count, unscheduled treatment value</li>
+          <li>Missed-call text-back in 60 seconds switched on</li>
+          <li>Weekly quality scorecard from week one</li>
+          <li>Converts to an annual plan with the pilot fee credited</li>
+        </ul>
+        <a class="btn btn-primary btn-lg" href="mailto:abdelshafyclapps@gmail.com?subject=Dr.%20Mia%20%241%2C500%20quality%20audit%20—%20my%20clinic&body=Hi%2C%0A%0AI%27d%20like%20to%20start%20with%20the%20Dr.%20Mia%20quality%20audit%20for%20my%20clinic.%0A%0AClinic%20name%3A%20%0AMy%20name%20%2F%20role%3A%20%0ABest%20time%20for%20a%2010-minute%20call%3A%20%0A%0AThanks!">Start with the audit</a>
+        <div class="pilot-fine">Prefer to talk first? Reply to this page's email and we'll do a 10-minute demo on your real FAQs.</div>
+      </div>
+
+      <h3 class="tiers-title">Then, one plan — priced per location</h3>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Essential</h3>
+          <div class="tier-price">$1,500/mo <span>· one location</span></div>
+          <p>Quality monitoring across every touchpoint:</p>
+          <ul class="tier-list">
+            <li>Missed-call recovery (60-second text-back, 24/7)</li>
+            <li>No-show follow-up sequences</li>
+            <li>Weekly quality scorecard for the owner (calls recovered, bookings saved, leaks found)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Growth</h3>
+          <div class="tier-price">$2,800/mo <span>· one location</span></div>
+          <p>Everything in Essential, plus:</p>
+          <ul class="tier-list">
+            <li>Recall automation (dormant-patient reactivation campaigns)</li>
+            <li>Practice dashboard (live: recovered revenue, recall performance, review velocity)</li>
+            <li>Review generation after every visit</li>
+            <li>Treatment-plan follow-up (unscheduled treatment = the biggest leak)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Dominance</h3>
+          <div class="tier-price">$4,500/mo <span>· up to 3 locations</span></div>
+          <p>Everything in Growth, multi-location, plus:</p>
+          <ul class="tier-list">
+            <li>Voice AI (quality-monitored call answering with a human voice)</li>
+            <li>Insurance eligibility checks before appointments</li>
+            <li>Quarterly quality review with the owner</li>
+          </ul>
+        </div>
+      </div>
+      <p class="tiers-fine">Annual plans = 2 months free.</p>
+
+      <div class="pilot-card addon-card">
+        <h3>The add-on: AI Front Desk — +$1,200/mo</h3>
+        <p>Full inbound answering, booking, and FAQs on your clinic's WhatsApp/SMS. It's the receptionist layer — available on any plan, once the quality system is watching over it. Try it in the <a href="#demo">live demo</a> above.</p>
+        <p class="tiers-fine">Also available: white-glove setup &amp; training $750 (waived on annual) · extra location +$800/mo · Spanish-language patient mode +$300/mo · historical recall-list blitz $950 one-time.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section">
+    <div class="section-inner narrow">
+      <h2>Fair questions</h2>
+      <div class="faq">
+        <details><summary>Is this page the real product?</summary><p>No — this page is a simulation of the patient experience, so you can feel what Dr. Mia does before any call. The real product runs on your clinic's own WhatsApp Business number.</p></details>
+        <details><summary>What does the quality audit actually measure?</summary><p>Your real patient-flow numbers: missed-call rate, no-show rate, dormant-patient count, and unscheduled treatment value — plus the first recovery system (missed-call text-back in 60 seconds) switched on during the pilot.</p></details>
+        <details><summary>What happens when she doesn't know an answer?</summary><p>She says so and escalates to your front desk with the full conversation attached. She never invents clinical information.</p></details>
+        <details><summary>Does Dr. Mia give clinical advice?</summary><p>No. Operations quality only — no clinical advice, no diagnosis.</p></details>
+        <details><summary>Do patients need to install anything?</summary><p>No. It's WhatsApp — the app your patients already use, on the phone number they already know.</p></details>
+        <details><summary>What happens after the 30 days?</summary><p>We review the scorecard together. If you move to an annual plan, the $1,500 pilot fee is credited — and annual plans include 2 months free.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">Dr. Mia · Clinic Quality Manager for Dental Clinics</div>
+    <div class="footer-fine">Built by MBM Systems · Demo conversations are simulated with synthetic data · Not for real patient use</div>
+  </div>
+</footer>
+
+<script src="demo.js"></script>
+</body>
+</html>
