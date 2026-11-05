@@ -8,6 +8,8 @@ Dr. Mia is a character-led clinical support platform. Dental care remains the fi
 
 > **Current status:** the repository contains a dental evidence workbench with three draft-only, source-cited pathways; a separate OB-GYN hospital reference workbench covering antenatal care, labour/birth, postpartum care, gynaecology, contraception, fertility and pregnancy/lactation medicine references; and shared avatar customization across Mia apps. Users may upload a portrait that is resized and stored locally in the browser, with export/import to carry it between local apps on different ports. The OB-GYN app has an optional US-only RxNorm/openFDA medicine-label lookup; it sends only a standalone medicine name and does not assess pregnancy risk or drug interactions. Egypt mode uses local reference links and does not reuse US candidate pathways. The dental approved evidence registry still has **zero approved medication evidence cards**; all three dental pathways are draft, rights-review pending and keyword-match only. No app diagnoses, autonomously chooses a medication, calculates/validates doses, or performs comprehensive interactions. The prototype is local-only, unauthenticated, synthetic-data only and not approved for real-patient use.
 
+**Live demo:** the Dr. Mia dental demo is published at https://mohammedabdelshafy.github.io/ai-front-desk/dental/ (interactive demo, simulated conversation, synthetic data — see `apps/dr-mia-dental/`, published by `.github/workflows/deploy-mia-obgyn-pages.yml`).
+
 ## Local prototype setup
 
 ```bash
